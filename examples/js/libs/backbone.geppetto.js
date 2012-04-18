@@ -23,10 +23,6 @@ define( [
     "marionette"
 ], function ( $, _, Backbone, Marionette ) {
 
-    console.log( "Backbone: " + Backbone );
-    console.log( "Marionette: " + Marionette );
-    console.log( "Backbone.Marionette: " + Backbone.Marionette );
-
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {
 
         var Geppetto = {};
@@ -62,11 +58,7 @@ define( [
 
         Geppetto.Context.prototype.mapCommand = function ( eventName, commandClass ) {
 
-            console.log( "command registered for " + eventName );
-
             this.vent.bindTo( eventName, function ( eventData ) {
-
-                console.log( "execute() : " + eventName );
 
                 var commandInstance = new commandClass();
 
@@ -76,6 +68,10 @@ define( [
                 commandInstance.execute && commandInstance.execute();
 
             }, this );
+        };
+        
+        Geppetto.Context.prototype.unmapAll = function() {
+            this.vent.unbindAll();    
         };
 
         var extend = Backbone.View.extend;
@@ -95,31 +91,40 @@ define( [
                     ? new contextDefinition( id, parentContext )
                     : new Geppetto.Context( id, parentContext );
 
+            newContext.el = el;
+            
             contexts[id] = newContext;
-            console.log( "createContext() : Created context for ID: " + id );
 
             return newContext;
         };
 
 
         Geppetto.getContext = function ( el ) {
-            var matched = $( el ).parents( "[" + DATA_TAG + "]" );
-            if ( !matched.length ) {
-                throw Error( "Could not find a parent element with data-geppetto-context attr for provided element" );
-            } else if ( matched.length > 1 ) {
-                throw Error( "Expected 1 parent element with data-geppetto-context attr for provided element but found " + matched.length );
+
+            var id;
+            if($(el).attr(DATA_TAG)) {
+                id = $(el).attr(DATA_TAG);                
+            } else {
+                var matched = $( el ).parents( "[" + DATA_TAG + "]" );
+                if ( !matched.length ) {
+                    throw Error( "Could not find a parent element with data-geppetto-context attr for provided element" );
+                } else if ( matched.length > 1 ) {
+                    throw Error( "Expected 1 parent element with data-geppetto-context attr for provided element but found " + matched.length );
+                }
+
+                id = $( matched[0] ).attr( DATA_TAG );
+
             }
-
-            var id = $( matched[0] ).attr( DATA_TAG );
-
-            console.log( "getContext() : Found context with ID: " + id );
-
+            
             var context = contexts[id];
             return context;
         };
-
+        
         Geppetto.removeContext = function ( el ) {
             var id = $( el ).attr( 'id' );
+            var context = contexts[id];
+            context.unmapAll();
+            context.el.close && context.el.close();
             delete contexts[id];
         };
 

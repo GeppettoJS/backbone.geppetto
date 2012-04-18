@@ -16,7 +16,8 @@ define( [
         events:{
             "click .sendLocalButton":"onLocalButtonClick",
             "click .sendParentButton":"onParentButtonClick",
-            "click .sendGlobalButton":"onGlobalButtonClick"
+            "click .sendGlobalButton":"onGlobalButtonClick",
+            "click .close-button":"onCloseButtonClick"
         },
 
         initialize:function () {
@@ -31,18 +32,6 @@ define( [
             this.context.model = this.model;
 
             this.context.listen( "messageSent", this.onMessageSent );
-
-//            var header = new WidgetHeader({
-//                context: this.context    
-//            });
-//
-//            var that = this;
-//            
-//            header.render().done(function(){
-//                that.$el.prepend(header.el);    
-//            });
-//            
-
 
             var messageBox = new WidgetMessageBox( {
                 context:this.context
@@ -64,6 +53,9 @@ define( [
         onGlobalButtonClick:function () {
             var messageText = this.$( ".messagebox" ).val();
             this.context.dispatch( "sendGlobalMessage", {message:messageText} );
+        },
+        onCloseButtonClick:function() {
+            this.context.dispatchToParent( "closeWidget", {context: this.context} );
         }
     } );
 

@@ -16,7 +16,8 @@ define( [
         },
 
         events:{
-            "click #addWidgetButton":"onAddWidgetButtonClick"
+            "click #addWidgetButton":"onAddWidgetButtonClick",
+            "click #clearWidgetButton":"onClearWidgetButtonClick"
         },
 
         onRender:function () {
@@ -27,6 +28,7 @@ define( [
 
             this.context.listen( "widgetCreated", this.onWidgetCreated );
             this.context.listen( "messageSent", this.onMessageSent );
+            this.context.listen( "closeWidget", this.onCloseWidget );
         },
 
         onAddWidgetButtonClick:function () {
@@ -39,7 +41,10 @@ define( [
             var that = this;
 
             newWidget.render().done( function () {
+                var el = $(newWidget.el);
+                el.hide();
                 that.$( "#widgets" ).append( newWidget.el );
+                el.fadeIn(200);
             } );
         },
 
@@ -48,6 +53,21 @@ define( [
             var newMessage = $( "<span>" + eventData.message + "<br></span>" );
 
             this.$( "#parent-messages" ).prepend( newMessage )
+        },
+        onCloseWidget:function ( eventData ) {
+            var context = eventData.context;
+            var el = context.el;
+            Geppetto.removeContext(context);
+            $(el).fadeOut(300, function() { $(el).remove(); });
+        },
+        onClearWidgetButtonClick:function() {
+            
+            var that = this;
+            
+            $(".widget" ).each(function(){
+                var context = Geppetto.getContext(this);
+                that.onCloseWidget({context: context});
+            });
         }
     } );
 

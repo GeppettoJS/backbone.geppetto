@@ -22,6 +22,9 @@ define( [
         },
 
         onMessageSent:function ( eventData ) {
+            
+            console.log("message received!");
+            
             var newMessage = $( "<span>" + eventData.message + "<br></span>" );
             this.$el.prepend( newMessage );
         }

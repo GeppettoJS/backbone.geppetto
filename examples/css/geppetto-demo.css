@@ -19,23 +19,35 @@
 }
 
 .widget {
+    position:relative;
     border-style: solid;
     border-width: 1px;
     margin: 5px;
     padding: 10px;
     display: inline-block;
     height: 200px;
-    width: 250px;
+    width: 260px;
+}
+
+.widget .widget-header {
+    padding-bottom: 15px;
+}
+
+.widget .close-button {
+    position:absolute;
+    top: 5px;
+    right: 5px;
 }
 
 .widget input {
-    width: 150px;
+    width: 180px;
     margin-bottom: 5px;
 }
 
 .widget .messages {
     position: absolute;
-    height: 130px;
-    width: 230px;
+    margin-top: 10px;
+    height: 110px;
+    width: 250px;
     overflow-y: auto;
 }
