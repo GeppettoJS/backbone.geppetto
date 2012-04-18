@@ -5,9 +5,8 @@ define( [
     "geppetto",
     "text!src/widget/widget-template.html",
     "src/widget/widget-context",
-    "src/widget/widget-header",
     "src/widget/widget-message-box"
-], function ( $, _, Marionette, Geppetto, WidgetTemplate, WidgetContext, WidgetHeader, WidgetMessageBox ) {
+], function ( $, _, Marionette, Geppetto, WidgetTemplate, WidgetContext, WidgetMessageBox ) {
 
     return Marionette.ItemView.extend( {
         template:WidgetTemplate,
