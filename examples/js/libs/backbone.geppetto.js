@@ -1,20 +1,10 @@
-// Copyright (C) 2012 Model N, Inc.  
-// MIT License
+// Backbone.Geppetto v0.1.1
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
-// associated documentation files (the "Software"), to deal in the Software without restriction, including 
-// without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-// copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to 
-// the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all copies or substantial 
-// portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
-// LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Copyright (C) 2012 Model N, Inc.  
+// Distributed under the MIT License
+//
+// Documentation and full license available at:
+// http://modeln.github.com/backbone.geppetto/
 
 define( [
     "jquery",
@@ -78,6 +68,47 @@ define( [
         Geppetto.Context.extend = extend;
 
         var contexts = {};
+        
+        var debug = {
+        
+            contexts : contexts,
+        
+            countEvents : function() {
+                
+                var numEvents = 0;
+                
+                _.each(contexts, function(context, id) {
+                    if (contexts.hasOwnProperty(id)) {
+                        numEvents += context.vent.bindings.length;    
+                    }                    
+                });
+                
+                return numEvents;
+            },
+            
+            countContexts: function() {
+                
+                var numContexts = 0;
+                
+                _.each(contexts, function(context, id) {
+                    if (contexts.hasOwnProperty(id)){
+                        numContexts++;
+                    }
+                });
+                return numContexts;
+            }
+            
+        };
+        
+        Geppetto.setDebug = function( enableDebug ) {
+            if (enableDebug) {
+                this.debug = debug;
+            } else {
+                this.debug = undefined;
+            }
+            return this.debug;
+        };
+                
         var counter = 0;
 
         var DATA_TAG = "data-geppetto-context";

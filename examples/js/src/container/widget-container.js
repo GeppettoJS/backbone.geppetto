@@ -29,8 +29,15 @@ define( [
             this.context.listen( "widgetCreated", this.onWidgetCreated );
             this.context.listen( "messageSent", this.onMessageSent );
             this.context.listen( "closeWidget", this.onCloseWidget );
+            
+            this.updateStats();
         },
 
+        updateStats: function() {
+            this.$("#numContexts" ).text(Geppetto.debug.countContexts());
+            this.$("#numEvents" ).text(Geppetto.debug.countEvents());
+        },
+        
         onAddWidgetButtonClick:function () {
             this.context.dispatch( "addWidget" );
         },
@@ -46,6 +53,8 @@ define( [
                 that.$( "#widgets" ).append( newWidget.el );
                 el.fadeIn(200);
             } );
+
+            this.updateStats();
         },
 
         onMessageSent:function ( eventData ) {
@@ -59,6 +68,8 @@ define( [
             var el = context.el;
             Geppetto.removeContext(context);
             $(el).fadeOut(300, function() { $(el).remove(); });
+
+            this.updateStats();
         },
         onClearWidgetButtonClick:function() {
             

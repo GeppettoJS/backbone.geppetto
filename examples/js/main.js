@@ -27,6 +27,10 @@ require(
 
             $( function () {
 
+                // expose context map as public property so that 
+                // we can monitor the number of contexts and events
+                Geppetto.setDebug(true);
+                
                 MyApp.render();
 
             } );

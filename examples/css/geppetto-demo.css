@@ -1,3 +1,7 @@
+body {
+    padding: 10px;
+}
+
 #loadingSpinner {
     width: 32px;
     height: 32px;
@@ -8,10 +12,26 @@
     margin-top: -16px;
 }
 
+#stats {
+    float:right;
+}
+
+.spacer {
+    width:150px;
+}
+
+#parent-messgae-container {
+    padding-top: 10px; 
+    padding-bottom: 10px;    
+}
+
 #parent-messages {
-    height: 50px;
+    border-style: solid;
+    border-width: 1px;
+    height: 100px;
     width: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #widgets {
@@ -25,7 +45,7 @@
     margin: 5px;
     padding: 10px;
     display: inline-block;
-    height: 200px;
+    height: 210px;
     width: 260px;
 }
 
@@ -48,6 +68,7 @@
     position: absolute;
     margin-top: 10px;
     height: 110px;
-    width: 250px;
+    width: 260px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
