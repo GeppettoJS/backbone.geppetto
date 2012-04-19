@@ -50,9 +50,9 @@ define( [
 
             newWidget.render().done( function () {
                 var el = $(newWidget.el);
-                el.hide();
+//                el.hide();
                 that.$( "#widgets" ).append( newWidget.el );
-                el.fadeIn(200);
+//                el.fadeIn(200);
             } );
 
             this.updateStats();
