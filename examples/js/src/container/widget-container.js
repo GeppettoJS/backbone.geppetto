@@ -17,7 +17,8 @@ define( [
 
         events:{
             "click #addWidgetButton":"onAddWidgetButtonClick",
-            "click #clearWidgetButton":"onClearWidgetButtonClick"
+            "click #clearWidgetButton":"onClearWidgetButtonClick",
+            "click #changeColorsButton":"onChangeColorsButtonClick"
         },
 
         onRender:function () {
@@ -71,14 +72,11 @@ define( [
 
             this.updateStats();
         },
-        onClearWidgetButtonClick:function() {
-            
-            var that = this;
-            
-            $(".widget" ).each(function(){
-                var context = Geppetto.getContext(this);
-                that.onCloseWidget({context: context});
-            });
+        onClearWidgetButtonClick:function() {            
+            this.context.dispatchGlobally("shutdownWidget");            
+        },
+        onChangeColorsButtonClick:function() {
+            this.context.dispatchGlobally("changeColor");
         }
     } );
 

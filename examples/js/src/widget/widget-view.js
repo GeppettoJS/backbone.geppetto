@@ -17,7 +17,7 @@ define( [
             "click .sendLocalButton":"onLocalButtonClick",
             "click .sendParentButton":"onParentButtonClick",
             "click .sendGlobalButton":"onGlobalButtonClick",
-            "click .close-button":"onCloseButtonClick"
+            "click .close-button":"onCloseWidgetRequest"
         },
 
         initialize:function () {
@@ -26,12 +26,18 @@ define( [
         },
 
         onRender:function () {
-            this.$el.css( "background-color", this.model.get( "color" ) );
 
             this.context = Geppetto.createContext( this.el, WidgetContext, this.options.parentContext );
             this.context.model = this.model;
 
             this.context.listen( "messageSent", this.onMessageSent );
+            this.context.listen( "shutdownWidget", this.onCloseWidgetRequest);
+            
+            // set initial color to the one already set on the model
+            this.onColorChanged();
+            
+            // listen for future changes to the model's "color" property
+            this.model.on("change:color", this.onColorChanged);
 
             var messageBox = new WidgetMessageBox( {
                 context:this.context
@@ -54,8 +60,11 @@ define( [
             var messageText = this.$( ".messagebox" ).val();
             this.context.dispatch( "sendGlobalMessage", {message:messageText} );
         },
-        onCloseButtonClick:function() {
+        onCloseWidgetRequest:function() {
             this.context.dispatchToParent( "closeWidget", {context: this.context} );
+        },
+        onColorChanged:function() {
+            this.$el.css( "background-color", this.model.get( "color" ) );
         }
     } );
 
