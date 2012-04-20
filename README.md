@@ -35,14 +35,14 @@ Who actually handles these Application Events?  Glad you asked!
 ### Controller
 Geppetto implements the Controller piece using the Command Pattern.  A Command is a small, single-purpose piece of code with an `execute()` method.  When an Application Event is fired, Geppetto acts as a dispatcher, deciding which Command type should be executed in response.  Geppetto creates an instance of the appropriate Command, injects it with any dependencies it needs (such as the model and the event payload), and invokes its `execute()` method.  A Command can do things like invoke web services, modify the Model, or dispatch Application Events of its own.  When its work is done, the Command instance is destroyed automatically.
 
-# API
+## API
 Coming soon!
 
-# Examples
-## Modular Widgets
+## Examples
+### Modular Widgets
 Pointless?  Yes.  Easy-to-understand?  I hope so!  Fun?  Probably just as much as Farmville!  [Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
 
-# License
+## License
 The MIT License (MIT)
 
 Copyright (c) 2012 Model N, Inc.
