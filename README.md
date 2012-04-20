@@ -12,6 +12,15 @@ More commonly, in Backbone applications you'll find business logic implemented d
 
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
 
+## Dependencies
+You'll need to include the following projects for Geppeto to work:
+
+### Backbone Marionette
+[Backbone Marionette](https://github.com/derickbailey/backbone.marionette) is required for its Event Aggregator, and recommended for its Composite View architecture, which works particularly well with Geppetto.
+
+### RequireJS
+[RequireJS](http://requirejs.org/) is currently required, but will likely be demoted to "recommended" in an upcoming release.  In a large multi-module application, RequireJS makes it much easier to manage dependencies.
+
 ## Technical Overview
 Geppetto implements a standard MVC architecture, with the added flavor of the "Mediated View" pattern.  The key players are:
 
@@ -23,10 +32,11 @@ The View is your HTML, generated however you want (template framework, etc.)
 
 ### View Mediator
 In a Geppetto App, Backbone.View is the View *Mediator*.  When we use the term "View" in our examples, we'll be referring both to the View Mediator (Javascript) and the View (HTML).  The Mediator has these main functions:
-*   Instantiates the View by generating HTML
-*   Listens for DOM events on the View's `el`
-*   Responds to DOM events by triggering **Application Events** for the **Controller** to respond to
-*   Listens for **Application Events** triggered by the **Controller** and manipulates the View in response
+
+* Instantiates the View by generating HTML
+* Listens for DOM events on the View's `el`
+* Responds to DOM events by triggering **Application Events** for the **Controller** to respond to
+* Listens for **Application Events** triggered by the **Controller** and manipulates the View in response
 
 The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
 
