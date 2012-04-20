@@ -1,15 +1,51 @@
-Backbone Geppetto
-=================
+# Backbone Geppetto
 
-About
--------
+## About
+
+### What is it?
 
 Geppetto is an extension for [Backbone Marionette](https://github.com/derickbailey/backbone.marionette).  While Marionette lets you "make your Backbone applications dance," Geppetto gives them a life of their own!  Geppetto does this by implementing an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.  
 
-Instead of invoking business functions directly, your apps simply dispatch an application event when they need work to be done.  Geppetto will automatically instantiate and execute the appropriate Command, which is destroyed as soon as its job is complete. For larger, more complex applications, Geppetto also allows the creation of module-specific "Contexts," each with its own unique event bus and Command registry.  This separation of concerns promotes code reuse between views, easier testing of business logic, and a cleaner way to communicate between related but separate parts of your app.
+The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
-License
--------
+### Why Another Backbone Library?
+
+Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.  
+
+More commonly, in Backbone applications you'll find business logic implemented directly in Backbone.View components.  For smaller apps, it's convenient to declare your "events" and your callback functions in the same place.  But as applications grow, and business logic needs to be reused across separate view components, this practice starts to get messy.
+
+To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
+
+## Technical Overview
+
+Geppetto implements a standard MVC architecture, using the "Mediator" pattern for the View.  The key players are:
+
+### Model
+
+The standard Backbone Model.
+
+### View
+
+The View is your HTML, generated however you want (template framework, etc.)
+
+### Mediator
+
+Here's where it gets confusing... In a Geppetto App, Backbone.View is not really your view--it's your view's *Mediator*.  The Mediator has these main functions:
+* Instantiates the View by generating HTML
+* Listens for DOM events on the View's `el`
+* Responds to DOM events by triggering **Application Events** for the **Controller** to respond to
+* Listens for **Application Events** triggered by the **Controller** and manipulates the View in response
+
+The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
+
+Who actually handles these Application Events?  Glad you asked...
+
+### Controller
+
+Geppetto implements the Controller piece using the Command Pattern.  A Command is a small, single-purpose piece of code with an `execute()` method.  When an Application Event is fired, Geppetto acts as a dispatcher, deciding which Command type should be executed in response.  Geppetto creates an instance of the appropriate Command, injects it with any dependencies it needs (such as the model and the event payload), and invokes its `execute()` method.  A Command can do things like invoke web services, modify the Model, or dispatch Application Events of its own.  When its work is done, the Command instance is destroyed automatically.
+
+# License
+
 The MIT License (MIT)
 
 Copyright (c) 2012 Model N, Inc.
