@@ -40,7 +40,13 @@ Coming soon!
 
 ## Examples
 ### Modular Widgets
-Pointless?  Yes.  Easy-to-understand?  I hope so!  Fun?  Probably just as much as Farmville!  [Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
+Pointless?  Yes.  
+Easy-to-understand?  I hope so!  
+Fun?  Probably just as much as Farmville!  
+
+[Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
+
+Source code available in the `examples` directory in the Github Repo.
 
 ## License
 The MIT License (MIT)
