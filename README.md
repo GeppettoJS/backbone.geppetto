@@ -13,7 +13,7 @@ More commonly, in Backbone applications you'll find business logic implemented d
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
 
 ## Technical Overview
-Geppetto implements a standard MVC architecture, "Mediated View" pattern.  The key players are:
+Geppetto implements a standard MVC architecture, with the added flavor of the "Mediated View" pattern.  The key players are:
 
 ### Model
 The standard Backbone Model.
@@ -30,7 +30,7 @@ Here's where it gets interesting... In a Geppetto App, Backbone.View is not real
 
 The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
 
-Who actually handles these Application Events?  Glad you asked...
+Who actually handles these Application Events?  Glad you asked!
 
 ### Controller
 Geppetto implements the Controller piece using the Command Pattern.  A Command is a small, single-purpose piece of code with an `execute()` method.  When an Application Event is fired, Geppetto acts as a dispatcher, deciding which Command type should be executed in response.  Geppetto creates an instance of the appropriate Command, injects it with any dependencies it needs (such as the model and the event payload), and invokes its `execute()` method.  A Command can do things like invoke web services, modify the Model, or dispatch Application Events of its own.  When its work is done, the Command instance is destroyed automatically.
