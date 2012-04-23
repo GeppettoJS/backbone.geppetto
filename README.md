@@ -37,7 +37,7 @@ require.config( {
         geppetto:'libs/backbone.geppetto'
     }
 } );
-````
+```
 
 ## Technical Overview
 Geppetto implements a standard MVC architecture, with the added flavor of the "Mediated View" pattern.  The key players are:
@@ -49,14 +49,15 @@ The standard Backbone Model.
 
 The View is implemented with Backbone.View or extensions of it such as Marionette.ItemView.  This implementation involves two separate concepts:
 
-**The DOM**
+1) **The DOM**
 
 * The truly visual portion of The View
 * Represented with HTML 
 * Responds to user input
 * Triggers events such as "click", "keyup", etc.
 
-**The Mediator**
+
+2) **The Mediator**
 
 * The Javascript portion of The View 
 * Creates DOM elements by generating HTML
@@ -126,9 +127,8 @@ return Backbone.View({
 	initialize: function(){
 		this.model = new Model();	
 	},
-	render: function(){
-		
-		this.context = new ParentViewContext();
+	render: function(){		
+		this.context = Backbone.createContext(this.el, ParentViewContext);
 		this.context.model = this.model;
 		
 		var childView = new ChildView({
@@ -166,15 +166,6 @@ Later on, instead of passing the "model" property from component-to-component, t
 Do you have any business logic in your app that doesn't necessarily belong to a view?  For instance, you might have some code that loads some backing data which is shared across many views.  Sure, you could place that business logic in your outer-most view, but then that view would be responsible for telling the sub-views whenever new data is available.  Wouldn't it be great if we could completely decouple our shared client business logic from our views?
 
 Well, now we can!  Each Context has a registry where you can assign a named event to an associated Command.  Whenever you want some work to be done, you simply dispatch an event onto the Context's Event Bus, and the appropriate command will automagically get instantiated, carry out its job, and clean itself up.  You may choose to have the Command dispatch another event when its work is done, so that any observers (such as Views) can be notified.
-
-### How Many Contexts Do I Need?
-Like most questions about application structure, the answer is the familiar and often-frustrating, "It depends."
-
-The best way to understand Contexts is to step back and think about which pieces of your application could theoretically exist as their own totally independent applications.  
-
-*   Single-Context Apps: If your app has many sub-views, which all need to communicate but could not really function on their own, then you might benefit from a Single-Context app.  You can still benefit from a loosely-coupled architecture using the Context's Service Locator pattern, and the Command Registry to keep your business logic neat and tidy.
-
-*   Multiple-Context Apps: If I have a multi-tabbed application, for instance, where each tab has its own self-contained UI, its own backing data, and its own business logic, then you might consider creating one Context per tab.  After all, the tab generally doesn't need to communicate with other tabs, nor should other tabs be informed of what actions are taking place within its boundaries.  Depending on your app's needs, you may choose to have one "parent" Context that represents the outer application shell, which handles global things like navigation, tab creation, etc.  See the example app below for a demo of communicating between parent and child contexts.
 
 ### Creating a Context
 
@@ -219,7 +210,9 @@ return Geppetto.Context.extend( {
 return Backbone.View.extend({
 	render: function() {
 		// use "this.options" to access Backbone constructor parameters
-		this.context = Geppetto.createContext(this.el, ModuleContext, this.options.parentContext);
+		this.context = Geppetto.createContext(
+			this.el, ModuleContext, this.options.parentContext
+		);
 	}
 });
 
@@ -239,11 +232,9 @@ return Backbone.View({
 		// Let Geppetto find my Context based on the DOM hierarchy.
 		Geppetto.getContext(this.el, onContextLoad);		
 	},
-	onContextLoad: function(context) {
-		
+	onContextLoad: function(context) {		
 		// I got my Model all by myself, and no parent view had to pass it to me!		
-		this.context = context;
-		
+		this.context = context;		
 		doSomeRenderingWithTheModel(this.context.model);
 	}
 });
@@ -280,7 +271,6 @@ The Context provides an Event Bus for loosely-coupled communication between comp
 ```javascript
 // Event only sent to Local Context
 context.dispatch( "fooEvent");
-});
 ```
 
 ### Dispatching Parent Events
@@ -288,7 +278,6 @@ context.dispatch( "fooEvent");
 ```javascript
 // Event only sent to Parent Context
 context.dispatchToParent( "fooEvent");
-});
 ```
 
 ### Dispatching Global Events
@@ -296,7 +285,6 @@ context.dispatchToParent( "fooEvent");
 ```javascript
 // Event sent to every registered Context
 context.dispatchGlobally( "fooEvent");
-});
 ```
 
 ### Dispatching Events with a Payload
@@ -308,21 +296,20 @@ context.dispatch( "fooEvent",
 							payloadPropertyBar: true,
 							payloadPropertyBaz: 12345
 						} );
-});
 ```
 
 ### Un-Registering Commands
 
-// this is done automatically when a Context is destroyed, so you normally would not do this manually.
-
 ```javascript
+// this is done automatically when a Context is destroyed, so you normally would not do this manually.
 context.unmapAll();
 ```
-
 
 ### Destroying a Context
 
 ```javascript
+// This will unregister all events bound to the Context and will also call close() on the Context's View (if available).
+// When used with Marionette.ItemView, this means that all your View Events get cleaned up, too.  Nice and tidy!
 Geppetto.removeContext(context);
 ```
 
@@ -330,6 +317,8 @@ Geppetto.removeContext(context);
 A Command is a small, single-purpose piece of code with an `execute()` method.  When an Application Event is fired, Geppetto acts as a dispatcher, deciding which Command type should be executed in response.  Geppetto creates an instance of the appropriate Command, injects it with any dependencies it needs (such as the model and the event payload), and invokes its `execute()` method.  A Command can do things like invoke web services, modify the Model, or dispatch Application Events of its own.  When its work is done, the Command instance is destroyed automatically.
 
 ### Implementing a Command
+
+All you need is an object literal with an execute() method!
 
 ```javascript
 var command = function () {};
@@ -343,6 +332,16 @@ return command;
 ```
 
 ### Dependency Injection
+
+The Geppetto framework automatically injects a few things into each Command instance before it is executed.
+
+The three injections are:
+
+* context
+* eventName
+* eventData
+
+See this example for their usage:
 
 ```javascript
 var command = function () {};
@@ -380,7 +379,6 @@ command.prototype.updateModel = function(theModel) {
 
 return command;
 ```
-
 
 ### Responsibilities of a Command
 
@@ -436,6 +434,19 @@ Backbone.Marionette.Geppetto.debug.countEvents();
 ```
 
 ## FAQ
+
+### How Many Contexts? 
+How many Contexts do I need in my app?
+
+Like most questions about application structure, the answer is the familiar and often-frustrating, "It depends."
+
+The best way to understand Contexts is to step back and think about which pieces of your application could theoretically exist as their own totally independent applications.  
+
+* Single-Context Apps: If your app has many sub-views, which all need to communicate but could not really function on their own, then you might benefit from a Single-Context app.  You can still benefit from a loosely-coupled architecture using the Context's Service Locator pattern, and the Command Registry to keep your business logic neat and tidy.
+
+* Multiple-Context Apps: If I have a multi-tabbed application, for instance, where each tab has its own self-contained UI, its own backing data, and its own business logic, then you might consider creating one Context per tab.  After all, the tab generally doesn't need to communicate with other tabs, nor should other tabs be informed of what actions are taking place within its boundaries.  Depending on your app's needs, you may choose to have one "parent" Context that represents the outer application shell, which handles global things like navigation, tab creation, etc.  See the example app below for a demo of communicating between parent and child contexts.
+
+
 ### Livequery Performance
 *"Livequery uses polling and timers to check for DOM events... will this affect performance?"*
 
