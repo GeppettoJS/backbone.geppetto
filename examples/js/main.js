@@ -3,6 +3,7 @@
 require.config( {
     paths:{
         jquery:'libs/jquery-1.7.1.min',
+        livequery: 'libs/jquery.livequery',
         underscore:'libs/underscore',
         backbone:'libs/backbone',
         marionette:'libs/backbone.marionette',
@@ -17,13 +18,14 @@ require(
             // external libraries with AMD support
 
             "jquery",
+            "livequery",
             "underscore",
             "backbone",
             "marionette",
             "geppetto",
             "myapp"
 
-        ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
+        ], function ( $, LiveQuery, _, Backbone, Marionette, Geppetto, MyApp ) {
 
             $( function () {
 

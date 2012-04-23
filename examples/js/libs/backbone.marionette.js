@@ -7,8 +7,6 @@ define( ['jquery', 'underscore', 'backbone'], function ( $, _, Backbone ) {
 // Documentation and Full License Available at:
 // http://github.com/derickbailey/backbone.marionette
 
-    console.log( "define marionette" );
-
     Backbone.Marionette = (function ( Backbone, _, $ ) {
         var Marionette = {};
 
@@ -801,8 +799,6 @@ define( ['jquery', 'underscore', 'backbone'], function ( $, _, Backbone ) {
 
         return Marionette;
     })( Backbone, _, window.jQuery || window.Zepto || window.ender );
-
-    console.log( "defined marionette" );
 
     return Backbone.Marionette;
 } );

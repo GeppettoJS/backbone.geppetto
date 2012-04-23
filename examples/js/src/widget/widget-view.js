@@ -39,9 +39,7 @@ define( [
             // listen for future changes to the model's "color" property
             this.model.on("change:color", this.onColorChanged);
 
-            var messageBox = new WidgetMessageBox( {
-                context:this.context
-            } );
+            var messageBox = new WidgetMessageBox();
 
             this.$el.append( messageBox.render().$el );
         },

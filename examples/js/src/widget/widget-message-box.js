@@ -13,18 +13,18 @@ define( [
             _.bindAll( this );
         },
 
-        render:function () {
-//            this.context = Geppetto.getContext(this.el);
-            this.context = this.options.context;
+        onContextReady:function (context) {
+            this.context = context;
             this.context.listen( "messageSent", this.onMessageSent );
+        },
 
+        render:function () {
+
+            Geppetto.getContext( this.el, this.onContextReady );
             return this;
         },
 
         onMessageSent:function ( eventData ) {
-            
-            console.log("message received!");
-            
             var newMessage = $( "<span>" + eventData.message + "<br></span>" );
             this.$el.prepend( newMessage );
         }

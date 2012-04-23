@@ -50,20 +50,17 @@ define( [
 
             newWidget.render().done( function () {
                 var el = $(newWidget.el);
-//                el.hide();
                 that.$( "#widgets" ).append( newWidget.el );
-//                el.fadeIn(200);
             } );
 
             this.updateStats();
         },
-
+        
         onMessageSent:function ( eventData ) {
-
             var newMessage = $( "<span>" + eventData.message + "<br></span>" );
-
             this.$( "#parent-messages" ).prepend( newMessage )
         },
+        
         onCloseWidget:function ( eventData ) {
             var context = eventData.context;
             var el = context.el;
@@ -72,9 +69,11 @@ define( [
 
             this.updateStats();
         },
+        
         onClearWidgetButtonClick:function() {            
             this.context.dispatchGlobally("shutdownWidget");            
         },
+        
         onChangeColorsButtonClick:function() {
             this.context.dispatchGlobally("changeColor");
         }
