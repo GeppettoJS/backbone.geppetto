@@ -318,7 +318,7 @@ A Command is a small, single-purpose piece of code with an `execute()` method.  
 
 ### Implementing a Command
 
-All you need is an object literal with an execute() method!
+All you need is a constructor function with an execute() method!
 
 ```javascript
 var command = function () {};
