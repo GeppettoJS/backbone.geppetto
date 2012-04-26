@@ -9,6 +9,7 @@ define( [
 ], function ( $, _, Marionette, Geppetto, WidgetTemplate, WidgetContext, WidgetMessageBox ) {
 
     return Marionette.ItemView.extend( {
+        
         template:WidgetTemplate,
 
         className:"widget",
@@ -22,24 +23,33 @@ define( [
 
         initialize:function () {
             _.bindAll( this );
-            this.model = this.options.model;
-        },
-
-        onRender:function () {
-
-            this.context = Geppetto.createContext( this.el, WidgetContext, this.options.parentContext );
-            this.context.model = this.model;
-
-            this.context.listen( "messageSent", this.onMessageSent );
-            this.context.listen( "shutdownWidget", this.onCloseWidgetRequest);
             
-            // set initial color to the one already set on the model
-            this.onColorChanged();
+            Geppetto.bindContext({
+                view: this,
+                context: WidgetContext,
+                parentContext: this.options.parentContext
+            });
             
+            this.context.model = this.options.model
+
             // listen for future changes to the model's "color" property
             this.model.on("change:color", this.onColorChanged);
 
-            var messageBox = new WidgetMessageBox();
+            this.context.listen( "messageSent", this.onMessageSent );
+            this.context.listen( "shutdownWidget", this.onCloseWidgetRequest);
+
+        },
+
+        onClose: function() {
+            this.model.off("change:color", this.onColorChanged);
+        },
+        
+        onRender:function () {
+            
+            // set initial color to the one already set on the model
+            this.onColorChanged();
+
+            var messageBox = new WidgetMessageBox({context: this.context});
 
             this.$el.append( messageBox.render().$el );
         },
@@ -59,7 +69,13 @@ define( [
             this.context.dispatch( "sendGlobalMessage", {message:messageText} );
         },
         onCloseWidgetRequest:function() {
-            this.context.dispatchToParent( "closeWidget", {context: this.context} );
+            var that = this;
+            this.$el.fadeOut(
+                    300, 
+                    function() { 
+                        that.close(); 
+                    }
+            );        
         },
         onColorChanged:function() {
             this.$el.css( "background-color", this.model.get( "color" ) );

@@ -22,14 +22,19 @@ define( [
         },
 
         onRender:function () {
-            this.context = Geppetto.createContext( this.el, WidgetContainerContext );
+
+            Geppetto.bindContext({
+                view: this,
+                context: WidgetContainerContext
+            });            
+            
             this.context.model = new Backbone.Model( {
                 widgetCounter:0
             } );
 
             this.context.listen( "widgetCreated", this.onWidgetCreated );
             this.context.listen( "messageSent", this.onMessageSent );
-            this.context.listen( "closeWidget", this.onCloseWidget );
+            this.context.listen( Geppetto.EVENT_CONTEXT_SHUTDOWN, this.onCloseWidget );
             
             this.updateStats();
         },
@@ -62,11 +67,6 @@ define( [
         },
         
         onCloseWidget:function ( eventData ) {
-            var context = eventData.context;
-            var el = context.el;
-            Geppetto.removeContext(context);
-            $(el).fadeOut(300, function() { $(el).remove(); });
-
             this.updateStats();
         },
         

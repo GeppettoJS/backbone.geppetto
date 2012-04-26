@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.1.1
+// Backbone.Geppetto v0.2.0
 //
 // Copyright (C) 2012 Model N, Inc.  
 // Distributed under the MIT License
@@ -8,44 +8,55 @@
 
 define( [
     "jquery",
-    "livequery",
     "underscore",
     "backbone",
     "marionette"
-], function ( $, LiveQuery, _, Backbone, Marionette ) {
+], function ( $, _, Backbone, Marionette ) {
 
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {
 
-        if ( ! $.livequery ) {
-            throw Error("Dependency failure: jQuery livequery must be included before backbone.geppetto");
-        }
-
-        $.extend($.fn, {
-
-            expireAndDelete : function() {
-                this.expire();
-
-                var toDelete = [];
-                var self = this;
-                $.each( $.livequery.queries, function(i, query) {
-                    if ( self.selector == query.selector && self.context == query.context )
-                        toDelete.push(i);
-                });
-
-                $.each( toDelete, function(i, indexToDelete){
-                    $.livequery.queries.splice(indexToDelete, 1);
-                });
-            }
-        });
-
         var Geppetto = {};
-
-        Geppetto.Context = function Context( id, parentContext ) {
-            this.id = id;
-            this.parentContext = parentContext;
+        
+        Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
+        
+        var contexts = {};
+        
+        Geppetto.Context = function Context( options ) {
+            
+            this.options = options || {};
+            
+            this.parentContext = this.options.parentContext;
             this.vent = new Backbone.Marionette.EventAggregator();
 
             this.initialize && this.initialize();
+            
+            this.id = _.uniqueId("Context");
+            
+            contexts[this.id] = this;
+        };
+        
+        Geppetto.bindContext = function bindContext( options ) {
+            
+            this.options = options || {};
+
+            var context = new this.options.context(this.options);
+            var view = this.options.view;    
+
+            if (!view.close) {
+                view.close = Backbone.Marionette.View.close;
+            }
+
+            view.on("close", function() {
+                
+                // todo: is it really necessary to unmap "close" here? 
+                // todo: might already be taken care of by marionette...
+                view.off("close");
+                
+                
+                context.unmapAll();
+            });
+
+            view.context = context;
         };
 
         Geppetto.Context.prototype.listen = function listen( eventName, callback ) {
@@ -84,7 +95,12 @@ define( [
         };
 
         Geppetto.Context.prototype.unmapAll = function unmapAll() {
+                        
             this.vent.unbindAll();
+            
+            delete contexts[this.id];
+            
+            this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
         };
 
         var extend = Backbone.View.extend;
@@ -134,80 +150,6 @@ define( [
 
         var counter = 0;
         var childCounter = 0;
-
-        var DATA_TAG = "data-geppetto-context";
-        var CHILD_DATA_TAG = "data-geppetto-child";
-
-        Geppetto.createContext = function createContext( el, contextDefinition, parentContext ) {
-
-            var id = counter++;
-            $( el ).attr( DATA_TAG, id );
-
-            var newContext = contextDefinition
-                    ? new contextDefinition( id, parentContext )
-                    : new Geppetto.Context( id, parentContext );
-
-            newContext.el = el;
-
-            contexts[id] = newContext;
-
-            return newContext;
-        };
-
-        Geppetto.getContext = function getContext( el, callback ) {
-
-            var that = this;
-
-            if (this.debug) {
-                var startTime = (new Date()).getTime();
-            }
-
-            var childId = childCounter++;
-            $(el).attr(CHILD_DATA_TAG, childId);
-
-            var childAttachedToParentSelector = $('[' + DATA_TAG + '] [' + CHILD_DATA_TAG + '="' + childId + '"]');
-
-            childAttachedToParentSelector.livequery(function() {
-
-                childAttachedToParentSelector.expireAndDelete();
-
-                var id;
-                if($(el).attr(DATA_TAG)) {
-                    id = $(el).attr(DATA_TAG);
-                } else {
-                    var matched = $( el ).parents( "[" + DATA_TAG + "]:first" );
-                    if ( !matched.length ) {
-                        throw Error( "Could not find a parent element with data-geppetto-context attr for provided element" );
-                    } else if ( matched.length > 1 ) {
-                        throw Error( "Expected 1 parent element with data-geppetto-context attr for provided element but found " + matched.length );
-                    }
-
-                    id = $( matched[0] ).attr( DATA_TAG );
-
-                }
-
-                var context = contexts[id];
-
-                if (that.debug) {
-                    var endTime = (new Date()).getTime();
-
-                    var timeDiff = endTime - startTime;
-                    console && console.log && console.log("Geppetto.getContext(): Completed in " + timeDiff + " ms.");
-                }
-
-                callback(context);
-
-            });
-
-        };
-
-        Geppetto.removeContext = function removeContext( el ) {
-            var id = $( el ).attr( 'id' );
-            var context = contexts[id];
-            context.unmapAll();
-            context.el.close && context.el.close();
-            delete contexts[id];
-        };
 
         return Geppetto;
 

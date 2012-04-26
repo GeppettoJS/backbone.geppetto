@@ -11,17 +11,9 @@ define( [
 
         initialize:function () {
             _.bindAll( this );
-        },
 
-        onContextReady:function (context) {
-            this.context = context;
+            this.context = this.options.context;
             this.context.listen( "messageSent", this.onMessageSent );
-        },
-
-        render:function () {
-
-            Geppetto.getContext( this.el, this.onContextReady );
-            return this;
         },
 
         onMessageSent:function ( eventData ) {

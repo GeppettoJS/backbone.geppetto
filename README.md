@@ -15,9 +15,6 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
 
-### Livequery
-[Livequery](http://docs.jquery.com/Plugins/livequery) is required to respond to an element being added to the DOM.  This is used by Geppetto's `getContext()` method, which allows an element to look up its parent Context instead of "passing the baton" from parent views to child views.
-
 ### Backbone Marionette
 [Backbone Marionette](https://github.com/derickbailey/backbone.marionette) is required for its Event Aggregator, and recommended for its Composite View architecture, which works particularly well with Geppetto.
 
@@ -30,7 +27,6 @@ Here is the RequireJS config with all dependencies listed:
 require.config( {
     paths:{
         jquery:'libs/jquery-1.7.1.min',
-        livequery: 'libs/jquery.livequery',
         underscore:'libs/underscore',
         backbone:'libs/backbone',
         marionette:'libs/backbone.marionette',
@@ -73,93 +69,9 @@ Geppetto implements the Controller piece using the Command Pattern.  Commands ar
 ## Geppetto.Context
 `Geppetto.Context` has many jobs, all of which involve providing a central place to share data and communication between related components. 
 
-### Job #1: Service/Model Locator
-The Context helps with dependency management, saving you from the tedious task of manually passing dependencies around.  Let's say that we've got a nested view structure, with three components: ParentView, ChildView, and GrandchildView, all nested like Russian dolls, and all backed by the same Model.  
+### Job #1: Event Bus
 
-Let's say that ChildView handles layouts, but doesn't actually need a handle to the Model instance since it doesn't display any Model data.  GrandchildView, however, does display data.  If the Model is created by ParentView, how does GrandchildView get a handle to the Model?
-
-You've probably written some code like this:
-
-```javascript
-
-// ParentView.js
-return Backbone.View({
-	initialize: function(){
-		// I don't need this model, but my child does!
-		this.model = new Model();	
-	},
-	render: function(){
-		var childView = new ChildView({
-			// Pass the model along to my child view...
-			model: this.model 
-		}
-	}
-});
-
-// ChildView.js
-return Backbone.View({
-	render: function(){
-		var grandchildView = new GrandchildView({
-			// Actually, I don't need the model, myself... 
-			// I just know that the grandchild view needs it, so I'm passing it along!
-			model: this.model 
-		}
-	}
-});
-
-// GrandchildView.js
-return Backbone.View({
-	render: function(){
-		    // Oh, thanks for the Model!  
-		    // I hope you didn't have to work too hard to bring it to me!
-			doSomeRenderingWithTheModel(this.model);
-		}
-	}
-});
-```
-Oftentimes, we find ourselves manually passing around dependencies through hierarchical Views, like a game of pass-the-baton.  This is tedious and fragile, and does not promote good separation of concerns.  Instead, wouldn't it be great if ChildView didn't need any Model reference at all, and GrandchildView could simply ask for it?
-
-Here's how we could accomplish this with Geppetto (Don't worry for now about where ParentViewContext comes from... we'll get to that!):
-
-```javascript
-// ParentView.js
-return Backbone.View({
-	initialize: function(){
-		this.model = new Model();	
-	},
-	render: function(){		
-		this.context = Backbone.createContext(this.el, ParentViewContext);
-		this.context.model = this.model;
-		
-		var childView = new ChildView({
-			// ChildView doesn't need the model, so I won't pass it...
-		}
-	}
-});
-
-// GrandchildView.js
-return Backbone.View({
-	render: function(){
-		// Let Geppetto find my Context based on the DOM hierarchy.
-		Geppetto.getContext(this.el, onContextLoad);		
-	},
-	onContextLoad: function(context) {
-		
-		// I got my Model all by myself, and no parent view had to pass it to me!		
-		this.context = context;
-		
-		doSomeRenderingWithTheModel(this.context.model);
-	}
-});
-```
-
-In the above example, we're seeing the service/model locator pattern in action.  First, our ParentView registers itself with Geppetto using `createContext()`.  We do this in the `render()` function because Geppetto uses the DOM to track relationships between components, and when we're inside this method, we can be sure that the View's `el` has been created. 
-
-Behind the scenes, Geppetto sets an attribute on the ParentView's DOM element, tying it to a Context instance with a unique identifier.  This will allow any of the ParentView's child Views to look up the Context later.  
-
-ParentView also is responsible for creating the Model, but we don't want out View to be responsible for keeping track of it.  Instead, once the Context is created, we assign the Model to it.  Our Model data now lives in a centralized place, accessible from any component belonging to this Context.
-
-Later on, instead of passing the "model" property from component-to-component, the GrandchildView can simply ask Geppetto for the Context it belongs to.  Since the View's "el" might not be attached to the DOM yet, we provide a callback function to `getContext()` which will be fired as soon as the View is attached to the DOM and its parent Context is found.   
+Each Context has an instance of Marionette.EventAggregator, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.  
 
 ### Job #2: Command Registry
 
@@ -173,8 +85,11 @@ Well, now we can!  Each Context has a registry where you can assign a named even
 
 // MainView.js
 return Backbone.View.extend({
-	render: function() {
-		this.context = Geppetto.createContext(this.el, MainContext);
+	initialize: function() {
+		Geppetto.bindContext({
+			view: this
+			context: MainContext
+		});
 	}
 });
 
@@ -187,11 +102,13 @@ return Geppetto.Context.extend( {
 ### Assigning a Parent Context
 
 ```javascript
-
 // ShellView.js
 return Backbone.View.extend({
-	render: function() {
-		this.context = Geppetto.createContext(this.el, ShellContext);
+	initialize: function() {
+		Geppetto.bindContext({
+			view: this, 
+			context: ShellContext
+		});
 	},
 	createModule: function() {
 		var moduleView = new ModuleView({
@@ -208,11 +125,13 @@ return Geppetto.Context.extend( {
 
 // ModuleView.js
 return Backbone.View.extend({
-	render: function() {
+	initialize: function() {
 		// use "this.options" to access Backbone constructor parameters
-		this.context = Geppetto.createContext(
-			this.el, ModuleContext, this.options.parentContext
-		);
+		Geppetto.bindContext({
+			view: this,
+			context: ModuleContext,
+			parentContext: this.options.parentContext
+		});
 	}
 });
 
@@ -220,25 +139,8 @@ return Backbone.View.extend({
 return Geppetto.Context.extend( {
     // map commands here...
 });
-
-
 ```
 
-### Finding a Component's Context
-
-```javascript
-return Backbone.View({
-	render: function(){
-		// Let Geppetto find my Context based on the DOM hierarchy.
-		Geppetto.getContext(this.el, onContextLoad);		
-	},
-	onContextLoad: function(context) {		
-		// I got my Model all by myself, and no parent view had to pass it to me!		
-		this.context = context;		
-		doSomeRenderingWithTheModel(this.context.model);
-	}
-});
-```
 
 ### Registering Commands
 
@@ -253,14 +155,12 @@ return Geppetto.Context.extend( {
 ### Listening to Events
 
 ```javascript
-
 // this usually goes in View code... to respond to an event fired by a Command finishing its job
 context.listen("fooCompleted", handleFooCompleted);
 
 var handleFooCompleted = function() {
 	// update the view or something...
 }
-
 ```
 
 ### Event Bus
@@ -307,11 +207,9 @@ context.unmapAll();
 
 ### Destroying a Context
 
-```javascript
-// This will unregister all events bound to the Context and will also call close() on the Context's View (if available).
-// When used with Marionette.ItemView, this means that all your View Events get cleaned up, too.  Nice and tidy!
-Geppetto.removeContext(context);
-```
+A Context is automatically destroyed when the `close()` method is called on its associated View.  You should already be in the habit of calling `close()` to properly clean up your View's event listeners.  If not, please read Derick Bailey's [article on killing zombies](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/).  The `close()` method is available on any Marionette.View.  If you're using a plain old Backbone.View with Geppetto, a `close()` method will be created on the View for you when you call `bindContext()`. 
+
+When a Context is destroyed, all events on the Context's event bus will be unmapped.
 
 ## Geppetto.Command
 A Command is a small, single-purpose piece of code with an `execute()` method.  When an Application Event is fired, Geppetto acts as a dispatcher, deciding which Command type should be executed in response.  Geppetto creates an instance of the appropriate Command, injects it with any dependencies it needs (such as the model and the event payload), and invokes its `execute()` method.  A Command can do things like invoke web services, modify the Model, or dispatch Application Events of its own.  When its work is done, the Command instance is destroyed automatically.
@@ -433,6 +331,13 @@ Backbone.Marionette.Geppetto.debug.countEvents();
 >> 25
 ```
 
+## Diagrams
+
+### MVC Overview
+
+[![MVC Diagram](http://i.imgur.com/zsVjd.gif)](http://i.imgur.com/zsVjd.gif)
+
+
 ## FAQ
 
 ### How Many Contexts? 
@@ -446,16 +351,6 @@ The best way to understand Contexts is to step back and think about which pieces
 
 * Multiple-Context Apps: If I have a multi-tabbed application, for instance, where each tab has its own self-contained UI, its own backing data, and its own business logic, then you might consider creating one Context per tab.  After all, the tab generally doesn't need to communicate with other tabs, nor should other tabs be informed of what actions are taking place within its boundaries.  Depending on your app's needs, you may choose to have one "parent" Context that represents the outer application shell, which handles global things like navigation, tab creation, etc.  See the example app below for a demo of communicating between parent and child contexts.
 
-
-### Livequery Performance
-*"Livequery uses polling and timers to check for DOM events... will this affect performance?"*
-
-Geppetto invokes Livequery when a View uses the `getContext()` method to find its Parent Context.  Since this requires a DOM hierarchy check, and since the View might not yet be added to the DOM, we use Livequery to notify us when the DOM attachment has taken place.  Only then can we run the Context selector, and retrieve the appropriate Context.  Immediately after this has taken place, we clean up the Livequery reference and the polling stops.  
-
-I tested this performance using the Modular Widgets example, and found that the `getContext()` call took an average of 25ms to complete with up to 50 Contexts on the page.  As the number of Contexts increased, the time did increase, but not by much.  Even with hundreds of Contexts on the page, the call still returned in about 100ms.  Even a very modular app should not need more than a dozen or so Contexts to be active at one time, so this should not be a huge concern for most.  
-
-Still, if that 25ms is a deal-breaker for you, you can still opt to manually pass around your Context from parent-to-child instead of using the Service locator pattern.  
-
 ## Examples
 ### Modular Widgets
 Pointless?  Yes.  
@@ -465,6 +360,24 @@ Fun?  Probably just as much as Farmville!
 [Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
 
 Source code available in the `examples` directory in the Github Repo.
+
+## Version History
+
+### 0.2.0
+*Released: 26 April 2012*
+
+* Removed Livequery and service-locator to simplify the framework and remove all ties to the DOM.  
+* Added logic to automatically destroy a Context and unmap its events when the close() method is called on the parent View
+
+### 0.1.1
+*Released: 19 April 2012*
+
+* Added DOM-based service locator using Livequery, allowing sub-views to find their parent context without it being passed to them
+
+### 0.1
+*Released: 16 April 2012*
+
+* Initial release
 
 ## License
 The MIT License (MIT)
