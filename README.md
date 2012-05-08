@@ -361,6 +361,13 @@ Fun?  Probably just as much as Farmville!
 
 Source code available in the `examples` directory in the Github Repo.
 
+## Tests
+### About
+Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) syntax provided by the [Pavlov](https://github.com/mmonteleone/pavlov) plugin.  
+
+### Specs
+Run the current Geppetto Test Specs in your browser on [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
+
 ## Version History
 
 ### 0.2.0
