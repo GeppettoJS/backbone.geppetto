@@ -26,10 +26,12 @@ require(
             "backbone",
             "marionette",
             "geppetto",
-            "geppetto-specs"
+            "../geppetto-specs"
 
-        ], function () {
+        ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
 
-            QUnit.start();
+            $( function () {
+                QUnit.start();
+            });
         }
 );
