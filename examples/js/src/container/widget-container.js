@@ -53,11 +53,13 @@ define( [
 
             var that = this;
 
-            newWidget.render().done( function () {
+            newWidget.on("render", ( function () {
                 var el = $(newWidget.el);
                 that.$( "#widgets" ).append( newWidget.el );
-            } );
+            } ));
 
+            newWidget.render();
+            
             this.updateStats();
         },
         

@@ -10,8 +10,10 @@ define( [
     "jquery",
     "underscore",
     "backbone",
+    "eventbinder",
+    "wreqr",
     "marionette"
-], function ( $, _, Backbone, Marionette ) {
+], function ( $, _, Backbone, EventBinder, Wreqr, Marionette ) {
 
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {
 
@@ -26,7 +28,10 @@ define( [
             this.options = options || {};
 
             this.parentContext = this.options.parentContext;
-            this.vent = new Backbone.Marionette.EventAggregator();
+            
+            this.vent = new Backbone.EventBinder();
+
+            _.extend(this.vent, Backbone.Events);
 
             this.initialize && this.initialize();
 
@@ -34,7 +39,7 @@ define( [
 
             contexts[this.id] = this;
         };
-
+        
         Geppetto.bindContext = function bindContext( options ) {
 
             this.options = options || {};
@@ -60,7 +65,7 @@ define( [
         };
 
         Geppetto.Context.prototype.listen = function listen( eventName, callback ) {
-            this.vent.bindTo( eventName, callback );
+            this.vent.bindTo( this.vent, eventName, callback );
         };
 
         Geppetto.Context.prototype.dispatch = function dispatch( eventName, eventData ) {
@@ -82,7 +87,7 @@ define( [
 
         Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, commandClass ) {
 
-            this.vent.bindTo( eventName, function ( eventData ) {
+            this.vent.bindTo( this.vent, eventName, function ( eventData ) {
 
                 var commandInstance = new commandClass();
 
@@ -118,7 +123,7 @@ define( [
 
                 _.each(contexts, function(context, id) {
                     if (contexts.hasOwnProperty(id)) {
-                        numEvents += context.vent.bindings.length;
+                        numEvents += _.size(context.vent._callbacks);
                     }
                 });
 

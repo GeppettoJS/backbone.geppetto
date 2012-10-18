@@ -23,7 +23,7 @@ You'll need to include the following projects for Geppetto to work:
 
 Here is the RequireJS config with all dependencies listed:
 
-```javascript
+```
 require.config( {
     paths:{
         jquery:'libs/jquery-1.7.1.min',

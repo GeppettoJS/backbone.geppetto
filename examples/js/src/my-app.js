@@ -9,18 +9,20 @@ define( [
 
     $( "#loadingSpinner" ).hide();
 
-    Backbone.Marionette.TemplateCache.loadTemplate = function ( template, callback ) {
+    Backbone.Marionette.TemplateCache.prototype.loadTemplate = function(templateId) {
+        // Marionette expects "templateId" to be the ID of a DOM element.
+        // But with RequireJS, templateId is actually the full text of the template.
+        var template = templateId;
 
-        // marionette expects the "template" param to be the ID of a template. 
-        // instead, with RequireJS, we are handed the full text of the template,
-        // so we need to override the way we load it...
+        // Make sure we have a template before trying to compile it
+        if (!template || template.length === 0){
+            var msg = "Could not find template: '" + templateId + "'";
+            var err = new Error(msg);
+            err.name = "NoTemplateError";
+            throw err;
+        }
 
-        var compiledTemplate = _.template( template );
-        callback.call( this, compiledTemplate );
-    };
-
-    Backbone.Marionette.Renderer.renderTemplate = function ( template, data ) {
-        return template( data );
+        return template;
     };
 
     var app = new WidgetContainer( {

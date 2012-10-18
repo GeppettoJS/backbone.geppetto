@@ -2,13 +2,19 @@
 
 require.config( {
     paths:{
-        jquery:'../../dependencies/jquery-1.7.1.min',
+        jquery:'../../dependencies/jquery',
         underscore:'../../dependencies/underscore',
         backbone:'../../dependencies/backbone',
+        eventbinder:'../../dependencies/backbone.eventbinder',
+        wreqr:'../../dependencies/backbone.wreqr',
         marionette:'../../dependencies/backbone.marionette',
         geppetto:'../../backbone.geppetto',
         text:'../../dependencies/text',
         myapp:"src/my-app"
+    },
+    
+    shim: {
+        "marionette": ["eventbinder"]
     }
 } );
 
@@ -19,11 +25,13 @@ require(
             "jquery",
             "underscore",
             "backbone",
+            "eventbinder",
+            "wreqr",
             "marionette",
             "geppetto",
             "myapp"
 
-        ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
+        ], function ( $, _, Backbone, EventBinder, Wreqr, Marionette, Geppetto, MyApp ) {
 
             $( function () {
 
