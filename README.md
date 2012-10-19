@@ -16,14 +16,18 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 You'll need to include the following projects for Geppetto to work:
 
 ### Backbone Marionette
-[Backbone Marionette](https://github.com/derickbailey/backbone.marionette) is required for its Event Aggregator, and recommended for its Composite View architecture, which works particularly well with Geppetto.
+[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) v1.0.0 beta 1 or higher is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
+
+Geppetto has been tested with Marionette v1.0.0 beta 1.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
+
+Geppetto requires the AMD version of Marionette, which can be downloaded from the Marionette project page.  It is also recommended to use the AMD versions of Marionette's dependencies, [EventBinder](https://github.com/marionettejs/backbone.eventbinder) and [Wreqr](https://github.com/marionettejs/backbone.wreqr), which can be found on their respective project pages.
 
 ### RequireJS
 [RequireJS](http://requirejs.org/) is currently required, but will likely be demoted to "recommended" in an upcoming release.  In a large multi-module application, RequireJS makes it much easier to manage dependencies.
 
 Here is the RequireJS config with all dependencies listed:
 
-```
+```javascript
 require.config( {
     paths:{
         jquery:'libs/jquery-1.7.1.min',
@@ -369,6 +373,11 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.2.1
+*Released: 18 October 2012*
+
+* Updated Geppetto to work with Marionette v1.0.0 beta 1  
 
 ### 0.2.0
 *Released: 26 April 2012*
