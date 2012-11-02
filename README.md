@@ -99,7 +99,9 @@ return Backbone.View.extend({
 
 // MainContext.js
 return Geppetto.Context.extend( {
-    // map commands here...
+	initialize: function () {
+		// map commands here...
+	}
 });
 ```
 
@@ -124,7 +126,9 @@ return Backbone.View.extend({
 
 // ShellContext.js
 return Geppetto.Context.extend( {
-    // map commands here...
+	initialize: function () {
+		// map commands here...
+	}
 });
 
 // ModuleView.js
@@ -141,7 +145,9 @@ return Backbone.View.extend({
 
 // ModuleContext.js
 return Geppetto.Context.extend( {
-    // map commands here...
+	initialize: function () {
+		// map commands here...
+	}
 });
 ```
 
@@ -150,9 +156,11 @@ return Geppetto.Context.extend( {
 
 ```javascript
 return Geppetto.Context.extend( {
-    this.mapCommand( "appEventFoo", FooCommand );
-    this.mapCommand( "appEventBar", BarCommand );
-    this.mapCommand( "appCommandBaz", BazCommand );
+	initialize: function () {
+		this.mapCommand( "appEventFoo", FooCommand );
+		this.mapCommand( "appEventBar", BarCommand );
+		this.mapCommand( "appCommandBaz", BazCommand );
+	}
 });
 ```
 
