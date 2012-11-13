@@ -16,11 +16,11 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 You'll need to include the following projects for Geppetto to work:
 
 ### Backbone Marionette
-[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) v1.0.0 beta 1 or higher is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
+[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) v1.0.0 beta 5 or higher is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
 
-Geppetto has been tested with Marionette v1.0.0 beta 1.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
+Geppetto has been tested with Marionette v1.0.0 beta 5.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
 
-Geppetto requires the AMD version of Marionette, which can be downloaded from the Marionette project page.  It is also recommended to use the AMD versions of Marionette's dependencies, [EventBinder](https://github.com/marionettejs/backbone.eventbinder) and [Wreqr](https://github.com/marionettejs/backbone.wreqr), which can be found on their respective project pages.
+Geppetto requires the Bundled/AMD version of Marionette, which can be downloaded from the [Marionette downloads page](http://marionettejs.com/#downloads).  Go to the "Bundled Builds" section and then download the "RequireJS (AMD) Compatible" version.  You can choose either the production (minified) or development (non-minified) version depending on your needs.
 
 ### RequireJS
 [RequireJS](http://requirejs.org/) is currently required, but will likely be demoted to "recommended" in an upcoming release.  In a large multi-module application, RequireJS makes it much easier to manage dependencies.
@@ -381,6 +381,13 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.2.2
+*Released: 12 November 2012*
+
+* Updated Geppetto to work with Marionette v1.0.0 beta 5
+* Marionette can now be downloaded as a bundled build which includes EventAggregator and Wreqr, so these secondary dependencies have been removed from Geppetto.  Instead, Geppetto's dependency is now on the bundled Marionette build.   
+* Removed redundant "contexts" variable which was defined twice.
 
 ### 0.2.1
 *Released: 18 October 2012*

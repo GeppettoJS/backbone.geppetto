@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.2.1
+// Backbone.Geppetto v0.2.2
 //
 // Copyright (C) 2012 Model N, Inc.  
 // Distributed under the MIT License
@@ -10,10 +10,8 @@ define( [
     "jquery",
     "underscore",
     "backbone",
-    "eventbinder",
-    "wreqr",
     "marionette"
-], function ( $, _, Backbone, EventBinder, Wreqr, Marionette ) {
+], function ( $, _, Backbone, Marionette ) {
 
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {
 
@@ -28,7 +26,7 @@ define( [
             this.options = options || {};
 
             this.parentContext = this.options.parentContext;
-            
+
             this.vent = new Backbone.EventBinder();
 
             _.extend(this.vent, Backbone.Events);
@@ -39,7 +37,7 @@ define( [
 
             contexts[this.id] = this;
         };
-        
+
         Geppetto.bindContext = function bindContext( options ) {
 
             this.options = options || {};
@@ -110,8 +108,6 @@ define( [
 
         var extend = Backbone.View.extend;
         Geppetto.Context.extend = extend;
-
-        var contexts = {};
 
         var debug = {
 
