@@ -12,6 +12,12 @@ More commonly, in Backbone applications you'll find business logic implemented d
 
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
 
+### Getting Geppetto
+
+Download latest release: [v0.2.2](https://github.com/ModelN/backbone.geppetto/archive/0.2.2.zip)
+
+Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
+
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
 
