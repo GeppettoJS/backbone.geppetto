@@ -14,9 +14,16 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 
 ### Getting Geppetto
 
-Download latest release: [v0.2.2](https://github.com/ModelN/backbone.geppetto/archive/0.2.2.zip)
+Download latest release: [v0.3](https://github.com/ModelN/backbone.geppetto/archive/0.3.zip)
 
 Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
+
+## Get Involved!
+
+### Mailing List
+
+Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!forum/backbone-geppetto) to discuss new features and stay-up-to-date on project updates.
+
 
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
@@ -174,12 +181,14 @@ return Geppetto.Context.extend( {
 
 ```javascript
 // this usually goes in View code... to respond to an event fired by a Command finishing its job
-context.listen("fooCompleted", handleFooCompleted);
+context.listen(this, "fooCompleted", handleFooCompleted);
 
 var handleFooCompleted = function() {
 	// update the view or something...
 }
 ```
+
+NOTE: The first parameter passed to the `listen()` function represents the object that is the interested party (the one doing the listening) and should generally always be `this`, to mean the current view.  Geppetto will automatically attach a listener to the `close()` event on this view, and clean up all the view's associated listeners whenever it is closed.
 
 ### Event Bus
 The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
@@ -387,6 +396,11 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.3
+*Released: 7 December 2012*
+
+* BREAKING: Added another required parameter to the `listen()` function representing the object (view) doing the listening. If it's a view, Geppetto will automatically unbind the view's listeners when the view is `close()`d.
 
 ### 0.2.2
 *Released: 12 November 2012*
