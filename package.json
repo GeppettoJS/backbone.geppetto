@@ -1,0 +1,65 @@
+{
+  "name": "Backbone.Geppetto",
+  "description": "Geppetto does this by implementing an event-driven Command framework, decoupling your View/Presenter code from your app's business logic",
+  "version": "0.3.0",
+  "homepage": "http://modeln.github.com/backbone.geppetto/",
+  "keywords": [
+    "backbone",
+    "plugin",
+    "marionette",
+    "geppetto",
+    "client",
+    "browser"
+  ],
+
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/ModelN/backbone.geppetto/blob/master/LICENSE"
+    }
+  ],
+
+  "scripts": {
+    "test" : "grunt jasmine",
+    "start" : "grunt jasmine-server"
+  },
+
+  "author": {
+    "name": "Dave Cadwallader"
+  },
+
+  "bugs": {
+    "web": "https://github.com/ModelN/backbone.geppetto/issues"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ModelN/backbone.geppetto.git"
+  },
+
+  "github": "https://github.com/ModelN/backbone.geppetto",
+
+  "devDependencies": {
+    "grunt": "~0.3.16",
+    "grunt-jasmine-runner": "latest",
+    "grunt-rigger": "*"
+  },
+
+  "volo": {
+    "url": "https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js",
+    "dependencies": {
+      "backbone": "Backbone.Marionette"
+    }
+  },
+
+  "jam":{
+    "dependencies": {
+      "Backbone.Marionette": "v1.0.0-beta6"
+    },
+    "main": "backbone.geppetto.js",
+    "include": [
+      "backbone.geppetto.js",
+      "README.md"
+    ]
+  }
+}
