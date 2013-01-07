@@ -10,7 +10,7 @@ define( [
     "jquery",
     "underscore",
     "backbone",
-    "marionette"
+    "Backbone.Marionette"
 ], function ( $, _, Backbone, Marionette ) {
 
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {

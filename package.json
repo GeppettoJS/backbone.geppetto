@@ -1,7 +1,7 @@
 {
   "name": "Backbone.Geppetto",
   "description": "Geppetto does this by implementing an event-driven Command framework, decoupling your View/Presenter code from your app's business logic",
-  "version": "0.3.0",
+  "version": "0.3.0-3",
   "homepage": "http://modeln.github.com/backbone.geppetto/",
   "keywords": [
     "backbone",
@@ -54,7 +54,7 @@
 
   "jam":{
     "dependencies": {
-      "Backbone.Marionette": "v1.0.0-beta6"
+      "Backbone.Marionette": ">=1.0.0-rc2"
     },
     "main": "backbone.geppetto.js",
     "include": [
