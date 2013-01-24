@@ -19,6 +19,13 @@ require.config( {
     },
 
     shim: {
+		underscore: {
+			exports: '_'
+		},
+		backbone: {
+			deps: ['underscore'],
+			exports: 'Backbone'
+		},
         "marionette": ["eventbinder"]
     }
 } );

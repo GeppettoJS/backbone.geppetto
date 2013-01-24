@@ -9,7 +9,16 @@ require.config( {
         geppetto:'../../backbone.geppetto',
         text:'../../dependencies/text',
         myapp:"src/my-app"
-    }
+    },
+	shim: {
+		underscore: {
+			exports: '_'
+		},
+		backbone: {
+			deps: ['underscore'],
+			exports: 'Backbone'
+		}
+	}
 
 } );
 
