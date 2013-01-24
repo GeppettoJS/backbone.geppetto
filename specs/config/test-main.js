@@ -11,8 +11,8 @@ require.config( {
         jquery:'../../dependencies/jquery',
         underscore:'../../dependencies/underscore',
         backbone:'../../dependencies/backbone',
-        eventbinder:'../../dependencies/backbone.eventbinder',
-        wreqr:'../../dependencies/backbone.wreqr',
+		'backbone.wreqr':'../../dependencies/backbone.wreqr',
+		'backbone.babysitter':'../../dependencies/backbone.babysitter',
         marionette:'../../dependencies/backbone.marionette',
         geppetto:'../../backbone.geppetto',
         text:'../../dependencies/text'
@@ -25,8 +25,7 @@ require.config( {
 		backbone: {
 			deps: ['underscore'],
 			exports: 'Backbone'
-		},
-        "marionette": ["eventbinder"]
+		}
     }
 } );
 
@@ -37,13 +36,11 @@ require(
             "jquery",
             "underscore",
             "backbone",
-            "eventbinder",
-            "wreqr",
             "marionette",
             "geppetto",
             "../geppetto-specs"
 
-        ], function ( $, _, Backbone, EventBinder, Wreqr, Marionette, Geppetto, MyApp ) {
+        ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
 
             $( function () {
                 QUnit.start();

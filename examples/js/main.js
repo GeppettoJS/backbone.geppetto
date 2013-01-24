@@ -6,6 +6,8 @@ require.config( {
         underscore:'../../dependencies/underscore',
         backbone:'../../dependencies/backbone',
         marionette:'../../dependencies/backbone.marionette',
+		'backbone.wreqr':'../../dependencies/backbone.wreqr',
+		'backbone.babysitter':'../../dependencies/backbone.babysitter',
         geppetto:'../../backbone.geppetto',
         text:'../../dependencies/text',
         myapp:"src/my-app"
