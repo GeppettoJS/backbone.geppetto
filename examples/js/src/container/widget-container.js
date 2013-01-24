@@ -32,9 +32,9 @@ define( [
                 widgetCounter:0
             } );
 
-            this.context.listen( "widgetCreated", this.onWidgetCreated );
-            this.context.listen( "messageSent", this.onMessageSent );
-            this.context.listen( Geppetto.EVENT_CONTEXT_SHUTDOWN, this.onCloseWidget );
+            this.context.listen( this, "widgetCreated", this.onWidgetCreated );
+            this.context.listen( this, "messageSent", this.onMessageSent );
+            this.context.listen( this, Geppetto.EVENT_CONTEXT_SHUTDOWN, this.onCloseWidget );
             
             this.updateStats();
         },

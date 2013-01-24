@@ -35,8 +35,8 @@ define( [
             // listen for future changes to the model's "color" property
             this.model.on("change:color", this.onColorChanged);
 
-            this.context.listen( "messageSent", this.onMessageSent );
-            this.context.listen( "shutdownWidget", this.onCloseWidgetRequest);
+            this.context.listen( this, "messageSent", this.onMessageSent );
+            this.context.listen( this, "shutdownWidget", this.onCloseWidgetRequest);
 
         },
 
