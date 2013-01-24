@@ -31,7 +31,7 @@ define( [
 
             this.vent = {};
 
-            _.extend(this.vent, Backbone.Events);
+			Marionette.addEventBinder(this.vent);
 
             this.initialize && this.initialize();
 
@@ -114,7 +114,7 @@ define( [
                 }
             }
 
-			this.vent.listenTo( this.vent, eventName, callback );
+			this.vent.listenTo( this.vent, eventName, callback, target );
 			// The arguments to listenTo are enough to stop listening to an event so we'll store those as the binding
             var binding = [this.vent, eventName, callback];
 
