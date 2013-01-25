@@ -102,7 +102,7 @@ Well, now we can!  Each Context has a registry where you can assign a named even
 
 // MainView.js
 return Backbone.View.extend({
-	initialize: function() {
+    initialize: function() {
 		Geppetto.bindContext({
 			view: this
 			context: MainContext
@@ -396,6 +396,17 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.4
+*Released: 25 January 2013*
+
+* Use new ["inversion-of-control"](http://documentcloud.github.com/backbone/#upgrading)-style Backbone `listenTo` API to allow consumers of Context events to maintain their own event references, 
+instead of Geppetto managing all the binding/unbinding logic.  
+* Consumers of Geppetto Context events which are not views, can use `Marionette.addEventBinder()` to mix-in the `listenTo` API into themselves.
+* Refactored internals to work with Backbone v0.9.10.
+* Updated dependencies to latest versions (Backbone, Marionette, jQuery)
+* Added unit tests to cover event cleanup cases.
+* Big thanks to [Kelvin Luck](https://github.com/vitch) for [his help](https://github.com/ModelN/backbone.geppetto/pull/8) with this release!
 
 ### 0.3
 *Released: 7 December 2012*

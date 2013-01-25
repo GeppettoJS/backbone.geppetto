@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.3
+// Backbone.Geppetto v0.4
 //
 // Copyright (C) 2012 Model N, Inc.  
 // Distributed under the MIT License
@@ -13,32 +13,24 @@ define( [
     "marionette"
 ], function ( $, _, Backbone, Marionette ) {
 
+    "use strict";
+
     Backbone.Marionette.Geppetto = (function ( Backbone, _, $ ) {
 
         var Geppetto = {};
 
         Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
-        var VIEW_ID_KEY = "__geppettoViewId__";
-
         var contexts = {};
 
         Geppetto.Context = function Context( options ) {
 
             this.options = options || {};
-
             this.parentContext = this.options.parentContext;
-
-            this.vent = new Backbone.EventBinder();
-
-            _.extend(this.vent, Backbone.Events);
-
+            this.vent = {};
+            Marionette.addEventBinder(this.vent);
             this.initialize && this.initialize();
-
             this._contextId = _.uniqueId("Context");
-
-            this._viewBindings = {};
-
             contexts[this._contextId] = this;
         };
 
@@ -74,53 +66,13 @@ define( [
             }
 
             var viewId;
-            
-            // if the target object doing the listening is a backbone view (or extension thereof)
-            // then keep track of its event bindings in an array of bindings specific to that view,
-            // so that when the view is closed, we can unbind all the bindings automatically.
-            if (target instanceof Backbone.View) {
 
-                viewId = target[VIEW_ID_KEY];
-                if ( ! viewId ) {
-
-                    // track the mapping of event bindings to the view by registering a unique ID on the view
-                    viewId = target[VIEW_ID_KEY] = _.uniqueId();
-
-                    // if the view does not already have a close() implementation, borrow the one from Marionette
-                    if (!target.close) {
-                        target.close = Backbone.Marionette.View.close;
-                    }
-
-                    var that = this;
-
-                    // when the view is closed, invoke our cleanup function
-                    target.on("close", function() {
-
-                        target.off("close");
-
-                        // unbind all the event bindings tied to this view
-                        _.each(that._viewBindings[viewId], function(binding) {
-                            that.vent.unbindFrom(binding);
-                        });
-
-                        target[VIEW_ID_KEY] = undefined;
-                        delete that._viewBindings[viewId];
-                    });
-
-                }
-
-                if ( ! this._viewBindings[viewId]) {
-                    this._viewBindings[viewId] = [];
-                }
+            if (!target.listenTo || !target.stopListening) {
+                throw new Error("Target for listen() must define a 'listenTo' and 'stopListening' function");
             }
 
-            var binding = this.vent.bindTo( this.vent, eventName, callback );
+            return target.listenTo( this.vent, eventName, callback, target );
 
-            if (target instanceof Backbone.View) {
-                this._viewBindings[viewId].push(binding);
-            }
-
-            return binding;
         };
 
         Geppetto.Context.prototype.dispatch = function dispatch( eventName, eventData ) {
@@ -142,7 +94,7 @@ define( [
 
         Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, commandClass ) {
 
-            this.vent.bindTo( this.vent, eventName, function ( eventData ) {
+            this.vent.listenTo( this.vent, eventName, function ( eventData ) {
 
                 var commandInstance = new commandClass();
 
@@ -156,7 +108,7 @@ define( [
 
         Geppetto.Context.prototype.unmapAll = function unmapAll() {
 
-            this.vent.unbindAll();
+            this.vent.stopListening();
 
             delete contexts[this._contextId];
 
@@ -176,7 +128,7 @@ define( [
 
                 _.each(contexts, function(context, id) {
                     if (contexts.hasOwnProperty(id)) {
-                        numEvents += _.size(context.vent._callbacks);
+                        numEvents += _.size(context.vent._events);
                     }
                 });
 
