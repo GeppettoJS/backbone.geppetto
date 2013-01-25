@@ -100,7 +100,7 @@ define( [
 
                         // unbind all the event bindings tied to this view
                         _.each(that._viewBindings[viewId], function(binding) {
-                            that.vent.stopListening(binding[0], binding[1], binding[2]);
+                            that.vent.stopListening(binding[0], binding[1]);
                         });
 
                         target[VIEW_ID_KEY] = undefined;
