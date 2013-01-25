@@ -13,7 +13,7 @@ define( [
             _.bindAll( this );
 
             this.context = this.options.context;
-            this.context.listen( "messageSent", this.onMessageSent );
+            this.context.listen( this, "messageSent", this.onMessageSent );
         },
 
         onMessageSent:function ( eventData ) {

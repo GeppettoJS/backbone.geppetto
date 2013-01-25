@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.3
+// Backbone.Geppetto v0.3-dev
 //
 // Copyright (C) 2012 Model N, Inc.  
 // Distributed under the MIT License
@@ -29,9 +29,9 @@ define( [
 
             this.parentContext = this.options.parentContext;
 
-            this.vent = new Backbone.EventBinder();
+            this.vent = {};
 
-            _.extend(this.vent, Backbone.Events);
+			Marionette.addEventBinder(this.vent);
 
             this.initialize && this.initialize();
 
@@ -100,7 +100,7 @@ define( [
 
                         // unbind all the event bindings tied to this view
                         _.each(that._viewBindings[viewId], function(binding) {
-                            that.vent.unbindFrom(binding);
+                            that.vent.stopListening(binding[0], binding[1]);
                         });
 
                         target[VIEW_ID_KEY] = undefined;
@@ -114,7 +114,9 @@ define( [
                 }
             }
 
-            var binding = this.vent.bindTo( this.vent, eventName, callback );
+			this.vent.listenTo( this.vent, eventName, callback, target );
+			// The arguments to listenTo are enough to stop listening to an event so we'll store those as the binding
+            var binding = [this.vent, eventName, callback];
 
             if (target instanceof Backbone.View) {
                 this._viewBindings[viewId].push(binding);
@@ -142,7 +144,7 @@ define( [
 
         Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, commandClass ) {
 
-            this.vent.bindTo( this.vent, eventName, function ( eventData ) {
+            this.vent.listenTo( this.vent, eventName, function ( eventData ) {
 
                 var commandInstance = new commandClass();
 
@@ -156,7 +158,7 @@ define( [
 
         Geppetto.Context.prototype.unmapAll = function unmapAll() {
 
-            this.vent.unbindAll();
+            this.vent.stopListening();
 
             delete contexts[this._contextId];
 
