@@ -28,10 +28,16 @@ Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!foru
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
 
-### Backbone Marionette
-[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) v1.0.0 beta 5 or higher is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
+### jQuery
+jQuery v1.9.0 is required to support Backbone and Marionette.
 
-Geppetto has been tested with Marionette v1.0.0 beta 5.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
+### Backbone
+Backbone v0.9.10 is required for its eventing system.
+
+### Backbone Marionette
+[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
+
+Geppetto has been tested with Marionette v1.0.0-rc4.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
 
 Geppetto requires the Bundled/AMD version of Marionette, which can be downloaded from the [Marionette downloads page](http://marionettejs.com/#downloads).  Go to the "Bundled Builds" section and then download the "RequireJS (AMD) Compatible" version.  You can choose either the production (minified) or development (non-minified) version depending on your needs.
 
