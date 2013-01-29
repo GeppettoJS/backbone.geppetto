@@ -28,7 +28,7 @@ define( [
             this.options = options || {};
             this.parentContext = this.options.parentContext;
             this.vent = {};
-            Marionette.addEventBinder(this.vent);
+            _.extend(this.vent, Backbone.Events);
             this.initialize && this.initialize();
             this._contextId = _.uniqueId("Context");
             contexts[this._contextId] = this;
@@ -93,12 +93,14 @@ define( [
         };
 
         Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, commandClass ) {
-
+            
+            var _this = this;
+            
             this.vent.listenTo( this.vent, eventName, function ( eventData ) {
 
                 var commandInstance = new commandClass();
 
-                commandInstance.context = this;
+                commandInstance.context = _this;
                 commandInstance.eventName = eventName;
                 commandInstance.eventData = eventData;
                 commandInstance.execute && commandInstance.execute();
