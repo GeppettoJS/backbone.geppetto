@@ -397,6 +397,11 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 
 ## Version History
 
+### 0.4.1
+*Released: 29 January 2013*
+
+* Compatibility with Marionette v1.0.0-rc4.  Thanks to [Mark Fayngersh](https://github.com/pheuter) for this fix.
+
 ### 0.4
 *Released: 25 January 2013*
 
