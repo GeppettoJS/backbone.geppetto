@@ -1,14 +1,14 @@
 # Backbone Geppetto
 ## About
 ### What is it?
-Geppetto is an extension for [Backbone Marionette](https://github.com/derickbailey/backbone.marionette).  While Marionette lets you "make your Backbone applications dance," Geppetto gives them a life of their own!  Geppetto does this by implementing an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.  
+Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.
 
 The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
 ### Why Another Framework?
 Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.  
 
-More commonly, in Backbone applications you'll find business logic implemented directly in Backbone.View components.  For smaller apps, it's convenient to declare your "events" and your callback functions in the same place.  But as applications grow, and business logic needs to be reused across separate view components, this practice starts to get messy.
+More commonly, in Backbone applications you'll find business logic implemented directly in Backbone.View components, or sometimes in the Model.  For smaller apps, it's convenient to declare your "events" and your callback functions in the same place.  But as applications grow, and business logic needs to be reused across separate view components, this practice starts to get messy.
 
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
 
@@ -28,31 +28,26 @@ Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!foru
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
 
-### jQuery
-jQuery v1.9.0 is required to support Backbone and Marionette.
-
 ### Backbone
-Backbone v0.9.10 is required for its eventing system.
+[Backbone v0.9.10](http://documentcloud.github.com/backbone/) is required for its eventing system.
+
+## Recommended Libraries
 
 ### Backbone Marionette
-[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) is required for its event binding and [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and recommended for its Composite View architecture, which works particularly well with Geppetto.
+[Backbone Marionette](https://github.com/marionettejs/backbone.marionette) is recommended for its [anti-zombie technology](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/), and its Composite View architecture, which works particularly well with Geppetto.
 
-Geppetto has been tested with Marionette v1.0.0-rc4.  Lower versions are not likely to work.  Higher versions will be tested as time permits.
-
-Geppetto requires the Bundled/AMD version of Marionette, which can be downloaded from the [Marionette downloads page](http://marionettejs.com/#downloads).  Go to the "Bundled Builds" section and then download the "RequireJS (AMD) Compatible" version.  You can choose either the production (minified) or development (non-minified) version depending on your needs.
+Geppetto was once dependent on Marionette because of its event binding components, but since Backbone v0.9.10, this logic is handled directly in Backbone, itself.
 
 ### RequireJS
-[RequireJS](http://requirejs.org/) is currently required, but will likely be demoted to "recommended" in an upcoming release.  In a large multi-module application, RequireJS makes it much easier to manage dependencies.
+[RequireJS](http://requirejs.org/) is not required, but is recommended.  In a large multi-module application, RequireJS makes it much easier to manage dependencies.
 
 Here is the RequireJS config with all dependencies listed:
 
 ```javascript
 require.config( {
     paths:{
-        jquery:'libs/jquery-1.7.1.min',
         underscore:'libs/underscore',
         backbone:'libs/backbone',
-        marionette:'libs/backbone.marionette',
         geppetto:'libs/backbone.geppetto'
     }
 } );
@@ -104,6 +99,10 @@ Well, now we can!  Each Context has a registry where you can assign a named even
 
 ### Creating a Context
 
+**Using Context factory method**
+
+This method is handy if your view does not depend on a fully-initialized context.  With this method, you pass a view instance, and a Context constructor function.
+
 ```javascript
 
 // MainView.js
@@ -122,6 +121,38 @@ return Geppetto.Context.extend( {
 		// map commands here...
 	}
 });
+```
+
+The factory method does a couple things automatically for you:
+
+1. Automatically attaches a "close" handler to the view instance.  If you are using a Marionette view, you will already have a close handler.  So this is really just to support base Backbone Views
+2. Automatically sets the "context" property on the view instance
+
+**By manually creating a Context**
+
+If your view requires your context to be fully-initialized when it, itself, is initialized, then you will have to create your Context manually.  One example for this is if your main view is a Marionette CollectionView, which requires an initialized Collection object, and your Collection is being initialized in your Context.
+
+For example:
+
+```javascript
+// instead of using Geppetto.BindContext to create the Context instance,
+// directly call its constructor manually.
+
+var contextInstance = new MyContext();
+
+// the contextInstance now has a reference to the Collection instance,
+// since that's how you wired up your Context's initialize() method...
+
+// create a new instance of your CollectionView, and pass a reference to the
+// Context's collection using the "options" param.  Before binding the events,
+// Marionette will attach this param to the view instance...
+
+var collectionViewInstance = new MyCollectionView({
+    collection: contextInstance.collection
+});
+
+// Since we didn't use BindContext, we need to manually attach our Context instance to the view
+collectionViewInstance.context = contextInstance;
 ```
 
 ### Assigning a Parent Context
@@ -324,20 +355,20 @@ Geppetto supports a debug mode, which can help with finding problems and measuri
 ### Enabling Debug Mode
 
 ```javascript
-Backbone.Marionette.Geppetto.setDebug(true);
+Backbone.Geppetto.setDebug(true);
 ```
 
 ### Disabling Debug Mode
 
 ```javascript
-Backbone.Marionette.Geppetto.setDebug(false);
+Backbone.Geppetto.setDebug(false);
 ```
 
 ### Inspecting Contexts
 
 ```javascript
 // Returns an Array of all registered Contexts
-Backbone.Marionette.Geppetto.debug.contexts
+Backbone.Geppetto.debug.contexts
 
 >> Object
 
@@ -350,7 +381,7 @@ Backbone.Marionette.Geppetto.debug.contexts
 
 ```javascript
 // Returns the total number of registered Contexts
-Backbone.Marionette.Geppetto.debug.countContexts();
+Backbone.Geppetto.debug.countContexts();
 
 >> 5
 ```
@@ -359,7 +390,7 @@ Backbone.Marionette.Geppetto.debug.countContexts();
 
 ```javascript
 // Returns the total number of registered Events across all Contexts
-Backbone.Marionette.Geppetto.debug.countEvents();
+Backbone.Geppetto.debug.countEvents();
 
 >> 25
 ```
@@ -402,6 +433,16 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.5
+*Released: 24 February 2013*
+
+* **BREAKING**: Removed Marionette dependency.  Geppetto now lives on the Backbone namespace as `Backbone.Geppetto` and not `Backbone.Marionette.Geppetto`.  If you're using AMD, you can also just `define(["geppetto"], function(Geppetto) {...});` without using any namespaces (recommended).  Marionette still works well with Geppetto; it's just no longer required.
+* Removed RequireJS dependency.  Added conditional support for AMD or browser globals.
+* Automatically inject `eventName` param into `eventData` payload, to facilitate re-dispatching of events, or registering a common handler for multiple events (and being able to tell them apart).
+* Added some sanity checks to `Context.listen()` to fail-fast if the right params are not provided.
+* Added a bunch of tests for 100% unit test coverage!  (Well, technically 97.59% since I haven't found a good way to test for missing dependencies).  Thanks to the awesome developers who made the [Blanket.js](http://migrii.github.com/blanket/) code coverage tool.
+* Updated some 3rd party testing libraries
 
 ### 0.4.1
 *Released: 29 January 2013*

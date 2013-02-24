@@ -1,7 +1,7 @@
 /**
  * Pavlov - Test framework-independent behavioral API
  *
- * version 0.3.0pre
+ * version 0.4.0pre
  *
  * http://github.com/mmonteleone/pavlov
  *
@@ -590,7 +590,7 @@
 
     // add global settings onto pavlov
     global.pavlov = {
-        version: '0.3.0pre',
+        version: '0.4.0pre',
         specify: specify,
         adapter: adapter,
         adapt: function (frameworkName, testFrameworkAdapter) {
