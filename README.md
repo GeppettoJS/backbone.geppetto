@@ -14,7 +14,7 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 
 ### Getting Geppetto
 
-Download latest release: [v0.3](https://github.com/ModelN/backbone.geppetto/archive/0.3.zip)
+Download latest release: [v0.5](https://github.com/ModelN/backbone.geppetto/archive/0.5.zip)
 
 Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
