@@ -3,4 +3,5 @@ node_js:
   - "0.8"
 before_script:
   - "git submodule update --init"
-  - "phantomjs specs/phantomjs-index.js"
+  - rackup  # start a Web server
+  - sleep 3 # give Web server some time to bind to sockets, etc

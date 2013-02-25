@@ -18,7 +18,7 @@
   ],
 
   "scripts": {
-      "test": "./node_modules/.bin/jshint . "
+      "test": "phantomjs specs/phantom-qunit_runner.js http://localhost/specs/index.html"
   },
 
   "author": {
