@@ -39,6 +39,7 @@
   "github": "https://github.com/ModelN/backbone.geppetto",
 
   "devDependencies": {
-      "qunit": "~1.9.0"
+      "qunit": "~0.5.9",
+      "jshint": "~0.9.1"
   }
 }
