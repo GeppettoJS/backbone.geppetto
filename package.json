@@ -18,7 +18,7 @@
   ],
 
   "scripts": {
-      "test": "phantomjs specs/phantom-qunit_runner.js http://localhost:8000/specs/index.html"
+      "test": "phantomjs specs/phantom_qunit_runner.js http://localhost:8000/specs/index.html"
   },
 
   "author": {
