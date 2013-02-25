@@ -1,4 +1,7 @@
 # Backbone Geppetto
+
+[![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto)
+
 ## About
 ### What is it?
 Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.
