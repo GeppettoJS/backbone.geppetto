@@ -3,5 +3,5 @@ node_js:
   - "0.8"
 before_script:
   - "git submodule update --init"
-  - "http-server -p 8000"  # start a Web server
+  - "http-server -p 8000 &"  # start a Web server
   - sleep 3 # give Web server some time to bind to sockets, etc
