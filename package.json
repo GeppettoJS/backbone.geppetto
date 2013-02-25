@@ -18,7 +18,7 @@
   ],
 
   "scripts": {
-      "test": "phantomjs specs/phantom-qunit_runner.js http://localhost/specs/index.html"
+      "test": "phantomjs specs/phantom-qunit_runner.js http://localhost:8000/specs/index.html"
   },
 
   "author": {
@@ -40,6 +40,7 @@
 
   "devDependencies": {
       "qunit": "~0.5.9",
-      "jshint": "~0.9.1"
+      "jshint": "~0.9.1",
+      "http-server": "~0.5.3"
   }
 }
