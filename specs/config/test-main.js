@@ -11,9 +11,6 @@ require.config( {
         jquery:'../../dependencies/jquery',
         underscore:'../../dependencies/underscore',
         backbone:'../../dependencies/backbone',
-		'backbone.wreqr':'../../dependencies/backbone.wreqr',
-		'backbone.babysitter':'../../dependencies/backbone.babysitter',
-        marionette:'../../dependencies/backbone.marionette',
         geppetto:'../../backbone.geppetto',
         text:'../../dependencies/text'
     },
@@ -36,7 +33,6 @@ require(
             "jquery",
             "underscore",
             "backbone",
-            "marionette",
             "geppetto",
             "../geppetto-specs"
 

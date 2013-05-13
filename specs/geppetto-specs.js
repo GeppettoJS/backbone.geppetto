@@ -1,9 +1,8 @@
 define( [
     "underscore",
     "backbone",
-    "marionette",
     "geppetto"
-], function(_, Backbone, Marionette, Geppetto) {
+], function(_, Backbone, Geppetto) {
 
 pavlov.specify("Backbone.Geppetto", function(){
 
@@ -31,7 +30,8 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         it("should bind the context instance to the view", function() {
             
-            var myView = new Marionette.ItemView();
+            var MyViewDef = Backbone.View.extend();
+            var myView = new MyViewDef();
             
             Geppetto.bindContext({
                 view: myView,
@@ -44,7 +44,7 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
     });
     
-    describe("when a Marionette ItemView adds an event listener to a context", function() {
+    describe("when a Backbone View adds an event listener to a context", function() {
         var parentView;
         var contextDefinition;
         var contextInstance;
@@ -54,7 +54,7 @@ pavlov.specify("Backbone.Geppetto", function(){
         before(function(){
             fooSpy = sinon.spy();
             contextDefinition = Geppetto.Context.extend();
-            var ParentViewDef = Marionette.ItemView.extend();
+            var ParentViewDef = Backbone.View.extend();
             parentView = new ParentViewDef();
             
             contextInstance = Geppetto.bindContext({
@@ -64,7 +64,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
             assert( parentView.context ).isDefined();
 
-            var childViewDef = Marionette.ItemView.extend({
+            var childViewDef = Backbone.View.extend({
 
                 initialize: function() {
                     _.bindAll(this);
@@ -87,9 +87,9 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         it("should hold the event in the view", function() {
 
-            assert( _.size(childViewInstance._listeners) ).isEqualTo(1);
+            assert( _.size(childViewInstance._listeners) ).isEqualTo(0);
             childViewInstance.listenToContext();
-            assert( _.size(childViewInstance._listeners) ).isEqualTo(2);
+            assert( _.size(childViewInstance._listeners) ).isEqualTo(1);
         });        
         
         it("should fire the foo event while the view is active", function() {
@@ -117,7 +117,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         it("should not fire the foo event after the view is closed", function() {
             childViewInstance.listenToContext();
-            childViewInstance.close();
+            childViewInstance.remove();
             contextInstance.dispatch("foo");
             assert(fooSpy.callCount ).isEqualTo(0);
         });
@@ -215,12 +215,12 @@ pavlov.specify("Backbone.Geppetto", function(){
         var context = null;
 
         before(function() {
-            var ViewDef = Marionette.ItemView.extend();
+            var ViewDef = Backbone.View.extend();
             view = new ViewDef();
             context = Geppetto.bindContext({
                 view: view,
                 context: Geppetto.Context.extend()
-            })
+            });
         });
 
         after(function() {
@@ -315,7 +315,7 @@ pavlov.specify("Backbone.Geppetto", function(){
                 }
             });
 
-            myView = new Marionette.ItemView();
+            myView = new Backbone.View();
 
             Geppetto.bindContext({
                 view: myView,
@@ -560,7 +560,7 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert(Geppetto.debug.countEvents()).isEqualTo(4);
 
             otherView.close();
-            assert(Geppetto.debug.countEvents()).isEqualTo(2);
+            assert(Geppetto.debug.countEvents()).isEqualTo(1);
 
             view.close();
             assert(Geppetto.debug.countEvents()).isEqualTo(0);

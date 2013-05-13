@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.5
+// Backbone.Geppetto v0.5.1
 //
 // Copyright (C) 2013 Model N, Inc.
 // Distributed under the MIT License
@@ -34,7 +34,9 @@
         this.parentContext = this.options.parentContext;
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
-        this.initialize && this.initialize();
+        if (_.isFunction(this.initialize)) {
+            this.initialize();
+        }
         this._contextId = _.uniqueId("Context");
         contexts[this._contextId] = this;
     };
@@ -50,7 +52,7 @@
             view.close = function() {
                 view.trigger("close");
                 view.remove();
-            }
+            };
         }
 
         view.on("close", function() {
@@ -69,15 +71,17 @@
             throw "Expected 3 arguments (target, eventName, callback)";
         }
 
-        if (!target.listenTo || !target.stopListening) {
+        if ( ! _.isObject(target) || 
+             ! _.isFunction(target.listenTo) || 
+             ! _.isFunction(target.stopListening)) {
             throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
         }
 
-        if (eventName == null || typeof eventName !== "string") {
+        if ( ! _.isString(eventName)) {
             throw "eventName must be a String";
         }
 
-        if (callback == null || typeof callback !== "function") {
+        if ( ! _.isFunction(callback)) {
             throw "callback must be a function";
         }
 
@@ -102,18 +106,20 @@
         } );
     };
 
-    Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, commandClass ) {
+    Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, CommandConstructor ) {
 
         var _this = this;
 
         this.vent.listenTo( this.vent, eventName, function ( eventData ) {
 
-            var commandInstance = new commandClass();
+            var commandInstance = new CommandConstructor();
 
             commandInstance.context = _this;
             commandInstance.eventName = eventName;
             commandInstance.eventData = eventData;
-            commandInstance.execute && commandInstance.execute();
+            if (_.isFunction(commandInstance.execute)) {
+                commandInstance.execute();
+            } 
 
         }, this );
     };

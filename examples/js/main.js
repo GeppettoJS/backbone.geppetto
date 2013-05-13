@@ -5,9 +5,9 @@ require.config( {
         jquery:'lib/dependencies/jquery',
         underscore:'lib/dependencies/underscore',
         backbone:'lib/dependencies/backbone',
-        marionette:'lib/dependencies/backbone.marionette',
-		'backbone.wreqr':'lib/dependencies/backbone.wreqr',
-		'backbone.babysitter':'lib/dependencies/backbone.babysitter',
+        marionette:'lib/example-dependencies/backbone.marionette',
+		'backbone.wreqr':'lib/example-dependencies/backbone.wreqr',
+		'backbone.babysitter':'lib/example-dependencies/backbone.babysitter',
         geppetto:'lib/backbone.geppetto',
         text:'lib/dependencies/text',
         myapp:"src/my-app"

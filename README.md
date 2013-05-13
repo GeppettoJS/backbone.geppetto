@@ -27,6 +27,23 @@ Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to downloa
 
 Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!forum/backbone-geppetto) to discuss new features and stay-up-to-date on project updates.
 
+### Contributing
+
+Pull requests are welcome.  For any significant change or new feature, please start a discussion in the Google Group, or log an issue first.  This will save you some time, in case your idea is deemed not general enough to be included in Geppetto.
+
+Before submitting a pull request, please run:
+
+```
+npm install
+```
+
+then
+
+```
+grunt
+```
+
+This will run the test suite, and lint the project files to be sure everything still works.
 
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
@@ -436,6 +453,17 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.5.1
+* Released 13 May 2013*
+
+* Add grunt build which runs the test specs, and lints the project.  See the docs section "Get Involved > Contributing" for more info.
+* Fixed several lint errors
+* Bump backbone to 1.0.  
+* Moved marionette and associated libs from "dependencies" to "example-dependencies" since Geppetto itself does not depend on them.
+* Bump Marionette versions to latest (used only by example app, not by Geppetto itself)
+* Refactored test specs to use plain Backbone views instead of Marionette views
+* Add bower config for integration with bower.io
 
 ### 0.5
 *Released: 24 February 2013*
