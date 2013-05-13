@@ -455,7 +455,7 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 ## Version History
 
 ### 0.5.1
-* Released 13 May 2013*
+*Released 13 May 2013*
 
 * Add grunt build which runs the test specs, and lints the project.  See the docs section "Get Involved > Contributing" for more info.
 * Fixed several lint errors
