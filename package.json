@@ -8,6 +8,7 @@
     "email": "dcadwallader@gmail.com",
     "url": "http://geekdave.com"
   },
+  "github": "https://github.com/ModelN/backbone.geppetto",
   "repository": {
     "type": "git",
     "url": "git://github.com/ModelN/backbone.geppetto.git"
@@ -26,7 +27,9 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt test",
+    "scripts": {
+      "test": "phantomjs specs/phantom_qunit_runner.js http://localhost:8000/specs/index.html"
+    },
     "travis-cov": {
       "threshold": 95,
       "removeKey": "branchFcn"
@@ -36,6 +39,9 @@
     "backbone": "~1.0.0"
   },
   "devDependencies": {
+    "http-server": "~0.5.3",  
+    "qunit": "~0.5.9",
+    "jshint": "~0.9.1",
     "grunt-contrib-qunit": "0.1.1rc6",
     "grunt": "0.4.0rc7",
     "grunt-contrib-jshint": "~0.4.3",
@@ -44,6 +50,8 @@
   },
   "keywords": [
     "backbone",
-    "plugin"
+    "plugin",
+    "command",
+    "mvc"
   ]
 }
