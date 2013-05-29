@@ -71,6 +71,15 @@
 
         view.context = context;
 
+        // map context events
+        _.each(view.contextEvents, function(callback, eventName) {
+            if (_.isFunction(callback)) {
+                context.listen(view, eventName, callback);
+            } else if (_.isString(callback)) {
+                context.listen(view, eventName, view[callback]);
+            }
+        });
+
         return context;
     };
 
@@ -133,8 +142,14 @@
         }, this );
     };
 
-    Geppetto.Context.prototype.unmapAll = function unmapAll() {
+    Geppetto.Context.prototype.mapCommands = function mapCommands() {
+        var _this = this;
+        _.each(this.commands, function(commandClass, eventName) {
+            _this.mapCommand(eventName, commandClass);
+        });
+    };
 
+    Geppetto.Context.prototype.unmapAll = function unmapAll() {
         this.vent.stopListening();
 
         delete contexts[this._contextId];
