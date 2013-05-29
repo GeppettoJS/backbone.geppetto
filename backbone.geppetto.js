@@ -45,20 +45,29 @@
 
         this.options = options || {};
 
-        var context = new this.options.context(this.options);
         var view = this.options.view;
 
-        if (!view.close) {
-            view.close = function() {
-                view.trigger("close");
-                view.remove();
-            };
-        }
+        var context = null;
+        if (typeof this.options.context === 'function') {
+            // create new context if we get constructor
+            context = new this.options.context(this.options);
 
-        view.on("close", function() {
-            view.off("close");
-            context.unmapAll();
-        });
+            // only close context if we are the owner
+            if (!view.close) {
+                view.close = function() {
+                    view.trigger("close");
+                    view.remove();
+                };
+            }
+
+            view.on("close", function() {
+                view.off("close");
+                context.unmapAll();
+            });
+        } else if (typeof this.options.context === 'object') {
+            // or use existing context if we get one
+            context = this.options.context;
+        }
 
         view.context = context;
 
