@@ -39,6 +39,8 @@
         }
         this._contextId = _.uniqueId("Context");
         contexts[this._contextId] = this;
+
+        this.mapCommands();
     };
 
     Geppetto.bindContext = function bindContext( options ) {
@@ -79,8 +81,6 @@
                 context.listen(view, eventName, view[callback]);
             }
         });
-
-        this.mapCommands();
 
         return context;
     };
