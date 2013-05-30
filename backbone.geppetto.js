@@ -35,32 +35,52 @@
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
         if (_.isFunction(this.initialize)) {
-            this.initialize();
+            this.initialize.apply(this, arguments);
         }
         this._contextId = _.uniqueId("Context");
         contexts[this._contextId] = this;
+
+        this.mapCommands();
     };
 
     Geppetto.bindContext = function bindContext( options ) {
 
         this.options = options || {};
 
-        var context = new this.options.context(this.options);
         var view = this.options.view;
 
-        if (!view.close) {
-            view.close = function() {
-                view.trigger("close");
-                view.remove();
-            };
+        var context = null;
+        if (typeof this.options.context === 'function') {
+            // create new context if we get constructor
+            context = new this.options.context(this.options);
+
+            // only close context if we are the owner
+            if (!view.close) {
+                view.close = function() {
+                    view.trigger("close");
+                    view.remove();
+                };
+            }
+
+            view.on("close", function() {
+                view.off("close");
+                context.unmapAll();
+            });
+        } else if (typeof this.options.context === 'object') {
+            // or use existing context if we get one
+            context = this.options.context;
         }
 
-        view.on("close", function() {
-            view.off("close");
-            context.unmapAll();
-        });
-
         view.context = context;
+
+        // map context events
+        _.each(view.contextEvents, function(callback, eventName) {
+            if (_.isFunction(callback)) {
+                context.listen(view, eventName, callback);
+            } else if (_.isString(callback)) {
+                context.listen(view, eventName, view[callback]);
+            }
+        });
 
         return context;
     };
@@ -124,8 +144,14 @@
         }, this );
     };
 
-    Geppetto.Context.prototype.unmapAll = function unmapAll() {
+    Geppetto.Context.prototype.mapCommands = function mapCommands() {
+        var _this = this;
+        _.each(this.commands, function(commandClass, eventName) {
+            _this.mapCommand(eventName, commandClass);
+        });
+    };
 
+    Geppetto.Context.prototype.unmapAll = function unmapAll() {
         this.vent.stopListening();
 
         delete contexts[this._contextId];
