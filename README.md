@@ -445,6 +445,9 @@ Fun?  Probably just as much as Farmville!
 
 Source code available in the `examples` directory in the Github Repo.
 
+## Related articles 
+* [Developing modular apps with backbone and Geppetto](http://niki4810.github.io/blog/2013/05/26/building-modular-apps-using-backbone-and-geppetto/)
+ 
 ## Tests
 ### About
 Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) syntax provided by the [Pavlov](https://github.com/mmonteleone/pavlov) plugin.  Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
