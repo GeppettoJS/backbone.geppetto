@@ -80,6 +80,8 @@
             }
         });
 
+        this.mapCommands();
+
         return context;
     };
 
