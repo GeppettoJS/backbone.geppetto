@@ -121,7 +121,7 @@ Well, now we can!  Each Context has a registry where you can assign a named even
 
 **Using Context factory method**
 
-This method is handy if your view does not depend on a fully-initialized context.  With this method, you pass a view instance, and a Context constructor function.
+With this method, you pass a view instance, and either a Context constructor function or an already-initialized Context object.
 
 ```javascript
 
@@ -145,7 +145,7 @@ return Geppetto.Context.extend( {
 
 The factory method does a couple things automatically for you:
 
-1. Automatically attaches a "close" handler to the view instance.  If you are using a Marionette view, you will already have a close handler.  So this is really just to support base Backbone Views
+1. If you pass a Context constructor function, it automatically attaches a "close" handler to the view instance.  If you are using a Marionette view, you will already have a close handler.  So this is really just to support base Backbone Views.  If you pass an already-initialized Context object, no functions will be attached, and you are responsible for cleaning up your own events.
 2. Automatically sets the "context" property on the view instance
 
 **By manually creating a Context**
@@ -171,8 +171,11 @@ var collectionViewInstance = new MyCollectionView({
     collection: contextInstance.collection
 });
 
-// Since we didn't use BindContext, we need to manually attach our Context instance to the view
-collectionViewInstance.context = contextInstance;
+Geppetto.bindContext({
+    view: collectionViewInstance,
+    context: contextInstance
+});
+
 ```
 
 ### Assigning a Parent Context

@@ -1,16 +1,23 @@
-module.exports = function(grunt) {
-  grunt.initConfig({
-    qunit: {
-      all: ['specs/index.html']
-    },
-    jshint: {
-      all: ['Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js']
-    }    
-  });
+module.exports = function ( grunt ) {
+    grunt.initConfig( {
+        blanket_qunit: {
+            all: {
+                options: {
+                    urls: ['specs/index.html?coverage=true&gruntReport'],
+                    threshold: 97
+                }
+            }
 
-  grunt.loadNpmTasks('grunt-contrib-qunit');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+        },
+        jshint: {
+            all: ['Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js']
+        }
+    } );
 
-  grunt.registerTask('default', ['qunit', 'jshint']);
+    grunt.loadNpmTasks('grunt-blanket-qunit');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
+    grunt.registerTask('lint', ['jshint']);
+    grunt.registerTask('coverage', ['blanket_qunit']);
+    grunt.registerTask('default', ['jshint', 'blanket_qunit']);
 };

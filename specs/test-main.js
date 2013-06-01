@@ -1,4 +1,4 @@
-"use strict";
+/*globals QUnit require*/
 
 // Defer QUnit startup until dependencies have been loaded with RequireJS
 QUnit.config.autostart = false;
@@ -8,11 +8,11 @@ QUnit.specify.globalApi = true;
 
 require.config( {
     paths:{
-        jquery:'../../dependencies/jquery',
-        underscore:'../../dependencies/underscore',
-        backbone:'../../dependencies/backbone',
-        geppetto:'../../backbone.geppetto',
-        text:'../../dependencies/text'
+        jquery:'../dependencies/jquery',
+        underscore:'../dependencies/underscore',
+        backbone:'../dependencies/backbone',
+        geppetto:'../backbone.geppetto',
+        text:'../dependencies/text'
     },
 
     shim: {
@@ -34,7 +34,7 @@ require(
             "underscore",
             "backbone",
             "geppetto",
-            "../geppetto-specs"
+            "geppetto-specs"
 
         ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
 

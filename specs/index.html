@@ -16,7 +16,20 @@
     <h2 id="qunit-userAgent"></h2>
     <ol id="qunit-tests"></ol>
 
-    <script data-main="config/test-main" src="../dependencies/require.js"></script>
-    <script type="text/javascript" src="lib/blanket.js" data-cover-only="//../../backbone.geppetto/"></script>
+    <script data-main="test-main" src="../dependencies/require.js"></script>
+    <script type="text/javascript" src="lib/blanket.js"
+            data-cover-flags="branchTracking"
+            data-cover-only="//../backbone.geppetto/"></script>
+
+    <script>
+        if (location.href.match(/(\?|&)gruntReport($|&|=)/)) {
+            blanket.options("reporter", "../node_modules/grunt-blanket-qunit/reporter/grunt-reporter.js");
+        }
+    </script>
+
+    <script>
+        
+    </script>
+
 </body>
 </html>

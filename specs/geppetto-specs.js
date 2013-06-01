@@ -50,13 +50,13 @@ pavlov.specify("Backbone.Geppetto", function(){
         var contextInstance;
         var childViewInstance;
         var fooSpy;
-        
+
         before(function(){
             fooSpy = sinon.spy();
             contextDefinition = Geppetto.Context.extend();
             var ParentViewDef = Backbone.View.extend();
             parentView = new ParentViewDef();
-            
+
             contextInstance = Geppetto.bindContext({
                 view: parentView,
                 context: contextDefinition
@@ -66,112 +66,32 @@ pavlov.specify("Backbone.Geppetto", function(){
 
             var childViewDef = Backbone.View.extend({
 
-                initialize: function() {
+                initialize: function(options) {
                     _.bindAll(this);
-                },
-
-                listenToContext: function() {
-                    this.context = this.options.context;
+                    Geppetto.bindContext({
+                        view: this,
+                        context: this.options.context
+                    });
                     this.context.listen(this, "foo", fooSpy);
                 }
             });
             childViewInstance = new childViewDef({
                 context: contextInstance
-            });            
+            });
         });
-        
+
         after(function() {
             parentView.close();
-            fooSpy = undefined;
-        });
-
-        it("should hold the event in the view", function() {
-
-            assert( _.size(childViewInstance._listeners) ).isEqualTo(0);
-            childViewInstance.listenToContext();
-            assert( _.size(childViewInstance._listeners) ).isEqualTo(1);
-        });        
-        
-        it("should fire the foo event while the view is active", function() {
-            childViewInstance.listenToContext();
-            contextInstance.dispatch("foo");
-            assert(fooSpy.callCount ).isEqualTo(1);
-        });
-
-        it("should pass the event name in the event payload object", function() {
-            childViewInstance.listenToContext();
-            contextInstance.dispatch("foo");
-            assert(fooSpy.callCount ).isEqualTo(1);
-            var payload = fooSpy.getCall(0).args[0];
-            assert(payload.eventName).isEqualTo("foo");
-        });
-
-        it("should pass supplied data in the payload object", function() {
-            childViewInstance.listenToContext();
-            contextInstance.dispatch("foo", {bar: "baz"});
-            assert(fooSpy.callCount ).isEqualTo(1);
-            var payload = fooSpy.getCall(0).args[0];
-            assert(payload.eventName).isEqualTo("foo");
-            assert(payload.bar).isEqualTo("baz");
-        });
-
-        it("should not fire the foo event after the view is closed", function() {
-            childViewInstance.listenToContext();
             childViewInstance.remove();
-            contextInstance.dispatch("foo");
-            assert(fooSpy.callCount ).isEqualTo(0);
-        });
-    });
-
-    describe("when a plain Backbone View adds an event listener to a context", function() {
-        var parentView;
-        var contextDefinition;
-        var contextInstance;
-        var childViewInstance;
-        var fooSpy;
-
-        before(function(){
-            fooSpy = sinon.spy();
-            contextDefinition = Geppetto.Context.extend();
-            var ParentViewDef = Backbone.View.extend();
-            parentView = new ParentViewDef();
-
-            contextInstance = Geppetto.bindContext({
-                view: parentView,
-                context: contextDefinition
-            });
-
-            assert( parentView.context ).isDefined();
-
-            var childViewDef = Backbone.View.extend({
-
-                initialize: function() {
-                    _.bindAll(this);
-                },
-
-                listenToContext: function() {
-                    this.context = this.options.context;
-                    this.context.listen(this, "foo", fooSpy);
-                }
-            });
-            childViewInstance = new childViewDef({
-                context: contextInstance
-            });
-        });
-
-        after(function() {
-            parentView.close();
             fooSpy = undefined;
         });
 
         it("should fire the foo event while the view is active", function() {
-            childViewInstance.listenToContext();
             contextInstance.dispatch("foo");
             assert(fooSpy.callCount ).isEqualTo(1);
         });
 
         it("should pass the event name in the event payload object", function() {
-            childViewInstance.listenToContext();
             contextInstance.dispatch("foo");
             assert(fooSpy.callCount ).isEqualTo(1);
             var payload = fooSpy.getCall(0).args[0];
@@ -179,7 +99,6 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
 
         it("should pass supplied data in the payload object", function() {
-            childViewInstance.listenToContext();
             contextInstance.dispatch("foo", {bar: "baz"});
             assert(fooSpy.callCount ).isEqualTo(1);
             var payload = fooSpy.getCall(0).args[0];
@@ -188,26 +107,135 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
 
         it("should the foo event when listened from the parent view", function() {
-            contextInstance.listen(parentView, "foo", fooSpy);
+            var parentFooSpy = sinon.spy();
+            contextInstance.listen(parentView, "foo", parentFooSpy);
             contextInstance.dispatch("foo");
             assert(fooSpy.callCount ).isEqualTo(1);
+            assert(parentFooSpy.callCount ).isEqualTo(1);
         });
 
         it("should not fire the foo event after the child view is closed", function() {
-            childViewInstance.listenToContext();
             childViewInstance.remove();
             contextInstance.dispatch("foo");
             assert(fooSpy.callCount ).isEqualTo(0);
         });
 
         it("should not fire the foo event when listened from the parent view and the parent view is closed", function() {
-            contextInstance.listen(parentView, "foo", fooSpy);
+            var parentFooSpy = sinon.spy();            
+            contextInstance.listen(parentView, "foo", parentFooSpy);
             parentView.close();
             contextInstance.dispatch("foo");
-            assert(fooSpy.callCount ).isEqualTo(0);
-        });
+            assert(parentFooSpy.callCount ).isEqualTo(0);
+        });        
     });
 
+    describe("when a Backbone View specifies a contextEvents map", function() {
+        var parentView;
+        var contextDefinition;
+        var contextInstance;
+        var childViewInstance;
+        var fooParentSpy;
+        var barParentSpy;
+        var fooChildSpy;
+        var barChildSpy;
+
+        before(function(){
+            fooParentSpy = sinon.spy();
+            barParentSpy = sinon.spy();
+            fooChildSpy = sinon.spy();
+            barChildSpy = sinon.spy();
+            
+            contextDefinition = Geppetto.Context.extend();
+            
+            var ParentViewDef = Backbone.View.extend({
+                initialize: function() {
+                    _.bindAll(this);
+                },
+                contextEvents: {
+                    "foo": "handleFoo",
+                    "bar": function() {
+                        barParentSpy();
+                    }
+                },
+                handleFoo: function() {
+                    fooParentSpy();
+                }                
+            });
+            parentView = new ParentViewDef();
+
+            contextInstance = Geppetto.bindContext({
+                view: parentView,
+                context: contextDefinition
+            });
+
+            assert( parentView.context ).isDefined();
+
+            var childViewDef = Backbone.View.extend({
+
+                contextEvents: {                    
+                    "foo": "handleFoo",
+                    "bar": function() {
+                        barChildSpy();
+                    }
+                },
+                handleFoo: function() {
+                    fooChildSpy();
+                },
+
+                initialize: function(options) {
+                    _.bindAll(this);
+                    Geppetto.bindContext({
+                        view: this,
+                        context: this.options.context
+                    });
+                }
+            });
+            childViewInstance = new childViewDef({
+                context: contextInstance
+            });
+        });
+
+        after(function() {
+            parentView.close();
+            childViewInstance.remove();
+            fooParentSpy = undefined;
+            barParentSpy = undefined;
+            fooChildSpy = undefined;
+            barChildSpy = undefined;            
+        });
+
+        it("should trigger the foo response function when registered as a string", function() {
+            contextInstance.dispatch("foo");
+            assert(fooParentSpy.callCount ).isEqualTo(1);
+            assert(fooChildSpy.callCount ).isEqualTo(1);
+        });
+
+        it("should trigger the bar response function when registered as a function", function() {
+            contextInstance.dispatch("bar");
+            assert(barParentSpy.callCount ).isEqualTo(1);
+            assert(barChildSpy.callCount ).isEqualTo(1);
+        });
+        
+        it("should remove the parent foo listener when the parent view is closed", function() {
+            contextInstance.dispatch("foo");
+            assert(fooParentSpy.callCount ).isEqualTo(1);
+            assert(fooChildSpy.callCount ).isEqualTo(1);
+            parentView.close();
+            contextInstance.dispatch("foo");
+            assert(fooParentSpy.callCount ).isEqualTo(1);
+            assert(fooChildSpy.callCount ).isEqualTo(2);
+        });
+
+        it("should remove the child foo listener when the child view is closed", function() {
+            contextInstance.dispatch("foo");
+            assert(fooParentSpy.callCount ).isEqualTo(1);
+            assert(fooChildSpy.callCount ).isEqualTo(1);
+            childViewInstance.remove();
+            contextInstance.dispatch("foo");
+            assert(fooParentSpy.callCount ).isEqualTo(2);
+            assert(fooChildSpy.callCount ).isEqualTo(1);
+        });        
+    });    
 
     describe("when registering a context listener", function() {
 
@@ -287,7 +315,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
     });
 
-    describe("when registering a command", function() {
+    describe("when registering commands individually using mapCommand", function() {
 
         var myView;
 
@@ -343,6 +371,63 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert( xyzSpy.called ).isFalse();
         });
     });
+
+    describe("when registering commands in batch using mapCommands", function() {
+
+        var myView;
+
+        var contextDefinition;
+
+        var AbcCommand;
+        var XyzCommand;
+
+        var abcSpy;
+        var xyzSpy;
+
+        before(function(){
+            abcSpy = sinon.spy();
+            AbcCommand = function(){};
+            AbcCommand.prototype.execute = abcSpy;
+
+            xyzSpy = sinon.spy();
+            XyzCommand = function(){};
+            XyzCommand.prototype.execute = xyzSpy;
+
+            contextDefinition = Geppetto.Context.extend({
+                commands: {
+                    "abcEvent": AbcCommand,
+                    "xyzEvent": XyzCommand
+                }
+            });
+
+            myView = new Backbone.View();
+
+            Geppetto.bindContext({
+                view: myView,
+                context: contextDefinition
+            });
+        });
+
+        after(function() {
+            myView.close();
+        });
+
+        it("should fire AbcCommand when abcEvent is dispatched", function() {
+            myView.context.dispatch("abcEvent");
+
+            assert( abcSpy.called ).isTrue();
+            assert( xyzSpy.called ).isFalse();
+        });
+
+        it("should not fire AbcCommand after the associated view is closed", function() {
+
+            myView.close();
+            myView.context.dispatch("abcEvent");
+
+            assert( abcSpy.called ).isFalse();
+            assert( xyzSpy.called ).isFalse();
+        });
+    });    
 
     describe("when a context has a parent context", function() {
 
