@@ -1,7 +1,7 @@
 {
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
-  "version": "0.6",
+  "version": "0.6.0",
   "homepage": "https://github.com/ModelN/backbone.geppetto",
   "author": {
     "name": "Dave Cadwallader",
