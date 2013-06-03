@@ -1,5 +1,17 @@
 module.exports = function ( grunt ) {
     grunt.initConfig( {
+
+        pkg: grunt.file.readJSON( 'package.json' ),
+        uglify: {
+            dist: {
+                options: {
+                    report: "gzip"                    
+                },
+                src: '<%= pkg.name %>.js',
+                dest: 'dist/<%= pkg.name %>.min.js'
+            }
+        },
+
         blanket_qunit: {
             all: {
                 options: {
@@ -14,10 +26,13 @@ module.exports = function ( grunt ) {
         }
     } );
 
-    grunt.loadNpmTasks('grunt-blanket-qunit');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+    grunt.loadNpmTasks( 'grunt-blanket-qunit' );
+    grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 
-    grunt.registerTask('lint', ['jshint']);
-    grunt.registerTask('coverage', ['blanket_qunit']);
-    grunt.registerTask('default', ['jshint', 'blanket_qunit']);
+    grunt.registerTask( 'lint', ['jshint'] );
+    grunt.registerTask( 'coverage', ['blanket_qunit'] );
+    grunt.registerTask( 'travis', ['jshint', 'blanket_qunit'] );
+    
+    grunt.registerTask( 'default', ['uglify', 'jshint', 'blanket_qunit'] );
 };

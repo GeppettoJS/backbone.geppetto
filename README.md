@@ -4,7 +4,7 @@
 
 ## About
 ### What is it?
-Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.
+Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.  Geppetto is lightweight, weighing in around half a kilobyte minified and gzipped.
 
 The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
@@ -17,7 +17,11 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 
 ### Getting Geppetto
 
-Download latest release: [v0.5](https://github.com/ModelN/backbone.geppetto/archive/0.5.zip)
+*Latest Stable Release: 0.6*
+
+* Minified: [backbone.geppetto.min.js](https://raw.github.com/ModelN/backbone.geppetto/master/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.zip).  
 
 Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
@@ -27,11 +31,35 @@ Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to downloa
 
 Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!forum/backbone-geppetto) to discuss new features and stay-up-to-date on project updates.
 
-### Contributing
+
+### Ways to Contribute
+
+Has Geppetto been helpful to you?  If you'd like to give back, here are a few ways:
+
+1. Blog about your experiences using Geppetto, and let us know about it!
+2. Create a demo app using Geppetto and add it to the examples directory.
+3. Improve the docs in the README.  
+4. Fix a bug or add a new feature and submit a pull request (see below)
+
+### Pull Requests
 
 Pull requests are welcome.  For any significant change or new feature, please start a discussion in the Google Group, or log an issue first.  This will save you some time, in case your idea is deemed not general enough to be included in Geppetto.
 
-Before submitting a pull request, please run:
+Before submitting a pull request, please:
+
+1. Write unit tests to cover any new or modified lines of code, and add it to `specs/geppetto.specs.js`.  See the [Tests](#tests) section for more info.
+2. Run the test specs to make sure everything works.  You can fire up a local web server, and point your browser to `http://localhost:<port>/specs/`
+3. Run the Grunt task to lint, test, and run code coverage on the project.  See the [Build](#build) section for more info.
+
+## Build
+
+### Grunt
+
+Geppetto uses [Grunt](http://gruntjs.com/) to verify each build.  If you are not familiar with Grunt, check out the [getting started guide](http://gruntjs.com/getting-started) for an introduction and installation instructions.
+
+Before submitting a pull request, please run the grunt task.  To do so:
+
+First, install local development dependencies.  From the root Geppetto directory, run:
 
 ```
 npm install
@@ -43,7 +71,24 @@ then
 grunt
 ```
 
-This will run the test suite, and lint the project files to be sure everything still works.
+The task will do 4 things:
+
+### Uglify
+The code will be minified and saved to `dist/backbone.geppetto.min.js`.
+
+### Lint
+Javascript files are checked for errors using [JSHint](http://jshint.com/).  The JSLint configuration is driven by the `.jshintrc` file.
+
+### Test
+Test specs are run headlessly using [PhantomJS](www.phantomjs.org)
+
+### Coverage
+Code coverage is enforced using [BlanketJS](http://blanketjs.org/).  Every line in Geppetto must have code coverage, with the exception of the AMD boilerplate at the top.  Currently this means that a 97% coverage rate is enforced.
+
+### Travis-CI
+
+The Grunt build is run automatically using [Travis-CI](travis-ci.org) upon every pull request and push to master.  But if any errors are found, you'll need to fix them and re-submit your pull request.  So please run the grunt task locally to save time.
+
 
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
@@ -227,17 +272,34 @@ return Geppetto.Context.extend( {
 
 ### Registering Commands
 
+**Option 1: Using the `mapCommand` function:**
+
 ```javascript
 return Geppetto.Context.extend( {
 	initialize: function () {
 		this.mapCommand( "appEventFoo", FooCommand );
 		this.mapCommand( "appEventBar", BarCommand );
-		this.mapCommand( "appCommandBaz", BazCommand );
+		this.mapCommand( "appEventBaz", BazCommand );
 	}
 });
 ```
 
+**Option 2: Using the `mapCommand` function:**
+
+```javascript
+return Geppetto.Context.extend( {
+	commands: {
+	    "appEventFoo": FooCommand
+		"appEventBar": BarCommand
+		"appEventBaz": BazCommand
+	}
+});
+
+```
+
 ### Listening to Events
+
+**Option 1: Using the `listen` method:**
 
 ```javascript
 // this usually goes in View code... to respond to an event fired by a Command finishing its job
@@ -249,6 +311,20 @@ var handleFooCompleted = function() {
 ```
 
 NOTE: The first parameter passed to the `listen()` function represents the object that is the interested party (the one doing the listening) and should generally always be `this`, to mean the current view.  Geppetto will automatically attach a listener to the `close()` event on this view, and clean up all the view's associated listeners whenever it is closed.
+
+**Option 2: Using the `contextEvents` map:**
+
+```javascript
+// this usually goes in View code... to respond to an event fired by a Command finishing its job
+
+contextEvents: {
+    "fooCompleted": "handleFooCompleted"
+}
+
+var handleFooCompleted = function() {
+	// update the view or something...
+}
+```
 
 ### Event Bus
 The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
@@ -459,6 +535,17 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.6
+*Released 2 June 2013*
+
+* When registering commands on a Context, you can now declare a `commands` object instead of using the `mapCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* Added test coverage enforcement to Grunt task using the [grunt-blanket-qunit](https://npmjs.org/package/grunt-blanket-qunit) plugin.
+* Added JSHint config file to allow tweaking the JSHint flags.
+* Updated Travis-CI config to use Grunt instead of custom Phantom script
+* README updates to several sections.
 
 ### 0.5.1
 *Released 13 May 2013*

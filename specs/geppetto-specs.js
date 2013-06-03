@@ -372,7 +372,7 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
     });
 
-    describe("when registering commands in batch using mapCommands", function() {
+    describe("when registering commands in batch using the commands map", function() {
 
         var myView;
 

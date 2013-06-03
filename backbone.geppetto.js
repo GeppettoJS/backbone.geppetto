@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.6 pre
+// Backbone.Geppetto v0.6h
 //
 // Copyright (C) 2013 Model N, Inc.
 // Distributed under the MIT License
