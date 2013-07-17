@@ -1,7 +1,7 @@
 {
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "homepage": "https://github.com/ModelN/backbone.geppetto",
   "author": {
     "name": "Dave Cadwallader",
@@ -27,7 +27,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-      "test": "grunt travis --verbose"
+    "test": "grunt travis --verbose"
   },
   "dependencies": {
     "backbone": "~1.0.0"

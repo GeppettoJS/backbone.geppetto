@@ -106,7 +106,31 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert(payload.bar).isEqualTo("baz");
         });
 
-        it("should the foo event when listened from the parent view", function() {
+        it("should throw an exception if the payload object is a string, not an object", function() {
+            assert(function() {
+                contextInstance.dispatch("foo", "baz");                
+            } ).throwsException("Event payload must be an object");
+        });
+
+        it("should throw an exception if the payload object is a boolean false, not an object", function() {
+            assert(function() {
+                contextInstance.dispatch("foo", false);
+            } ).throwsException("Event payload must be an object");
+        });
+
+        it("should throw an exception if the payload object is a boolean true, not an object", function() {
+            assert(function() {
+                contextInstance.dispatch("foo", true);
+            } ).throwsException("Event payload must be an object");
+        });
+
+        it("should throw an exception if the payload object is null, not an object", function() {
+            assert(function() {
+                contextInstance.dispatch("foo", null);
+            } ).throwsException("Event payload must be an object");
+        });
+
+        it("should pass the foo event when listened from the parent view", function() {
             var parentFooSpy = sinon.spy();
             contextInstance.listen(parentView, "foo", parentFooSpy);
             contextInstance.dispatch("foo");

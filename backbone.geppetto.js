@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.6
+// Backbone.Geppetto v0.6.1
 //
 // Copyright (C) 2013 Model N, Inc.
 // Distributed under the MIT License
@@ -109,6 +109,9 @@
     };
 
     Geppetto.Context.prototype.dispatch = function dispatch( eventName, eventData ) {
+        if ( ! _.isUndefined(eventData) && ! _.isObject(eventData) ) {
+            throw "Event payload must be an object";
+        }
         eventData = eventData || {};
         eventData.eventName = eventName;
         this.vent.trigger( eventName, eventData );        };
@@ -159,8 +162,7 @@
         this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
     };
 
-    var extend = Backbone.View.extend;
-    Geppetto.Context.extend = extend;
+    Geppetto.Context.extend = Backbone.View.extend;
 
     var debug = {
 

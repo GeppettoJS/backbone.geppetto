@@ -17,11 +17,17 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 
 ### Getting Geppetto
 
-*Latest Stable Release: 0.6*
+*Latest Stable Release: 0.6.1*
+
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.1/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.1/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.1.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.1.zip).  
+
+*Unreleased Edge Version (master)*
 
 * Minified: [backbone.geppetto.min.js](https://raw.github.com/ModelN/backbone.geppetto/master/dist/backbone.geppetto.min.js)
 * Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.zip).  
+* Full Release (Tests, Examples): [master.zip](https://github.com/ModelN/backbone.geppetto/archive/master.zip).  
 
 Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
@@ -352,6 +358,9 @@ context.dispatchGlobally( "fooEvent");
 
 ### Dispatching Events with a Payload
 
+If your event has some associated data that should be available to the consumer of your event, you can
+pass that event as an object as the second parameter of the call to `dispatch` like so:
+
 ```javascript
 context.dispatch( "fooEvent", 
 						{
@@ -535,6 +544,11 @@ Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.6.1
+*Released 17 July 2013*
+
+* Enforce that event payloads are objects, and not other types.  
 
 ### 0.6
 *Released 2 June 2013*
