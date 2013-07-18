@@ -290,7 +290,7 @@ return Geppetto.Context.extend( {
 });
 ```
 
-**Option 2: Using the `mapCommand` function:**
+**Option 2: Using the `commands` map:**
 
 ```javascript
 return Geppetto.Context.extend( {
