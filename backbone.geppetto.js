@@ -91,8 +91,8 @@
             throw "Expected 3 arguments (target, eventName, callback)";
         }
 
-        if ( ! _.isObject(target) || 
-             ! _.isFunction(target.listenTo) || 
+        if ( ! _.isObject(target) ||
+             ! _.isFunction(target.listenTo) ||
              ! _.isFunction(target.stopListening)) {
             throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
         }
@@ -133,6 +133,10 @@
 
         var _this = this;
 
+		if(!_.isFunction(CommandConstructor)){
+			throw "Command must be constructable";
+		}
+
         this.vent.listenTo( this.vent, eventName, function ( eventData ) {
 
             var commandInstance = new CommandConstructor();
@@ -142,7 +146,7 @@
             commandInstance.eventData = eventData;
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
-            } 
+            }
 
         }, this );
     };
