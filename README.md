@@ -9,25 +9,25 @@ Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backb
 The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
 ### Why Another Framework?
-Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.  
+Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.
 
 More commonly, in Backbone applications you'll find business logic implemented directly in Backbone.View components, or sometimes in the Model.  For smaller apps, it's convenient to declare your "events" and your callback functions in the same place.  But as applications grow, and business logic needs to be reused across separate view components, this practice starts to get messy.
 
-To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.  
+To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.
 
 ### Getting Geppetto
 
-*Latest Stable Release: 0.6.1*
+*Latest Stable Release: 0.6.2*
 
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.1/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.1/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.1.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.1.zip).  
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.2/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.2/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.2.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.2.zip).
 
 *Unreleased Edge Version (master)*
 
 * Minified: [backbone.geppetto.min.js](https://raw.github.com/ModelN/backbone.geppetto/master/dist/backbone.geppetto.min.js)
 * Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js)
-* Full Release (Tests, Examples): [master.zip](https://github.com/ModelN/backbone.geppetto/archive/master.zip).  
+* Full Release (Tests, Examples): [master.zip](https://github.com/ModelN/backbone.geppetto/archive/master.zip).
 
 Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
@@ -44,7 +44,7 @@ Has Geppetto been helpful to you?  If you'd like to give back, here are a few wa
 
 1. Blog about your experiences using Geppetto, and let us know about it!
 2. Create a demo app using Geppetto and add it to the examples directory.
-3. Improve the docs in the README.  
+3. Improve the docs in the README.
 4. Fix a bug or add a new feature and submit a pull request (see below)
 
 ### Pull Requests
@@ -137,14 +137,14 @@ The View is implemented with Backbone.View or extensions of it such as Marionett
 1) **The DOM**
 
 * The truly visual portion of The View
-* Represented with HTML 
+* Represented with HTML
 * Responds to user input
 * Triggers events such as "click", "keyup", etc.
 
 
 2) **The Mediator**
 
-* The Javascript portion of The View 
+* The Javascript portion of The View
 * Creates DOM elements by generating HTML
 * Listens for DOM events on the View's `el`
 * Responds to DOM events by triggering **Application Events** for the **Controller** to respond to
@@ -156,11 +156,11 @@ The last two points are the key differences between Geppetto Applications and tr
 Geppetto implements the Controller piece using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
 
 ## Geppetto.Context
-`Geppetto.Context` has many jobs, all of which involve providing a central place to share data and communication between related components. 
+`Geppetto.Context` has many jobs, all of which involve providing a central place to share data and communication between related components.
 
 ### Job #1: Event Bus
 
-Each Context has an instance of Marionette.EventAggregator, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.  
+Each Context has an instance of Marionette.EventAggregator, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.
 
 ### Job #2: Command Registry
 
@@ -236,7 +236,7 @@ Geppetto.bindContext({
 return Backbone.View.extend({
 	initialize: function() {
 		Geppetto.bindContext({
-			view: this, 
+			view: this,
 			context: ShellContext
 		});
 	},
@@ -295,9 +295,14 @@ return Geppetto.Context.extend( {
 ```javascript
 return Geppetto.Context.extend( {
 	commands: {
-	    "appEventFoo": FooCommand
-		"appEventBar": BarCommand
-		"appEventBaz": BazCommand
+	    "appEventFoo":          FooCommand,
+		"appEventBar":          BarCommand,
+		"appEventBaz":          BazCommand,
+		"appEventFooBarBaz":    [
+		    FooCommand,
+		    BarCommand,
+		    BazCommand
+		]
 	}
 });
 
@@ -362,7 +367,7 @@ If your event has some associated data that should be available to the consumer 
 pass that event as an object as the second parameter of the call to `dispatch` like so:
 
 ```javascript
-context.dispatch( "fooEvent", 
+context.dispatch( "fooEvent",
 						{
 							payloadPropertyFoo: "payloadValueFoo",
 							payloadPropertyBar: true,
@@ -379,7 +384,7 @@ context.unmapAll();
 
 ### Destroying a Context
 
-A Context is automatically destroyed when the `close()` method is called on its associated View.  You should already be in the habit of calling `close()` to properly clean up your View's event listeners.  If not, please read Derick Bailey's [article on killing zombies](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/).  The `close()` method is available on any Marionette.View.  If you're using a plain old Backbone.View with Geppetto, a `close()` method will be created on the View for you when you call `bindContext()`. 
+A Context is automatically destroyed when the `close()` method is called on its associated View.  You should already be in the habit of calling `close()` to properly clean up your View's event listeners.  If not, please read Derick Bailey's [article on killing zombies](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/).  The `close()` method is available on any Marionette.View.  If you're using a plain old Backbone.View with Geppetto, a `close()` method will be created on the View for you when you call `bindContext()`.
 
 When a Context is destroyed, all events on the Context's event bus will be unmapped.
 
@@ -421,7 +426,7 @@ command.prototype.execute = function () {
 	// Injection #1: context
     // The Context which invoked this command will be injected automatically,
 	// so any properties assigned to the Context will be available in the Command.
-	// This is a good way to provide access to your Model data! 
+	// This is a good way to provide access to your Model data!
 	this.updateModel(this.context.model);
 
 	// Injection #2: eventName
@@ -434,7 +439,7 @@ command.prototype.execute = function () {
 	} else {
 		// other stuff
 	}
-	
+
 	// Injection #3: eventData
 	// An object literal that was passed from the caller which first dispatched the application event.  This is a way
 	// to provide payload data to a Command.  The Command may also dispatch an app event with payload data as a response back to the view.
@@ -452,7 +457,7 @@ return command;
 
 ### Responsibilities of a Command
 
-* **Single Purpose**: A Command should have one purpose and one purpose only.  This makes understanding and testing the command very easy.  
+* **Single Purpose**: A Command should have one purpose and one purpose only.  This makes understanding and testing the command very easy.
 * **Short-Lived**: A Command should "get in and get out", doing its job and exiting the `execute()` function as soon as its job is done.  This allows the Command to be garbage collected.
 * **Respectful of its Boundaries**: A Command should never manipulate the view directly.  Your Command's job is to act on Model data, and dispatch an event when it's done.  The View can listen for this event and handle updating itself.
 
@@ -512,12 +517,12 @@ Backbone.Geppetto.debug.countEvents();
 
 ## FAQ
 
-### How Many Contexts? 
+### How Many Contexts?
 How many Contexts do I need in my app?
 
 Like most questions about application structure, the answer is the familiar and often-frustrating, "It depends."
 
-The best way to understand Contexts is to step back and think about which pieces of your application could theoretically exist as their own totally independent applications.  
+The best way to understand Contexts is to step back and think about which pieces of your application could theoretically exist as their own totally independent applications.
 
 * Single-Context Apps: If your app has many sub-views, which all need to communicate but could not really function on their own, then you might benefit from a Single-Context app.  You can still benefit from a loosely-coupled architecture using the Context's Service Locator pattern, and the Command Registry to keep your business logic neat and tidy.
 
@@ -525,17 +530,17 @@ The best way to understand Contexts is to step back and think about which pieces
 
 ## Examples
 ### Modular Widgets
-Pointless?  Yes.  
-Easy-to-understand?  I hope so!  
-Fun?  Probably just as much as Farmville!  
+Pointless?  Yes.
+Easy-to-understand?  I hope so!
+Fun?  Probably just as much as Farmville!
 
 [Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
 
 Source code available in the `examples` directory in the Github Repo.
 
-## Related articles 
+## Related articles
 * [Developing modular apps with backbone and Geppetto](http://niki4810.github.io/blog/2013/05/26/building-modular-apps-using-backbone-and-geppetto/)
- 
+
 ## Tests
 ### About
 Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) syntax provided by the [Pavlov](https://github.com/mmonteleone/pavlov) plugin.  Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
@@ -545,10 +550,17 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 
 ## Version History
 
+### 0.6.2
+*Released 31 July 2013*
+
+* Enforce that commands are constructable.
+* Allow batch registration of several commands for a single event
+* Thanks to [creynders](https://github.com/creynders) for these enhancements!
+
 ### 0.6.1
 *Released 17 July 2013*
 
-* Enforce that event payloads are objects, and not other types.  
+* Enforce that event payloads are objects, and not other types.
 
 ### 0.6
 *Released 2 June 2013*
@@ -566,7 +578,7 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 
 * Add grunt build which runs the test specs, and lints the project.  See the docs section "Get Involved > Contributing" for more info.
 * Fixed several lint errors
-* Bump backbone to 1.0.  
+* Bump backbone to 1.0.
 * Moved marionette and associated libs from "dependencies" to "example-dependencies" since Geppetto itself does not depend on them.
 * Bump Marionette versions to latest (used only by example app, not by Geppetto itself)
 * Refactored test specs to use plain Backbone views instead of Marionette views
@@ -590,8 +602,8 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 ### 0.4
 *Released: 25 January 2013*
 
-* Use new ["inversion-of-control"](http://documentcloud.github.com/backbone/#upgrading)-style Backbone `listenTo` API to allow consumers of Context events to maintain their own event references, 
-instead of Geppetto managing all the binding/unbinding logic.  
+* Use new ["inversion-of-control"](http://documentcloud.github.com/backbone/#upgrading)-style Backbone `listenTo` API to allow consumers of Context events to maintain their own event references,
+instead of Geppetto managing all the binding/unbinding logic.
 * Consumers of Geppetto Context events which are not views, can use `Marionette.addEventBinder()` to mix-in the `listenTo` API into themselves.
 * Refactored internals to work with Backbone v0.9.10.
 * Updated dependencies to latest versions (Backbone, Marionette, jQuery)
@@ -607,18 +619,18 @@ instead of Geppetto managing all the binding/unbinding logic.
 *Released: 12 November 2012*
 
 * Updated Geppetto to work with Marionette v1.0.0 beta 5
-* Marionette can now be downloaded as a bundled build which includes EventAggregator and Wreqr, so these secondary dependencies have been removed from Geppetto.  Instead, Geppetto's dependency is now on the bundled Marionette build.   
+* Marionette can now be downloaded as a bundled build which includes EventAggregator and Wreqr, so these secondary dependencies have been removed from Geppetto.  Instead, Geppetto's dependency is now on the bundled Marionette build.
 * Removed redundant "contexts" variable which was defined twice.
 
 ### 0.2.1
 *Released: 18 October 2012*
 
-* Updated Geppetto to work with Marionette v1.0.0 beta 1  
+* Updated Geppetto to work with Marionette v1.0.0 beta 1
 
 ### 0.2.0
 *Released: 26 April 2012*
 
-* Removed Livequery and service-locator to simplify the framework and remove all ties to the DOM.  
+* Removed Livequery and service-locator to simplify the framework and remove all ties to the DOM.
 * Added logic to automatically destroy a Context and unmap its events when the close() method is called on the parent View
 
 ### 0.1.1

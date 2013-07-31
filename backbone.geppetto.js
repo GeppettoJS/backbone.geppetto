@@ -153,8 +153,14 @@
 
     Geppetto.Context.prototype.mapCommands = function mapCommands() {
         var _this = this;
-        _.each(this.commands, function(commandClass, eventName) {
-            _this.mapCommand(eventName, commandClass);
+        _.each(this.commands, function(mixedType, eventName) {
+			if(_.isArray(mixedType)){
+				_.each(mixedType, function(commandClass){
+					_this.mapCommand(eventName, commandClass);
+				});
+			}else{
+				_this.mapCommand(eventName, mixedType);
+			}
         });
     };
 

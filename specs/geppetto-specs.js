@@ -426,7 +426,11 @@ pavlov.specify("Backbone.Geppetto", function(){
             contextDefinition = Geppetto.Context.extend({
                 commands: {
                     "abcEvent": AbcCommand,
-                    "xyzEvent": XyzCommand
+                    "xyzEvent": XyzCommand,
+					"abcxyzEvent": [
+						AbcCommand,
+						XyzCommand
+					]
                 }
             });
 
@@ -457,6 +461,12 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert( abcSpy.called ).isFalse();
             assert( xyzSpy.called ).isFalse();
         });
+
+		it("should fire all commands registered as array", function(){
+			myView.context.dispatch("abcxyzEvent");
+			assert( abcSpy.called).isTrue();
+			assert( xyzSpy.called).isTrue();
+		});
     });
 
     describe("when a context has a parent context", function() {
