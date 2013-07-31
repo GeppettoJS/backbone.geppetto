@@ -91,8 +91,8 @@
             throw "Expected 3 arguments (target, eventName, callback)";
         }
 
-        if ( ! _.isObject(target) || 
-             ! _.isFunction(target.listenTo) || 
+        if ( ! _.isObject(target) ||
+             ! _.isFunction(target.listenTo) ||
              ! _.isFunction(target.stopListening)) {
             throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
         }
@@ -142,15 +142,21 @@
             commandInstance.eventData = eventData;
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
-            } 
+            }
 
         }, this );
     };
 
     Geppetto.Context.prototype.mapCommands = function mapCommands() {
         var _this = this;
-        _.each(this.commands, function(commandClass, eventName) {
-            _this.mapCommand(eventName, commandClass);
+        _.each(this.commands, function(mixedType, eventName) {
+			if(_.isArray(mixedType)){
+				_.each(mixedType, function(commandClass){
+					_this.mapCommand(eventName, commandClass);
+				});
+			}else{
+				_this.mapCommand(eventName, mixedType);
+			}
         });
     };
 
