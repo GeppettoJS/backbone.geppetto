@@ -1,10 +1,10 @@
 /*globals QUnit require*/
 
 // Defer QUnit startup until dependencies have been loaded with RequireJS
-QUnit.config.autostart = false;
+//QUnit.config.autostart = false;
 
 // Allow QUnit to use global scope, which RequireJS needs to inject dependencies
-QUnit.specify.globalApi = true;
+//QUnit.specify.globalApi = true;
 
 require.config( {
     paths:{
@@ -36,10 +36,7 @@ require(
             "geppetto",
             "geppetto-specs"
 
-        ], function ( $, _, Backbone, Marionette, Geppetto, MyApp ) {
-
-            $( function () {
-                QUnit.start();
-            });
+        ], function () {
+            mocha.run();             
         }
 );

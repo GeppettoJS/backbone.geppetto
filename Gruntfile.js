@@ -11,28 +11,28 @@ module.exports = function ( grunt ) {
                 dest: 'dist/<%= pkg.name %>.min.js'
             }
         },
-
-        blanket_qunit: {
-            all: {
-                options: {
-                    urls: ['specs/index.html?coverage=true&gruntReport'],
-                    threshold: 97
-                }
-            }
-
-        },
         jshint: {
             all: ['Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js']
+        },
+
+        blanket_mocha: {
+            all: [ 'specs/index.html' ],
+            options: {
+                threshold: 98,
+                log: true,
+                reporter: 'Spec',
+                mocha: {}
+            }
         }
     } );
 
     grunt.loadNpmTasks( 'grunt-contrib-uglify' );
-    grunt.loadNpmTasks( 'grunt-blanket-qunit' );
+    grunt.loadNpmTasks( 'grunt-blanket-mocha' );
     grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 
     grunt.registerTask( 'lint', ['jshint'] );
-    grunt.registerTask( 'coverage', ['blanket_qunit'] );
-    grunt.registerTask( 'travis', ['jshint', 'blanket_qunit'] );
+    grunt.registerTask( 'coverage', ['blanket_mocha'] );
+    grunt.registerTask( 'travis', ['jshint', 'blanket_mocha'] );
     
-    grunt.registerTask( 'default', ['uglify', 'jshint', 'blanket_qunit'] );
+    grunt.registerTask( 'default', ['uglify', 'jshint', 'blanket_mocha'] );
 };

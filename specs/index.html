@@ -1,35 +1,41 @@
-<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-    <script type="text/javascript" src="lib/qunit.js"></script>
-<script type="text/javascript" src="lib/pavlov.js"></script>
-<script type="text/javascript" src="lib/sinon.js"></script>
-<link rel="stylesheet" href="lib/qunit.css" type="text/css" media="screen" />
-</head>
-<body>
-    <h1 id="qunit-header"></h1>
-    <h2 id="qunit-banner"></h2>
-    <div id="qunit-testrunner-toolbar"></div>
-    <h2 id="qunit-userAgent"></h2>
-    <ol id="qunit-tests"></ol>
+    <title>Mocha Tests</title>
+    <link rel="stylesheet" href="mocha/mocha.css" />
+    <style>
+        #fixture {
+            position: absolute;
+            top: -9999;
+            left: -9999;
+        };
+    </style>
+    <script src="mocha/chai.js"></script>
+    <script src="mocha/mocha.js"></script>
+    <script src="mocha/sinon-chai.js"></script>
 
     <script data-main="test-main" src="../dependencies/require.js"></script>
+
     <script type="text/javascript" src="lib/blanket.js"
-            data-cover-flags="branchTracking"
             data-cover-only="//../backbone.geppetto/"></script>
 
+    <script type="text/javascript" src="../node_modules/grunt-blanket-mocha/support/mocha-blanket.js"></script>
+
+    <script type="text/javascript" src="lib/sinon.js"></script>
+
     <script>
-        if (location.href.match(/(\?|&)gruntReport($|&|=)/)) {
-            blanket.options("reporter", "../node_modules/grunt-blanket-qunit/reporter/grunt-reporter.js");
+
+        mocha.setup('bdd');
+        
+        if (window.PHANTOMJS) {
+            blanket.options("reporter", "../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");            
         }
     </script>
 
-    <script>
-        
-    </script>
-
+</head>
+<body>
+<div id="mocha"></div>
+<div id="fixture">
+</div>
 </body>
 </html>

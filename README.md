@@ -17,11 +17,11 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 
 ### Getting Geppetto
 
-*Latest Stable Release: 0.6.2*
+*Latest Stable Release: 0.6.3*
 
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.2/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.2/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.2.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.2.zip).
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.3/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.3/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.3.zip).
 
 *Unreleased Edge Version (master)*
 
@@ -543,12 +543,19 @@ Source code available in the `examples` directory in the Github Repo.
 
 ## Tests
 ### About
-Geppetto test specs are written using [QUnit](http://docs.jquery.com/Qunit) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) syntax provided by the [Pavlov](https://github.com/mmonteleone/pavlov) plugin.  Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
+Geppetto test specs are written using [Mocha](http://visionmedia.github.io/mocha/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) 
+syntax provided by the [Chai](http://chaijs.com/) plugin.  
+Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
 
 ### Specs
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Version History
+
+### 0.6.3
+*Released 31 July 2013*
+
+* Switch test specs from qunit/pavlov to mocha/chai.
 
 ### 0.6.2
 *Released 31 July 2013*
