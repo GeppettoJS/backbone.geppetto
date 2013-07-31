@@ -18,21 +18,21 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
 
     });
-    
+
     describe("when binding a context", function() {
-        
+
         var contextDefinition;
         var contextInstance;
-        
+
         before(function(){
             contextDefinition = Geppetto.Context.extend();
         });
 
         it("should bind the context instance to the view", function() {
-            
+
             var MyViewDef = Backbone.View.extend();
             var myView = new MyViewDef();
-            
+
             Geppetto.bindContext({
                 view: myView,
                 context: contextDefinition
@@ -43,7 +43,7 @@ pavlov.specify("Backbone.Geppetto", function(){
             myView.close();
         });
     });
-    
+
     describe("when a Backbone View adds an event listener to a context", function() {
         var parentView;
         var contextDefinition;
@@ -108,7 +108,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         it("should throw an exception if the payload object is a string, not an object", function() {
             assert(function() {
-                contextInstance.dispatch("foo", "baz");                
+                contextInstance.dispatch("foo", "baz");
             } ).throwsException("Event payload must be an object");
         });
 
@@ -145,12 +145,12 @@ pavlov.specify("Backbone.Geppetto", function(){
         });
 
         it("should not fire the foo event when listened from the parent view and the parent view is closed", function() {
-            var parentFooSpy = sinon.spy();            
+            var parentFooSpy = sinon.spy();
             contextInstance.listen(parentView, "foo", parentFooSpy);
             parentView.close();
             contextInstance.dispatch("foo");
             assert(parentFooSpy.callCount ).isEqualTo(0);
-        });        
+        });
     });
 
     describe("when a Backbone View specifies a contextEvents map", function() {
@@ -168,9 +168,9 @@ pavlov.specify("Backbone.Geppetto", function(){
             barParentSpy = sinon.spy();
             fooChildSpy = sinon.spy();
             barChildSpy = sinon.spy();
-            
+
             contextDefinition = Geppetto.Context.extend();
-            
+
             var ParentViewDef = Backbone.View.extend({
                 initialize: function() {
                     _.bindAll(this);
@@ -183,7 +183,7 @@ pavlov.specify("Backbone.Geppetto", function(){
                 },
                 handleFoo: function() {
                     fooParentSpy();
-                }                
+                }
             });
             parentView = new ParentViewDef();
 
@@ -196,7 +196,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
             var childViewDef = Backbone.View.extend({
 
-                contextEvents: {                    
+                contextEvents: {
                     "foo": "handleFoo",
                     "bar": function() {
                         barChildSpy();
@@ -225,7 +225,7 @@ pavlov.specify("Backbone.Geppetto", function(){
             fooParentSpy = undefined;
             barParentSpy = undefined;
             fooChildSpy = undefined;
-            barChildSpy = undefined;            
+            barChildSpy = undefined;
         });
 
         it("should trigger the foo response function when registered as a string", function() {
@@ -239,7 +239,7 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert(barParentSpy.callCount ).isEqualTo(1);
             assert(barChildSpy.callCount ).isEqualTo(1);
         });
-        
+
         it("should remove the parent foo listener when the parent view is closed", function() {
             contextInstance.dispatch("foo");
             assert(fooParentSpy.callCount ).isEqualTo(1);
@@ -258,8 +258,8 @@ pavlov.specify("Backbone.Geppetto", function(){
             contextInstance.dispatch("foo");
             assert(fooParentSpy.callCount ).isEqualTo(2);
             assert(fooChildSpy.callCount ).isEqualTo(1);
-        });        
-    });    
+        });
+    });
 
     describe("when registering a context listener", function() {
 
@@ -350,7 +350,7 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         var abcSpy;
         var xyzSpy;
-        
+
         before(function(){
             abcSpy = sinon.spy();
             AbcCommand = function(){};
@@ -378,7 +378,7 @@ pavlov.specify("Backbone.Geppetto", function(){
         after(function() {
             myView.close();
         });
-        
+
         it("should fire AbcCommand when abcEvent is dispatched", function() {
             myView.context.dispatch("abcEvent");
 
@@ -420,7 +420,11 @@ pavlov.specify("Backbone.Geppetto", function(){
             contextDefinition = Geppetto.Context.extend({
                 commands: {
                     "abcEvent": AbcCommand,
-                    "xyzEvent": XyzCommand
+                    "xyzEvent": XyzCommand,
+					"abcxyzEvent": [
+						AbcCommand,
+						XyzCommand
+					]
                 }
             });
 
@@ -451,7 +455,13 @@ pavlov.specify("Backbone.Geppetto", function(){
             assert( abcSpy.called ).isFalse();
             assert( xyzSpy.called ).isFalse();
         });
-    });    
+
+		it("should fire all commands registered as array", function(){
+			myView.context.dispatch("abcxyzEvent");
+			assert( abcSpy.called).isTrue();
+			assert( xyzSpy.called).isTrue();
+		});
+    });
 
     describe("when a context has a parent context", function() {
 
@@ -515,13 +525,13 @@ pavlov.specify("Backbone.Geppetto", function(){
 
         var view1;
         var context1;
-        
+
         var view2;
         var context2;
 
         var view3;
-        var context3;        
-        
+        var context3;
+
         before(function() {
 
             var viewDef1 = Backbone.View.extend();
@@ -530,20 +540,20 @@ pavlov.specify("Backbone.Geppetto", function(){
                  view: view1,
                  context: Geppetto.Context.extend()
              });
-            
+
             var viewDef2 = Backbone.View.extend();
              view2 = new viewDef2();
              context2 = Geppetto.bindContext({
                  view: view2,
                  context: Geppetto.Context.extend()
-             });            
+             });
 
             var viewDef3 = Backbone.View.extend();
              view3 = new viewDef3();
              context3 = Geppetto.bindContext({
                  view: view3,
                  context: Geppetto.Context.extend()
-             });            
+             });
 
         });
 
