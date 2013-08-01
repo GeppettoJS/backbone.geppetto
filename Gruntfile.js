@@ -5,7 +5,7 @@ module.exports = function ( grunt ) {
         uglify: {
             dist: {
                 options: {
-                    report: "gzip"                    
+                    report: "gzip"
                 },
                 src: '<%= pkg.name %>.js',
                 dest: 'dist/<%= pkg.name %>.min.js'
@@ -18,7 +18,7 @@ module.exports = function ( grunt ) {
         blanket_mocha: {
             all: [ 'specs/index.html' ],
             options: {
-                threshold: 98,
+                threshold: 97,
                 log: true,
                 reporter: 'Spec',
                 mocha: {}
@@ -33,6 +33,6 @@ module.exports = function ( grunt ) {
     grunt.registerTask( 'lint', ['jshint'] );
     grunt.registerTask( 'coverage', ['blanket_mocha'] );
     grunt.registerTask( 'travis', ['jshint', 'blanket_mocha'] );
-    
+
     grunt.registerTask( 'default', ['uglify', 'jshint', 'blanket_mocha'] );
 };

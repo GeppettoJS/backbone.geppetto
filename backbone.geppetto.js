@@ -85,6 +85,20 @@
         return context;
     };
 
+    Geppetto.Context.prototype._execute = function _execute( CommandConstructor, args, event ){
+
+        var commandInstance = new CommandConstructor();
+        commandInstance.context = this;
+        if(event){
+            commandInstance.event = event;
+        }
+        if (_.isFunction(commandInstance.execute)) {
+            commandInstance.execute.apply(commandInstance, args);
+        }else{
+            throw "Command must define an 'execute' function";
+        }
+    };
+
     Geppetto.Context.prototype.listen = function listen( target, eventName, callback ) {
 
         if (arguments.length !== 3) {
@@ -108,59 +122,67 @@
         return target.listenTo( this.vent, eventName, callback, target );
     };
 
-    Geppetto.Context.prototype.dispatch = function dispatch( eventName, eventData ) {
-        if ( ! _.isUndefined(eventData) && ! _.isObject(eventData) ) {
-            throw "Event payload must be an object";
-        }
-        eventData = eventData || {};
-        eventData.eventName = eventName;
-        this.vent.trigger( eventName, eventData );        };
+    Geppetto.Context.prototype.dispatch = function dispatch( eventName /* ...rest */ ) {
 
-    Geppetto.Context.prototype.dispatchToParent = function dispatchToParent( eventName, eventData ) {
+        this.vent.trigger.apply( this.vent, arguments);
+    };
+
+    Geppetto.Context.prototype.dispatchToParent = function dispatchToParent( eventName /* ...rest */) {
+
         if ( this.parentContext ) {
-            this.parentContext.vent.trigger( eventName, eventData );
+            var vent = this.parentContext.vent;
+            vent.trigger.apply( vent, arguments );
         }
     };
 
-    Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally( eventName, eventData ) {
-
+    Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally( eventName /* ...rest */ ) {
+        var args = arguments;
         _.each( contexts, function ( context, contextId ) {
-            context.vent.trigger( eventName, eventData );
+            var vent = context.vent;
+            vent.trigger.apply( vent, args );
         } );
+    };
+
+    Geppetto.Context.prototype.execute = function execute( commands /* ...rest */){
+
+        var _this = this;
+        var args = Array.prototype.slice.call(arguments);
+        args.shift();
+        _.each(commands, function(CommandConstructor){
+            if(!_.isFunction(CommandConstructor)){
+                throw "Command must be constructable";
+            }
+            _this._execute(CommandConstructor, args);
+        });
     };
 
     Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, CommandConstructor ) {
 
         var _this = this;
 
-		if(!_.isFunction(CommandConstructor)){
-			throw "Command must be constructable";
-		}
+        if(!_.isFunction(CommandConstructor)){
+            throw "Command must be constructable";
+        }
 
-        this.vent.listenTo( this.vent, eventName, function ( eventData ) {
-
-            var commandInstance = new CommandConstructor();
-
-            commandInstance.context = _this;
-            commandInstance.eventName = eventName;
-            commandInstance.eventData = eventData;
-            if (_.isFunction(commandInstance.execute)) {
-                commandInstance.execute();
-            }
-
-        }, this );
+        this.vent.listenTo( this.vent, eventName, function ( /* ...rest */ ) {
+            var event = {
+                name : eventName,
+                data : Array.prototype.slice.call(arguments)
+            };
+            _this._execute(CommandConstructor, arguments, event);
+        });
     };
 
     Geppetto.Context.prototype.mapCommands = function mapCommands() {
         var _this = this;
         _.each(this.commands, function(mixedType, eventName) {
-			if(_.isArray(mixedType)){
-				_.each(mixedType, function(commandClass){
-					_this.mapCommand(eventName, commandClass);
-				});
-			}else{
-				_this.mapCommand(eventName, mixedType);
-			}
+            if(_.isArray(mixedType)){
+                _.each(mixedType, function(commandClass){
+                    _this.mapCommand(eventName, commandClass);
+                });
+            }else{
+                _this.mapCommand(eventName, mixedType);
+            }
         });
     };
 

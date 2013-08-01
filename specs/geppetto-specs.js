@@ -95,43 +95,13 @@ define( [
                 expect(fooSpy.callCount ).to.equal(1);
             });
 
-            it("should pass the event name in the event payload object", function() {
-                contextInstance.dispatch("foo");
-                expect(fooSpy ).to.have.been.calledOnce;
-                var payload = fooSpy.getCall(0).args[0];
-                expect(payload.eventName).to.equal("foo");
-            });
-
             it("should pass supplied data in the payload object", function() {
-                contextInstance.dispatch("foo", {bar: "baz"});
+				var expected = ["bar", "baz", "qux"];
+				var event = ["foo"].concat(expected);
+                contextInstance.dispatch.apply(contextInstance, event);
                 expect(fooSpy.callCount ).to.equal(1);
-                var payload = fooSpy.getCall(0).args[0];
-                expect(payload.eventName).to.equal("foo");
-                expect(payload.bar).to.equal("baz");
-            });
-
-            it("should throw an exception if the payload object is a string, not an object", function() {
-                expect(function() {
-                    contextInstance.dispatch("foo", "baz");
-                } ).to.throw("Event payload must be an object");
-            });
-
-            it("should throw an exception if the payload object is a boolean false, not an object", function() {
-                expect(function() {
-                    contextInstance.dispatch("foo", false);
-                } ).to.throw("Event payload must be an object");
-            });
-
-            it("should throw an exception if the payload object is a boolean true, not an object", function() {
-                expect(function() {
-                    contextInstance.dispatch("foo", true);
-                } ).to.throw("Event payload must be an object");
-            });
-
-            it("should throw an exception if the payload object is null, not an object", function() {
-                expect(function() {
-                    contextInstance.dispatch("foo", null);
-                } ).to.throw("Event payload must be an object");
+                var actual = fooSpy.getCall(0).args;
+                expect(actual).to.deep.equal(expected);
             });
 
             it("should pass the foo event when listened from the parent view", function() {
@@ -401,11 +371,6 @@ define( [
                 expect( xyzSpy.called ).to.be.false;
             });
 
-            it("should throw an error if the command is not a function", function(){
-                expect(function(){
-                    myView.context.mapCommand("failEvent", {});
-                }).to.throw("Command must be constructable");
-            });
         });
 
         describe("when registering commands in batch using the commands map", function() {
@@ -474,6 +439,89 @@ define( [
                 expect( xyzSpy.called ).to.be.true;
             });
         });
+
+		describe("when executing a command", function(){
+			var context;
+			var executionSpy;
+			var Command;
+			beforeEach(function(){
+				executionSpy = sinon.spy();
+				Command = function(){};
+				Command.prototype.execute = executionSpy;
+				var contextDefinition = Geppetto.Context.extend();
+				context = new contextDefinition();
+			});
+
+			afterEach(function(){
+				context.unmapAll();
+			});
+
+			it("should throw an error if the command is not a function", function(){
+				expect(function(){
+					context.execute([{}]);
+				}).to.throw("Command must be constructable");
+			});
+
+			it("should throw an error if the command has no 'execute' method", function(){
+				expect(function(){
+					context.execute([function(){}]);
+				}).to.throw("Command must define an 'execute' function");
+			});
+
+			it("its execute method should be called", function(){
+				context.execute([Command]);
+				expect(executionSpy.called).to.be.true;
+			});
+
+			it("should receive the payload as arguments", function(){
+				var expected = ['foo', 'bar', 'baz'];
+				var args = [[Command]].concat(expected);
+				context.execute.apply(context, args);
+				var actual = executionSpy.getCall(0).args;
+				expect(actual).to.deep.equal(expected);
+			});
+
+			it("should be injected with the context", function(){
+				var actual;
+				var Command = function(){
+					this.execute = function(){
+						actual = this.context;
+					};
+				};
+				context.execute([Command]);
+				expect(actual).to.equal(context);
+			});
+
+			it("should be injected with an event object when triggered", function(){
+				var actual;
+				var Command = function(){
+					this.execute = function(){
+						actual = this.event;
+					};
+				};
+				var expected = {
+					name : 'foo',
+					data : ['bar', 'baz', 'qux']
+				};
+				context.mapCommand(expected.name, Command);
+				context.dispatch.apply(context, [expected.name].concat(expected.data));
+				expect(actual).to.deep.equal(expected);
+			});
+
+			it("should have separate event data arrays for each command", function(){
+				var actual = [];
+				var Command = function(){
+					this.execute = function(){
+						actual.push(this.event.data);
+					};
+				};
+				context.mapCommand('foo', Command);
+				context.mapCommand('foo', Command);
+				context.dispatch('foo', 'bar', 'baz');
+				expect(actual[0]).to.not.equal(actual[1]);
+				expect(actual[0]).to.deep.equal(actual[1]);
+			});
+		});
 
         describe("when a context has a parent context", function() {
 
