@@ -1,7 +1,9 @@
 module.exports = function ( grunt ) {
+    var pkgConfig = grunt.file.readJSON('package.json');
+    pkgConfig.version = grunt.file.readJSON('version.json').version;
     grunt.initConfig( {
 
-        pkg: grunt.file.readJSON( 'package.json' ),
+        pkg: pkgConfig,
         uglify: {
             dist: {
                 options: {
@@ -23,16 +25,24 @@ module.exports = function ( grunt ) {
                 reporter: 'Spec',
                 mocha: {}
             }
-        }
+        },
+        version       : {
+            defaults : {
+                src : [
+                    'package.json', 'bower.json', '<%= pkg.name %>.js'
+                ]
+            }
+        }        
     } );
 
     grunt.loadNpmTasks( 'grunt-contrib-uglify' );
     grunt.loadNpmTasks( 'grunt-blanket-mocha' );
     grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+    grunt.loadNpmTasks( 'grunt-version' );
 
     grunt.registerTask( 'lint', ['jshint'] );
     grunt.registerTask( 'coverage', ['blanket_mocha'] );
     grunt.registerTask( 'travis', ['jshint', 'blanket_mocha'] );
     
-    grunt.registerTask( 'default', ['uglify', 'jshint', 'blanket_mocha'] );
+    grunt.registerTask( 'default', [ 'version', 'uglify', 'jshint', 'blanket_mocha'] );
 };

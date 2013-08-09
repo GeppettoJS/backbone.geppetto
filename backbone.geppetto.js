@@ -1,4 +1,4 @@
-// Backbone.Geppetto v0.6.3
+// Backbone.Geppetto
 //
 // Copyright (C) 2013 Model N, Inc.
 // Distributed under the MIT License
@@ -23,6 +23,8 @@
     }
 
     var Geppetto = {};
+
+    Geppetto.version = '0.6.3';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
