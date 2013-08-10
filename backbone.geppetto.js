@@ -22,11 +22,108 @@
         throw "Please include Backbone before Geppetto";
     }
 
+
+	var NO_MAPPING_FOUND = 'no mapping found for this key';
+
+    var Injector = function () {
+        this._mappings = {};
+    };
+	Injector.prototype = {
+        _createAndSetupInstance:function ( key, Clazz ) {
+            var instance = new Clazz();
+            this.injectInto( instance, key );
+            return instance;
+        },
+
+        _retrieveFromCacheOrCreate:function ( key, overrideRules ) {
+            var output;
+            if ( this._mappings.hasOwnProperty( key ) ) {
+                var config = this._mappings[ key ];
+                if ( !overrideRules && config.isSingleton ) {
+                    if ( config.object == null ) {
+                        config.object = this._createAndSetupInstance( key, config.clazz );
+                    }
+                    output = config.object;
+                } else {
+                    if ( config.clazz ) {
+                        output = this._createAndSetupInstance( key, config.clazz );
+                    } else {
+                        //TODO shouldn't this be null
+                        output = config.object;
+                    }
+                }
+            } else {
+                throw NO_MAPPING_FOUND;
+            }
+            return output;
+        },
+
+        getObject:function ( key ) {
+            return this._retrieveFromCacheOrCreate( key, false );
+        },
+
+        mapValue:function ( key, useValue ) {
+            this._mappings[ key ] = {
+                clazz:null,
+                object:useValue,
+                isSingleton:true
+            };
+            if ( this.hasMapping( key )) {
+                this.injectInto( useValue, key );
+            }
+            return this;
+        },
+
+        hasMapping:function ( key ) {
+            return this._mappings.hasOwnProperty( key );
+        },
+
+        mapClass:function ( key, clazz ) {
+            this._mappings[ key ] = {
+                clazz:clazz,
+                object:null,
+                isSingleton:false
+            };
+            return this;
+        },
+
+        mapSingleton:function ( key, clazz ) {
+            this._mappings[ key ] = {
+                clazz:clazz,
+                object:null,
+                isSingleton:true
+            };
+            return this;
+        },
+
+        instantiate:function ( key ) {
+            return this._retrieveFromCacheOrCreate( key, true );
+        },
+
+        injectInto:function ( instance ) {
+			if( ( typeof instance === 'object' ) ){
+				_.each(this._mappings, function(mapping, key){
+					if(key in instance){
+						instance[key] = this.getObject(key);
+					}
+				});
+			}
+            return this;
+        },
+        unmap:function ( key ) {
+            delete this._mappings[ key ];
+
+            return this;
+        }
+	};
+
     var Geppetto = {};
 
     Geppetto.version = '0.6.3';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
+
+	Geppetto.Injector = Injector;
 
     var contexts = {};
 
@@ -34,6 +131,7 @@
 
         this.options = options || {};
         this.parentContext = this.options.parentContext;
+		this.injector = new Injector();
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
         if (_.isFunction(this.initialize)) {
@@ -74,6 +172,7 @@
         }
 
         view.context = context;
+		context.injector.injectInto(view);
 
         // map context events
         _.each(view.contextEvents, function(callback, eventName) {
@@ -146,6 +245,7 @@
             commandInstance.context = _this;
             commandInstance.eventName = eventName;
             commandInstance.eventData = eventData;
+			_this.injector.injectInto(commandInstance);
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
             }
