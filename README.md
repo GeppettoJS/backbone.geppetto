@@ -406,7 +406,7 @@ command.prototype.execute = function () {
 return command;
 ```
 
-### Dependency Injection
+### Injected Data
 
 The Geppetto framework automatically injects a few things into each Command instance before it is executed.
 
@@ -415,6 +415,8 @@ The three injections are:
 * context
 * eventName
 * eventData
+
+They can be accessed as properties of the command object via `this`.
 
 See this example for their usage:
 
