@@ -2,14 +2,14 @@
 
 require.config( {
     paths:{
-        jquery:'../../../../../../dependencies/jquery',
-        underscore:'../../../dependencies/underscore',
-        backbone:'../../../dependencies/backbone',
+        jquery:'../../dependencies/jquery',
+        underscore:'../../dependencies/underscore',
+        backbone:'../../dependencies/backbone',
         marionette:'lib/example-dependencies/backbone.marionette',
-		'backbone.wreqr':'lib/example-dependencies/backbone.wreqr',
-		'backbone.babysitter':'lib/example-dependencies/backbone.babysitter',
-        geppetto:'../../../backbone.geppetto',
-        text:'../../../dependencies/text',
+        'backbone.wreqr':'lib/example-dependencies/backbone.wreqr',
+        'backbone.babysitter':'lib/example-dependencies/backbone.babysitter',
+        geppetto:'../../backbone.geppetto',
+        text:'../../dependencies/text',
         myapp:"src/my-app"
     },
 	shim: {
