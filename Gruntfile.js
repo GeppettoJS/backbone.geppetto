@@ -22,7 +22,7 @@ module.exports = function ( grunt ) {
             options: {
                 threshold: 98,
                 log: true,
-                reporter: 'Spec',
+                reporter: 'mocha-unfunk-reporter',
                 mocha: {}
             }
         },

@@ -697,7 +697,6 @@ define( [
                 expect(Geppetto.debug.countEvents()).to.equal(0);
             });
 
-
         });
 
 
