@@ -27,6 +27,7 @@
 
     var Injector = function () {
         this._mappings = {};
+		this.parent = undefined;
     };
 	Injector.prototype = {
         _createAndSetupInstance:function ( key, Clazz ) {
@@ -40,23 +41,28 @@
             if ( this._mappings.hasOwnProperty( key ) ) {
                 var config = this._mappings[ key ];
                 if ( !overrideRules && config.isSingleton ) {
-                    if ( config.object == null ) {
+                    if ( !config.object ) {
                         config.object = this._createAndSetupInstance( key, config.clazz );
                     }
                     output = config.object;
                 } else {
                     if ( config.clazz ) {
                         output = this._createAndSetupInstance( key, config.clazz );
-                    } else {
-                        //TODO shouldn't this be null
-                        output = config.object;
                     }
                 }
+			}else if(this.parent && this.parent.hasMapping(key)){
+				output = this.parent._retrieveFromCacheOrCreate(key,overrideRules);
             } else {
-                throw NO_MAPPING_FOUND;
+                throw new Error(NO_MAPPING_FOUND);
             }
             return output;
         },
+
+		createChildInjector : function(){
+			var child = new Injector();
+			child.parent = this;
+			return child;
+		},
 
         getObject:function ( key ) {
             return this._retrieveFromCacheOrCreate( key, false );
@@ -68,14 +74,11 @@
                 object:useValue,
                 isSingleton:true
             };
-            if ( this.hasMapping( key )) {
-                this.injectInto( useValue, key );
-            }
             return this;
         },
 
         hasMapping:function ( key ) {
-            return this._mappings.hasOwnProperty( key );
+            return this._mappings.hasOwnProperty( key )	|| (!!this.parent && this.parent.hasMapping(key));
         },
 
         mapClass:function ( key, clazz ) {
@@ -101,12 +104,10 @@
         },
 
         injectInto:function ( instance ) {
-			if( ( typeof instance === 'object' ) ){
-				_.each(this._mappings, function(mapping, key){
-					if(key in instance){
-						instance[key] = this.getObject(key);
-					}
-				});
+			if( ( typeof instance === 'object' ) && 'injections' in instance ){
+				_.each(instance.injections, function(key, index){
+					instance[key] = this.getObject(key);
+				}, this);
 			}
             return this;
         },
@@ -114,7 +115,11 @@
             delete this._mappings[ key ];
 
             return this;
-        }
+        },
+		unmapAll:function(){
+			this._mappings = {};
+			return this;
+		}
 	};
 
     var Geppetto = {};
@@ -131,7 +136,11 @@
 
         this.options = options || {};
         this.parentContext = this.options.parentContext;
-		this.injector = new Injector();
+		if(this.parentContext){
+			this.injector = this.parentContext.injector.createChildInjector();
+		}else{
+			this.injector = new Injector();
+		}
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
         if (_.isFunction(this.initialize)) {
@@ -268,6 +277,7 @@
 
     Geppetto.Context.prototype.unmapAll = function unmapAll() {
         this.vent.stopListening();
+		this.injector.unmapAll();
 
         delete contexts[this._contextId];
 
