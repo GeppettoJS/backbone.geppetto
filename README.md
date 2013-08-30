@@ -160,7 +160,7 @@ Geppetto implements the Controller piece using the Command Pattern.  Commands ar
 
 ### Job #1: Event Bus
 
-Each Context has an instance of Marionette.EventAggregator, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.
+Each Context has an instance of Backbone.Events, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.
 
 ### Job #2: Command Registry
 
