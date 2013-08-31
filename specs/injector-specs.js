@@ -112,7 +112,7 @@ define( [
             var clazz;
             beforeEach(function(){
                 clazz = Backbone.View.extend();
-                
+
                 injector.mapView(key, clazz);
             });
             it('should be determinable',function(){
@@ -122,7 +122,7 @@ define( [
                 var actual = injector.getObject(key);
                 expect(actual).to.be.a("function");
             });
-            it('should produce a new instance every time',function(){
+            it('should retrieve the same class every time',function(){
                 var first = injector.getObject(key);
                 var second = injector.getObject(key);
                 expect(second).to.not.equal(first);
@@ -136,7 +136,7 @@ define( [
                 var ViewConstructor = injector.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(initializeSpy).to.have.been.calledOnce;
-            });            
+            });
             it("should be injected with its dependencies when instantiated", function(){
                 clazz.prototype.injections = ['foo'];
                 var foo = {};
@@ -159,17 +159,17 @@ define( [
                 var otherContext = new Geppetto.Context();
                 var myContextStub = sinon.stub(context, "listen");
                 var otherContextStub = sinon.stub(otherContext, "listen");
-                
+
                 var ViewConstructor = injector.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(myContextStub).not.to.have.been.called;
                 expect(otherContextStub).not.to.have.been.called;
-                
+
                 viewInstance.listen(viewInstance, "abc", function(){});
 
                 expect(myContextStub).to.have.been.calledOnce;
-                expect(otherContextStub).not.to.have.been.called;                
-                
+                expect(otherContextStub).not.to.have.been.called;
+
                 otherContext.unmapAll();
             });
             it("should call injected 'dispatch' only on its own context", function(){
@@ -188,8 +188,8 @@ define( [
                 expect(otherContextStub).not.to.have.been.called;
 
                 otherContext.unmapAll();
-            });            
-        });        
+            });
+        });
 		describe("when injecting objects", function(){
 			var key = 'a value';
 			var value = {};

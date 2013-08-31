@@ -24,6 +24,11 @@
 
 
     var NO_MAPPING_FOUND = 'no mapping found for key: ';
+	var TYPES = {
+		SINGLETON : 'singleton',
+		VIEW: 'view',
+		OTHER: 'other'
+	};
 
     var Injector = function (context) {
         this._mappings = {};
@@ -41,13 +46,13 @@
             var output;
             if ( this._mappings.hasOwnProperty( key ) ) {
                 var config = this._mappings[ key ];
-                if ( !overrideRules && config.isSingleton ) {
+                if ( !overrideRules && config.type === TYPES.SINGLETON ) {
                     if ( !config.object ) {
                         config.object = this._createAndSetupInstance( key, config.clazz );
                     }
                     output = config.object;
                 } else {
-                    if (config.isView) {
+                    if (config.type === TYPES.VIEW) {
                         output = this._wrapViewConstructor(config.clazz);
                     } else if ( config.clazz ) {
                         output = this._createAndSetupInstance( key, config.clazz );
@@ -89,7 +94,7 @@
             this._mappings[ key ] = {
                 clazz:null,
                 object:useValue,
-                isSingleton:true
+                type:TYPES.SINGLETON
             };
             return this;
         },
@@ -102,7 +107,7 @@
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
-                isSingleton:false
+                type:TYPES.OTHER
             };
             return this;
         },
@@ -111,8 +116,7 @@
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
-                isSingleton:false,
-                isView: true
+                type:TYPES.VIEW
             };
             return this;
         },
@@ -121,7 +125,7 @@
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
-                isSingleton:true
+                type:TYPES.SINGLETON
             };
             return this;
         },
