@@ -53,7 +53,7 @@
                     output = config.object;
                 } else {
                     if (config.type === TYPES.VIEW) {
-                        output = this._wrapViewConstructor(config.clazz);
+                        output = config.clazz;
                     } else if ( config.clazz ) {
                         output = this._createAndSetupInstance( key, config.clazz );
                     }
@@ -114,7 +114,7 @@
 
         mapView:function ( key, clazz ) {
             this._mappings[ key ] = {
-                clazz:clazz,
+                clazz:this._wrapViewConstructor(clazz),
                 object:null,
                 type:TYPES.VIEW
             };

@@ -125,7 +125,7 @@ define( [
             it('should retrieve the same class every time',function(){
                 var first = injector.getObject(key);
                 var second = injector.getObject(key);
-                expect(second).to.not.equal(first);
+                expect(second).to.equal(first);
             });
             it("should call the view's original 'initialize' function when instantiated", function(){
                 var initializeSpy = sinon.spy();
