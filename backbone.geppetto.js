@@ -36,9 +36,10 @@
         this.parent = undefined;
     };
     Resolver.prototype = {
-        _createAndSetupInstance:function ( key, Clazz ) {
+		//TODO: remove key argument
+        _createAndSetupInstance:function ( key, Clazz, wiring ) {
             var instance = new Clazz();
-            this.resolve( instance, key );
+            this.resolve( instance, wiring );
             return instance;
         },
 
@@ -48,14 +49,14 @@
                 var config = this._mappings[ key ];
                 if ( !overrideRules && config.type === TYPES.SINGLETON ) {
                     if ( !config.object ) {
-                        config.object = this._createAndSetupInstance( key, config.clazz );
+                        config.object = this._createAndSetupInstance( key, config.clazz, config.wiring );
                     }
                     output = config.object;
                 } else {
                     if (config.type === TYPES.VIEW) {
                         output = config.clazz;
                     } else if ( config.clazz ) {
-                        output = this._createAndSetupInstance( key, config.clazz );
+                        output = this._createAndSetupInstance( key, config.clazz, config.wiring );
                     }
                 }
             }else if(this.parent && this.parent.hasWiring(key)){
@@ -66,13 +67,13 @@
             return output;
         },
 
-        _wrapViewConstructor: function(ViewConstructor) {
+        _wrapViewConstructor: function(ViewConstructor, wiring) {
 
             var context = this._context;
 
             var WrappedConstructor = ViewConstructor.extend({
                 initialize: function(){
-                    context.resolver.resolve(this);
+                    context.resolver.resolve(this, wiring);
                     ViewConstructor.prototype.initialize.call(this, arguments);
                 }
             });
@@ -103,29 +104,31 @@
             return this._mappings.hasOwnProperty( key )	|| (!!this.parent && this.parent.hasWiring(key));
         },
 
-        wireClass:function ( key, clazz ) {
+        wireClass:function ( key, clazz, wiring ) {
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
-                type:TYPES.OTHER
+                type:TYPES.OTHER,
+				wiring : wiring
             };
             return this;
         },
 
-        wireView:function ( key, clazz ) {
+        wireView:function ( key, clazz, wiring ) {
             this._mappings[ key ] = {
-                clazz:this._wrapViewConstructor(clazz),
+                clazz:this._wrapViewConstructor(clazz, wiring),
                 object:null,
                 type:TYPES.VIEW
             };
             return this;
         },
 
-        wireSingleton:function ( key, clazz ) {
+        wireSingleton:function ( key, clazz, wiring ) {
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
-                type:TYPES.SINGLETON
+                type:TYPES.SINGLETON,
+				wiring : wiring
             };
             return this;
         },
@@ -134,10 +137,11 @@
             return this._retrieveFromCacheOrCreate( key, true );
         },
 
-        resolve:function ( instance ) {
-            if( ( typeof instance === 'object' ) && 'wiring' in instance ){
-				var propNameArgIndex = Number(! _.isArray(instance.wiring));
-                _.each(instance.wiring, function(dependencyKey){
+        resolve:function ( instance, wiring ) {
+			wiring = wiring || instance.wiring;
+            if( wiring ){
+				var propNameArgIndex = Number(! _.isArray(wiring));
+                _.each(wiring, function(dependencyKey){
                     instance[arguments[propNameArgIndex]] = this.getObject(dependencyKey);
                 }, this);
             }
@@ -276,7 +280,7 @@
         } );
     };
 
-    Geppetto.Context.prototype.wireCommand = function wireCommand( eventName, CommandConstructor ) {
+    Geppetto.Context.prototype.wireCommand = function wireCommand( eventName, CommandConstructor, wiring ) {
 
         var _this = this;
 
@@ -291,7 +295,7 @@
             commandInstance.context = _this;
             commandInstance.eventName = eventName;
             commandInstance.eventData = eventData;
-            _this.resolver.resolve(commandInstance);
+            _this.resolver.resolve(commandInstance, wiring);
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
             }
