@@ -31,6 +31,35 @@ define( [
 				}).to.throw(/no mapping found/);
 			});
 		});
+		describe("when resolving dependencies", function(){
+			var key1 = 'key1';
+			var value1 = {};
+			var key2 = 'key2';
+			var value2 = {};
+			beforeEach(function(){
+				resolver.wireValue(key1, value1);
+				resolver.wireValue(key2, value2);
+			});
+			it("should accept an array for wiring config", function(){
+				var depender = {
+					wiring: [key1, key2]
+				};
+				resolver.resolve(depender);
+				expect(depender.key1).to.equal(value1);
+				expect(depender.key2).to.equal(value2);
+			});
+			it("should accept a map for wiring config", function(){
+				var depender = {
+					wiring: {
+						k1: key1,
+						k2: key2
+					}
+				};
+				resolver.resolve(depender);
+				expect(depender.k1).to.equal(value1);
+				expect(depender.k2).to.equal(value2);
+			});
+		});
 		describe("when mapping a singleton", function(){
 			var key = 'a singleton';
 			var SingletonClass = function(){

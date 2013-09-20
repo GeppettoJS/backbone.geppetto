@@ -136,8 +136,9 @@
 
         resolve:function ( instance ) {
             if( ( typeof instance === 'object' ) && 'wiring' in instance ){
-                _.each(instance.wiring, function(key, index){
-                    instance[key] = this.getObject(key);
+				var propNameArgIndex = Number(! _.isArray(instance.wiring));
+                _.each(instance.wiring, function(dependencyKey){
+                    instance[arguments[propNameArgIndex]] = this.getObject(dependencyKey);
                 }, this);
             }
             this.addPubSub( instance );
