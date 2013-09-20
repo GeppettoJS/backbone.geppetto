@@ -30,15 +30,15 @@
 		OTHER: 'other'
 	};
 
-    var Injector = function (context) {
+    var Resolver = function (context) {
         this._mappings = {};
         this._context = context;
         this.parent = undefined;
     };
-    Injector.prototype = {
+    Resolver.prototype = {
         _createAndSetupInstance:function ( key, Clazz ) {
             var instance = new Clazz();
-            this.injectInto( instance, key );
+            this.resolve( instance, key );
             return instance;
         },
 
@@ -58,7 +58,7 @@
                         output = this._createAndSetupInstance( key, config.clazz );
                     }
                 }
-            }else if(this.parent && this.parent.hasMapping(key)){
+            }else if(this.parent && this.parent.hasWiring(key)){
                 output = this.parent._retrieveFromCacheOrCreate(key,overrideRules);
             } else {
                 throw new Error(NO_MAPPING_FOUND + key);
@@ -72,7 +72,7 @@
 
             var WrappedConstructor = ViewConstructor.extend({
                 initialize: function(){
-                    context.injector.injectInto(this);
+                    context.resolver.resolve(this);
                     ViewConstructor.prototype.initialize.call(this, arguments);
                 }
             });
@@ -80,8 +80,8 @@
             return WrappedConstructor;
         },
 
-        createChildInjector : function(){
-            var child = new Injector(this._context);
+        createChildResolver : function(){
+            var child = new Resolver(this._context);
             child.parent = this;
             return child;
         },
@@ -90,7 +90,7 @@
             return this._retrieveFromCacheOrCreate( key, false );
         },
 
-        mapValue:function ( key, useValue ) {
+        wireValue:function ( key, useValue ) {
             this._mappings[ key ] = {
                 clazz:null,
                 object:useValue,
@@ -99,11 +99,11 @@
             return this;
         },
 
-        hasMapping:function ( key ) {
-            return this._mappings.hasOwnProperty( key )	|| (!!this.parent && this.parent.hasMapping(key));
+        hasWiring:function ( key ) {
+            return this._mappings.hasOwnProperty( key )	|| (!!this.parent && this.parent.hasWiring(key));
         },
 
-        mapClass:function ( key, clazz ) {
+        wireClass:function ( key, clazz ) {
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
@@ -112,7 +112,7 @@
             return this;
         },
 
-        mapView:function ( key, clazz ) {
+        wireView:function ( key, clazz ) {
             this._mappings[ key ] = {
                 clazz:this._wrapViewConstructor(clazz),
                 object:null,
@@ -121,7 +121,7 @@
             return this;
         },
 
-        mapSingleton:function ( key, clazz ) {
+        wireSingleton:function ( key, clazz ) {
             this._mappings[ key ] = {
                 clazz:clazz,
                 object:null,
@@ -134,9 +134,9 @@
             return this._retrieveFromCacheOrCreate( key, true );
         },
 
-        injectInto:function ( instance ) {
-            if( ( typeof instance === 'object' ) && 'injections' in instance ){
-                _.each(instance.injections, function(key, index){
+        resolve:function ( instance ) {
+            if( ( typeof instance === 'object' ) && 'wiring' in instance ){
+                _.each(instance.wiring, function(key, index){
                     instance[key] = this.getObject(key);
                 }, this);
             }
@@ -147,12 +147,12 @@
             instance.listen = _.bind(this._context.listen, this._context);
             instance.dispatch = _.bind(this._context.dispatch, this._context);
         },
-        unmap:function ( key ) {
+        release:function ( key ) {
             delete this._mappings[ key ];
 
             return this;
         },
-        unmapAll:function(){
+        releaseAll:function(){
             this._mappings = {};
             return this;
         }
@@ -164,7 +164,7 @@
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
-    Geppetto.Injector = Injector;
+    Geppetto.Resolver = Resolver;
 
     var contexts = {};
 
@@ -173,9 +173,9 @@
         this.options = options || {};
         this.parentContext = this.options.parentContext;
         if(this.parentContext){
-            this.injector = this.parentContext.injector.createChildInjector();
+            this.resolver = this.parentContext.resolver.createChildResolver();
         }else{
-            this.injector = new Injector(this);
+            this.resolver = new Resolver(this);
         }
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
@@ -209,7 +209,7 @@
 
             view.on("close", function() {
                 view.off("close");
-                context.unmapAll();
+                context.destroy();
             });
         } else if (typeof this.options.context === 'object') {
             // or use existing context if we get one
@@ -217,7 +217,7 @@
         }
 
         view.context = context;
-        context.injector.injectInto(view);
+        context.resolver.resolve(view);
 
         // map context events
         _.each(view.contextEvents, function(callback, eventName) {
@@ -275,7 +275,7 @@
         } );
     };
 
-    Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, CommandConstructor ) {
+    Geppetto.Context.prototype.wireCommand = function wireCommand( eventName, CommandConstructor ) {
 
         var _this = this;
 
@@ -290,7 +290,7 @@
             commandInstance.context = _this;
             commandInstance.eventName = eventName;
             commandInstance.eventData = eventData;
-            _this.injector.injectInto(commandInstance);
+            _this.resolver.resolve(commandInstance);
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
             }
@@ -303,17 +303,17 @@
         _.each(this.commands, function(mixedType, eventName) {
             if(_.isArray(mixedType)){
                 _.each(mixedType, function(commandClass){
-                    _this.mapCommand(eventName, commandClass);
+                    _this.wireCommand(eventName, commandClass);
                 });
             }else{
-                _this.mapCommand(eventName, mixedType);
+                _this.wireCommand(eventName, mixedType);
             }
         });
     };
 
-    Geppetto.Context.prototype.unmapAll = function unmapAll() {
+    Geppetto.Context.prototype.destroy = function destroy() {
         this.vent.stopListening();
-        this.injector.unmapAll();
+        this.resolver.releaseAll();
 
         delete contexts[this._contextId];
 

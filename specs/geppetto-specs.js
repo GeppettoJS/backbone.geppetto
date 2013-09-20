@@ -29,15 +29,15 @@ define( [
 				context = new Geppetto.Context();
 			});
 			afterEach(function(){
-				context.unmapAll();
+				context.destroy();
 			});
-			it("should create an injector", function(){
-				expect(context.injector).to.be.an.instanceOf(Geppetto.Injector);
+			it("should create an resolver", function(){
+				expect(context.resolver).to.be.an.instanceOf(Geppetto.Resolver);
 			});
-			it("should unmap its injectors mappings upon shutdown", function(){
+			it("should release its resolvers wirings upon shutdown", function(){
 				var unmapperSpy = sinon.spy();
-				context.injector.unmapAll = unmapperSpy;
-				context.unmapAll();
+				context.resolver.releaseAll = unmapperSpy;
+				context.destroy();
 				expect(unmapperSpy ).to.have.been.calledOnce;
 			});
 		});
@@ -364,7 +364,7 @@ define( [
 
         });
 
-        describe("when registering commands individually using mapCommand", function() {
+        describe("when registering commands individually using wireCommand", function() {
 
             var myView;
 
@@ -387,8 +387,8 @@ define( [
 
                 contextDefinition = Geppetto.Context.extend({
                     initialize:function () {
-                        this.mapCommand( "abcEvent", AbcCommand );
-                        this.mapCommand( "xyzEvent", XyzCommand );
+                        this.wireCommand( "abcEvent", AbcCommand );
+                        this.wireCommand( "xyzEvent", XyzCommand );
                     }
                 });
 
@@ -422,7 +422,7 @@ define( [
 
             it("should throw an error if the command is not a function", function(){
                 expect(function(){
-                    myView.context.mapCommand("failEvent", {});
+                    myView.context.wireCommand("failEvent", {});
                 }).to.throw("Command must be constructable");
             });
         });
@@ -551,8 +551,8 @@ define( [
                 expect(spy.callCount).to.equal(1);
             });
 
-			it("should have an injector which is a child injector of the parent", function(){
-				expect(childContext.injector.parent).to.equal(parentContext.injector);
+			it("should have an resolver which is a child resolver of the parent", function(){
+				expect(childContext.resolver.parent).to.equal(parentContext.resolver);
 			});
 
         });
