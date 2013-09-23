@@ -38,6 +38,25 @@ define([
 				context.destroy();
 				expect(unmapperSpy).to.have.been.calledOnce;
 			});
+			it("should wrap the resolver's methods", function(){
+				var wrapped = [
+					"wireView",
+					"wireSingleton",
+					"wireValue",
+					"wireClass",
+					"hasWiring",
+					"getObject",
+					"instantiate",
+					"resolve",
+					"release",
+					"releaseAll"
+				];
+				_.each(wrapped, function(methodName){
+					var stub = sinon.stub(context.resolver, methodName);
+					context[methodName].call(context);
+					expect(stub).to.have.been.calledOnce;
+				});
+			});
 		});
 
 		describe("when binding a context", function(){
@@ -782,6 +801,5 @@ define([
 			});
 
 		});
-
 	});
 });

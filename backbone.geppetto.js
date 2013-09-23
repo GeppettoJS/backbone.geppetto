@@ -302,6 +302,53 @@
         }, this );
     };
 
+	Geppetto.Context.prototype.wireView = function( key, clazz, wiring ) {
+		this.resolver.wireView(key,clazz,wiring);
+		return this;
+	};
+
+	Geppetto.Context.prototype.wireSingleton=function ( key, clazz, wiring ) {
+		this.resolver.wireSingleton(key,clazz,wiring);
+		return this;
+	};
+
+	Geppetto.Context.prototype.wireValue=function ( key, useValue ) {
+		this.resolver.wireValue(key, useValue);
+		return this;
+	};
+
+	Geppetto.Context.prototype.wireClass=function ( key, clazz, wiring ) {
+		this.resolver.wireClass(key, clazz, wiring);
+		return this;
+	};
+
+	Geppetto.Context.prototype.hasWiring=function(key){
+		return this.resolver.hasWiring(key);
+	};
+
+	Geppetto.Context.prototype.getObject = function(key){
+		return this.resolver.getObject(key);
+	};
+
+	Geppetto.Context.prototype.instantiate = function ( key ) {
+		return this.resolver.instantiate(key);
+	};
+
+	Geppetto.Context.prototype.resolve = function ( instance, wiring ) {
+		this.resolver.resolve(instance,wiring);
+		return this;
+	};
+
+	Geppetto.Context.prototype.release = function(key){
+		this.resolver.release(key);
+		return this;
+	};
+
+	Geppetto.Context.prototype.releaseAll = function(){
+		this.resolver.releaseAll();
+		return this;
+	};
+
     Geppetto.Context.prototype.mapCommands = function mapCommands() {
         var _this = this;
         _.each(this.commands, function(mixedType, eventName) {
