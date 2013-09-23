@@ -571,6 +571,29 @@ define([
 			});
 		});
 
+		describe("when registering commands in batch using wireCommands", function(){
+			var context;
+			var FooCommand;
+			var executionSpy;
+			beforeEach(function(){
+				executionSpy = sinon.spy();
+				FooCommand = function(){
+					this.execute = executionSpy;
+				};
+				context = new Geppetto.Context();
+			});
+			afterEach(function(){
+				context.destroy();
+			});
+			it("should fire FooCommand after dispatch", function(){
+				context.wireCommands({
+					'foo' : FooCommand
+				});
+				context.dispatch('foo');
+				expect(executionSpy).to.have.been.calledOnce;
+			});
+		});
+
 		describe("when a context has a parent context", function(){
 
 			var parentView;
