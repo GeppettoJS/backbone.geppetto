@@ -36,8 +36,7 @@
         this.parent = undefined;
     };
     Resolver.prototype = {
-		//TODO: remove key argument
-        _createAndSetupInstance:function ( key, Clazz, wiring ) {
+        _createAndSetupInstance:function ( Clazz, wiring ) {
             var instance = new Clazz();
             this.resolve( instance, wiring );
             return instance;
@@ -49,14 +48,14 @@
                 var config = this._mappings[ key ];
                 if ( !overrideRules && config.type === TYPES.SINGLETON ) {
                     if ( !config.object ) {
-                        config.object = this._createAndSetupInstance( key, config.clazz, config.wiring );
+                        config.object = this._createAndSetupInstance( config.clazz, config.wiring );
                     }
                     output = config.object;
                 } else {
                     if (config.type === TYPES.VIEW) {
                         output = config.clazz;
                     } else if ( config.clazz ) {
-                        output = this._createAndSetupInstance( key, config.clazz, config.wiring );
+                        output = this._createAndSetupInstance( config.clazz, config.wiring );
                     }
                 }
             }else if(this.parent && this.parent.hasWiring(key)){
