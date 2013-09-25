@@ -158,7 +158,7 @@ module.exports = function(grunt) {
     grunt.registerTask('beautify', ['jsbeautifier']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('coverage', ['blanket_mocha']);
-    grunt.registerTask('travis', ['jshint', 'blanket_mocha', "saucelabs-mocha"]);
+    grunt.registerTask('travis', ['jshint', 'blanket_mocha']);
     grunt.registerTask("sauce", ["connect", "saucelabs-mocha"]);
 
     grunt.registerTask('default', ['version', 'uglify', 'jshint', 'blanket_mocha']);
