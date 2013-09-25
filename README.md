@@ -1,6 +1,6 @@
 # Backbone Geppetto
 
-[![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto)
+[![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto) [![devDependency Status](https://david-dm.org/ModelN/backbone.geppetto/dev-status.png)](https://david-dm.org/ModelN/backbone.geppetto#info=devDependencies)
 
 ## About
 ### What is it?
