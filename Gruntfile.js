@@ -1,67 +1,54 @@
 module.exports = function(grunt) {
 
-    var browsers = [
-        {
+    var browsers = [{
             browserName: "firefox",
             version: "22",
             platform: "XP"
-        },
-        {
+        }, {
             browserName: "firefox",
             version: "21",
             platform: "XP"
-        },
-        {
+        }, {
             browserName: "chrome",
             version: "29",
             platform: "XP"
-        },
-        {
+        }, {
             browserName: "chrome",
             version: "28",
             platform: "Mac 10.6"
-        },
-        {
+        }, {
             browserName: 'internet explorer',
             platform: 'WIN8',
             version: '10'
-        },
-        {
+        }, {
             browserName: 'internet explorer',
             platform: 'VISTA',
             version: '9'
-        },
-        {
+        }, {
             browserName: 'internet explorer',
             platform: 'XP',
             version: '8'
-        },
-        {
+        }, {
             browserName: 'safari',
             platform: 'Mac 10.8',
             version: '6'
-        },
-        {
+        }, {
             browserName: 'safari',
             platform: 'Mac 10.6',
             version: '5'
-        },
-        {
+        }, {
             browserName: 'iphone',
             platform: 'Mac 10.8',
             version: '6'
-        },
-        {
+        }, {
             browserName: 'iphone',
             platform: 'Mac 10.8',
             version: '5.1'
-        },
-        {
+        }, {
             browserName: 'ipad',
             platform: 'Mac 10.8',
             version: '6'
-        },
-        {
+        }, {
             browserName: 'ipad',
             platform: 'Mac 10.8',
             version: '5.1'
@@ -69,7 +56,7 @@ module.exports = function(grunt) {
 
 
     ];
-    
+
     var pkgConfig = grunt.file.readJSON('package.json');
     pkgConfig.version = grunt.file.readJSON('version.json').version;
     grunt.initConfig({
@@ -105,9 +92,18 @@ module.exports = function(grunt) {
             }
         },
         "jsbeautifier": {
-            files: ['beautify.json', 'Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js'],
-            options: {
-                config: "beautify.json"
+            fix: {
+                src: ['beautify.json', 'Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js'],
+                options: {
+                    config: "beautify.json"
+                }
+            },
+            check: {
+                src: ['beautify.json', 'Gruntfile.js', 'backbone.geppetto.js', 'specs/*.js'],
+                options: {
+                    config: "beautify.json",
+                    mode: "VERIFY_ONLY"
+                }
             }
         },
         connect: {
@@ -155,12 +151,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-open');
     grunt.loadNpmTasks('grunt-saucelabs');
-    
-    grunt.registerTask('beautify', ['jsbeautifier']);
+
+    grunt.registerTask('beautify', ['jsbeautifier:fix']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('coverage', ['blanket_mocha']);
-    grunt.registerTask('travis', ['jshint', 'blanket_mocha']);
+    grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha']);
     grunt.registerTask("sauce", ['connect', 'saucelabs-mocha']);
 
-    grunt.registerTask('default', ['version', 'uglify', 'jshint', 'blanket_mocha']);
+    grunt.registerTask('default', ['version', 'jsbeautifier:fix', 'uglify', 'jshint', 'blanket_mocha']);
 };

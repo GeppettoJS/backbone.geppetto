@@ -77,18 +77,21 @@ then
 grunt
 ```
 
-The task will do 4 things:
+Grunt will perform these tasks:
 
-### Uglify
+* Beautify
+To reduce merging and styling issues related to whitespace and formatting, the [jsbeautifier](https://github.com/vkadam/grunt-jsbeautifier) task normalizes all formatting in project source.  If you fail to run `grunt` prior to check-in, and any files have not been beautified, Travis-CI will reject the checkin.
+
+* Uglify
 The code will be minified and saved to `dist/backbone.geppetto.min.js`.
 
-### Lint
+* Lint
 Javascript files are checked for errors using [JSHint](http://jshint.com/).  The JSLint configuration is driven by the `.jshintrc` file.
 
-### Test
+* Test
 Test specs are run headlessly using [PhantomJS](www.phantomjs.org)
 
-### Coverage
+* Coverage
 Code coverage is enforced using [BlanketJS](http://blanketjs.org/).  Every line in Geppetto must have code coverage, with the exception of the AMD boilerplate at the top.  Currently this means that a 97% coverage rate is enforced.
 
 ### Travis-CI
