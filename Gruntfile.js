@@ -136,7 +136,7 @@ module.exports = function(grunt) {
                 options: {
                     urls: ["http://localhost:9001/specs/index.html"],
                     build: process.env.TRAVIS_JOB_ID,
-                    concurrency: 3,
+                    concurrency: 1,
                     detailedError: true,
                     browsers: browsers,
                     testname: "Backbone.Geppetto",
