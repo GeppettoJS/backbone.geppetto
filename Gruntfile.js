@@ -3,21 +3,72 @@ module.exports = function(grunt) {
     var browsers = [
         {
             browserName: "firefox",
+            version: "22",
             platform: "XP"
-        },        
+        },
+        {
+            browserName: "firefox",
+            version: "21",
+            platform: "XP"
+        },
         {
             browserName: "chrome",
+            version: "29",
             platform: "XP"
-        },        
+        },
+        {
+            browserName: "chrome",
+            version: "28",
+            platform: "Mac 10.6"
+        },
         {
             browserName: 'internet explorer',
-            platform: 'WIN8'
+            platform: 'WIN8',
+            version: '10'
+        },
+        {
+            browserName: 'internet explorer',
+            platform: 'VISTA',
+            version: '9'
+        },
+        {
+            browserName: 'internet explorer',
+            platform: 'XP',
+            version: '8'
         },
         {
             browserName: 'safari',
-            platform: 'Mac 10.8'
-        }                       
-];
+            platform: 'Mac 10.8',
+            version: '6'
+        },
+        {
+            browserName: 'safari',
+            platform: 'Mac 10.6',
+            version: '5'
+        },
+        {
+            browserName: 'iphone',
+            platform: 'Mac 10.8',
+            version: '6'
+        },
+        {
+            browserName: 'iphone',
+            platform: 'Mac 10.8',
+            version: '5.1'
+        },
+        {
+            browserName: 'ipad',
+            platform: 'Mac 10.8',
+            version: '6'
+        },
+        {
+            browserName: 'ipad',
+            platform: 'Mac 10.8',
+            version: '5.1'
+        }
+
+
+    ];
     
     var pkgConfig = grunt.file.readJSON('package.json');
     pkgConfig.version = grunt.file.readJSON('version.json').version;
@@ -85,7 +136,7 @@ module.exports = function(grunt) {
                 options: {
                     urls: ["http://localhost:9001/specs/index.html"],
                     build: process.env.TRAVIS_JOB_ID,
-                    concurrency: 1,
+                    concurrency: 3,
                     detailedError: true,
                     browsers: browsers,
                     testname: "Backbone.Geppetto",
