@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-cli": "~0.1.6",
     "grunt-blanket-mocha": "~0.3.1",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-uglify": "~0.2.2",
@@ -44,7 +43,8 @@
     "grunt-concurrent": "~0.4.0",
     "grunt-open": "~0.2.2",
     "grunt-jsbeautifier": "~0.2.2",
-    "grunt-saucelabs": "~4.0.2"
+    "grunt-saucelabs": "~4.0.2",
+    "matchdep": "~0.1.2"
   },
   "keywords": [
     "backbone",

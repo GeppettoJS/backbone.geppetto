@@ -147,20 +147,13 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-jsbeautifier');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-blanket-mocha');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-version');
-    grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-concurrent');
-    grunt.loadNpmTasks('grunt-open');
-    grunt.loadNpmTasks('grunt-saucelabs');
+    // shortcut for calling grunt.loadNpmTasks on every grunt plugin registered in package.json
+    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
     grunt.registerTask('beautify', ['jsbeautifier:fix']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('coverage', ['blanket_mocha']);
-    grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha']);
+    grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha', 'connect', 'saucelabs-mocha']);
     grunt.registerTask("sauce", ['connect', 'saucelabs-mocha']);
 
     grunt.registerTask('default', ['version', 'jsbeautifier:fix', 'uglify', 'jshint', 'blanket_mocha']);
