@@ -147,8 +147,10 @@ module.exports = function(grunt) {
         }
     });
 
-    // shortcut for calling grunt.loadNpmTasks on every grunt plugin registered in package.json
-    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+    // Loading dependencies
+    for (var key in grunt.file.readJSON("package.json").devDependencies) {
+        if (key !== "grunt" && key.indexOf("grunt") === 0) grunt.loadNpmTasks(key);
+    }
 
     grunt.registerTask('beautify', ['jsbeautifier:fix']);
     grunt.registerTask('lint', ['jshint']);
