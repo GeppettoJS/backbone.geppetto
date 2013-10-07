@@ -23,24 +23,24 @@ define([
 
         });
 
-		describe("when a context was instantiated", function(){
-			var context;
-			beforeEach(function(){
-				context = new Geppetto.Context();
-			});
-			afterEach(function(){
-				context.unmapAll();
-			});
-			it("should create an injector", function(){
-				expect(context.injector).to.be.an.instanceOf(Geppetto.Injector);
-			});
-			it("should unmap its injectors mappings upon shutdown", function(){
-				var unmapperSpy = sinon.spy();
-				context.injector.unmapAll = unmapperSpy;
-				context.unmapAll();
-				expect(unmapperSpy ).to.have.been.calledOnce;
-			});
-		});
+        describe("when a context was instantiated", function() {
+            var context;
+            beforeEach(function() {
+                context = new Geppetto.Context();
+            });
+            afterEach(function() {
+                context.unmapAll();
+            });
+            it("should create an injector", function() {
+                expect(context.injector).to.be.an.instanceOf(Geppetto.Injector);
+            });
+            it("should unmap its injectors mappings upon shutdown", function() {
+                var unmapperSpy = sinon.spy();
+                context.injector.unmapAll = unmapperSpy;
+                context.unmapAll();
+                expect(unmapperSpy).to.have.been.calledOnce;
+            });
+        });
 
         describe("when binding a context", function() {
 
@@ -575,9 +575,9 @@ define([
                 expect(spy.callCount).to.equal(1);
             });
 
-			it("should have an injector which is a child injector of the parent", function(){
-				expect(childContext.injector.parent).to.equal(parentContext.injector);
-			});
+            it("should have an injector which is a child injector of the parent", function() {
+                expect(childContext.injector.parent).to.equal(parentContext.injector);
+            });
 
         });
 

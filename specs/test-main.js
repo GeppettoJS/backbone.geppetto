@@ -30,14 +30,14 @@ require(
     [
         // external libraries with AMD support
 
-            "jquery",
-            "underscore",
-            "backbone",
-            "geppetto",
-            "geppetto-specs",
-			"injector-specs"
+        "jquery",
+        "underscore",
+        "backbone",
+        "geppetto",
+        "geppetto-specs",
+        "injector-specs"
 
-        ], function () {
-            mocha.run();
-        }
+    ], function() {
+        mocha.run();
+    }
 );
