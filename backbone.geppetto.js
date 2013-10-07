@@ -6,7 +6,7 @@
 // Documentation and full license available at:
 // http://modeln.github.com/backbone.geppetto/
 
-(function (factory) {
+(function(factory) {
     if (typeof define === "function" && define.amd) {
         // Register as an AMD module if available...
         define(["underscore", "backbone"], factory);
@@ -18,7 +18,7 @@
 
     "use strict";
 
-    if(!Backbone){
+    if (!Backbone) {
         throw "Please include Backbone before Geppetto";
     }
 
@@ -168,7 +168,7 @@
 
     var contexts = {};
 
-    Geppetto.Context = function Context( options ) {
+    Geppetto.Context = function Context(options) {
 
         this.options = options || {};
         this.parentContext = this.options.parentContext;
@@ -188,7 +188,7 @@
         this.mapCommands();
     };
 
-    Geppetto.bindContext = function bindContext( options ) {
+    Geppetto.bindContext = function bindContext(options) {
 
         this.options = options || {};
 
@@ -231,59 +231,58 @@
         return context;
     };
 
-    Geppetto.Context.prototype.listen = function listen( target, eventName, callback ) {
+    Geppetto.Context.prototype.listen = function listen(target, eventName, callback) {
 
         if (arguments.length !== 3) {
             throw "Expected 3 arguments (target, eventName, callback)";
         }
 
-        if ( ! _.isObject(target) ||
-                ! _.isFunction(target.listenTo) ||
-                ! _.isFunction(target.stopListening)) {
+        if (!_.isObject(target) || !_.isFunction(target.listenTo) || !_.isFunction(target.stopListening)) {
             throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
         }
 
-        if ( ! _.isString(eventName)) {
+        if (!_.isString(eventName)) {
             throw "eventName must be a String";
         }
 
-        if ( ! _.isFunction(callback)) {
+        if (!_.isFunction(callback)) {
             throw "callback must be a function";
         }
 
-        return target.listenTo( this.vent, eventName, callback, target );
+        return target.listenTo(this.vent, eventName, callback, target);
     };
 
-    Geppetto.Context.prototype.dispatch = function dispatch( eventName, eventData ) {
-        if ( ! _.isUndefined(eventData) && ! _.isObject(eventData) ) {
+    Geppetto.Context.prototype.dispatch = function dispatch(eventName, eventData) {
+        if (!_.isUndefined(eventData) && !_.isObject(eventData)) {
             throw "Event payload must be an object";
         }
         eventData = eventData || {};
         eventData.eventName = eventName;
-        this.vent.trigger( eventName, eventData );        };
+        this.vent.trigger(eventName, eventData);
+    };
 
-    Geppetto.Context.prototype.dispatchToParent = function dispatchToParent( eventName, eventData ) {
-        if ( this.parentContext ) {
-            this.parentContext.vent.trigger( eventName, eventData );
+    Geppetto.Context.prototype.dispatchToParent = function dispatchToParent(eventName, eventData) {
+        if (this.parentContext) {
+            this.parentContext.vent.trigger(eventName, eventData);
         }
     };
 
-    Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally( eventName, eventData ) {
+    Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally(eventName, eventData) {
 
-        _.each( contexts, function ( context, contextId ) {
-            context.vent.trigger( eventName, eventData );
-        } );
+        _.each(contexts, function(context, contextId) {
+            context.vent.trigger(eventName, eventData);
+        });
     };
 
-    Geppetto.Context.prototype.mapCommand = function mapCommand( eventName, CommandConstructor ) {
+    Geppetto.Context.prototype.mapCommand = function mapCommand(eventName, CommandConstructor) {
 
         var _this = this;
 
-        if(!_.isFunction(CommandConstructor)){
+        if (!_.isFunction(CommandConstructor)) {
             throw "Command must be constructable";
         }
 
-        this.vent.listenTo( this.vent, eventName, function ( eventData ) {
+        this.vent.listenTo(this.vent, eventName, function(eventData) {
 
             var commandInstance = new CommandConstructor();
 
@@ -295,17 +294,17 @@
                 commandInstance.execute();
             }
 
-        }, this );
+        }, this);
     };
 
     Geppetto.Context.prototype.mapCommands = function mapCommands() {
         var _this = this;
         _.each(this.commands, function(mixedType, eventName) {
-            if(_.isArray(mixedType)){
-                _.each(mixedType, function(commandClass){
+            if (_.isArray(mixedType)) {
+                _.each(mixedType, function(commandClass) {
                     _this.mapCommand(eventName, commandClass);
                 });
-            }else{
+            } else {
                 _this.mapCommand(eventName, mixedType);
             }
         });
@@ -324,9 +323,9 @@
 
     var debug = {
 
-        contexts : contexts,
+        contexts: contexts,
 
-        countEvents : function countEvents() {
+        countEvents: function countEvents() {
 
             var numEvents = 0;
 
@@ -344,7 +343,7 @@
             var numContexts = 0;
 
             _.each(contexts, function(context, id) {
-                if (contexts.hasOwnProperty(id)){
+                if (contexts.hasOwnProperty(id)) {
                     numContexts++;
                 }
             });
@@ -353,7 +352,7 @@
 
     };
 
-    Geppetto.setDebug = function setDebug( enableDebug ) {
+    Geppetto.setDebug = function setDebug(enableDebug) {
         if (enableDebug) {
             this.debug = debug;
         } else {

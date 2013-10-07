@@ -1,24 +1,24 @@
 /* suppress jshint warnings for chai syntax - https://github.com/chaijs/chai/issues/41#issuecomment-14904150 */
 /* jshint -W024 */
 /* jshint expr:true */
-define( [
+define([
     "underscore",
     "backbone",
     "geppetto"
 ], function(_, Backbone, Geppetto) {
 
     var expect = chai.expect;
-    describe("Backbone.Geppetto", function(){
+    describe("Backbone.Geppetto", function() {
 
-        describe("when loading Geppetto", function(){
+        describe("when loading Geppetto", function() {
 
             it("should be defined as an AMD module", function() {
-                expect( Geppetto ).not.to.be.null;
+                expect(Geppetto).not.to.be.null;
             });
 
             it("should be defined as a property on the Backbone object", function() {
-                expect( Backbone.Geppetto ).not.to.be.null;
-                expect( Backbone.Geppetto ).to.equal(Geppetto);
+                expect(Backbone.Geppetto).not.to.be.null;
+                expect(Backbone.Geppetto).to.equal(Geppetto);
             });
 
         });
@@ -47,7 +47,7 @@ define( [
             var contextDefinition;
             var contextInstance;
 
-            beforeEach(function(){
+            beforeEach(function() {
                 contextDefinition = Geppetto.Context.extend();
             });
 
@@ -61,7 +61,7 @@ define( [
                     context: contextDefinition
                 });
 
-                expect( myView.context ).to.exist;
+                expect(myView.context).to.exist;
 
                 myView.close();
             });
@@ -74,7 +74,7 @@ define( [
             var childViewInstance;
             var fooSpy;
 
-            beforeEach(function(){
+            beforeEach(function() {
                 fooSpy = sinon.spy();
                 contextDefinition = Geppetto.Context.extend();
                 var ParentViewDef = Backbone.View.extend();
@@ -85,7 +85,7 @@ define( [
                     context: contextDefinition
                 });
 
-                expect( parentView.context ).to.exist;
+                expect(parentView.context).to.exist;
 
                 var childViewDef = Backbone.View.extend({
 
@@ -111,19 +111,21 @@ define( [
 
             it("should fire the foo event while the view is active", function() {
                 contextInstance.dispatch("foo");
-                expect(fooSpy.callCount ).to.equal(1);
+                expect(fooSpy.callCount).to.equal(1);
             });
 
             it("should pass the event name in the event payload object", function() {
                 contextInstance.dispatch("foo");
-                expect(fooSpy ).to.have.been.calledOnce;
+                expect(fooSpy).to.have.been.calledOnce;
                 var payload = fooSpy.getCall(0).args[0];
                 expect(payload.eventName).to.equal("foo");
             });
 
             it("should pass supplied data in the payload object", function() {
-                contextInstance.dispatch("foo", {bar: "baz"});
-                expect(fooSpy.callCount ).to.equal(1);
+                contextInstance.dispatch("foo", {
+                    bar: "baz"
+                });
+                expect(fooSpy.callCount).to.equal(1);
                 var payload = fooSpy.getCall(0).args[0];
                 expect(payload.eventName).to.equal("foo");
                 expect(payload.bar).to.equal("baz");
@@ -132,39 +134,43 @@ define( [
             it("should throw an exception if the payload object is a string, not an object", function() {
                 expect(function() {
                     contextInstance.dispatch("foo", "baz");
-                } ).to.throw("Event payload must be an object");
+                }).to.
+                throw ("Event payload must be an object");
             });
 
             it("should throw an exception if the payload object is a boolean false, not an object", function() {
                 expect(function() {
                     contextInstance.dispatch("foo", false);
-                } ).to.throw("Event payload must be an object");
+                }).to.
+                throw ("Event payload must be an object");
             });
 
             it("should throw an exception if the payload object is a boolean true, not an object", function() {
                 expect(function() {
                     contextInstance.dispatch("foo", true);
-                } ).to.throw("Event payload must be an object");
+                }).to.
+                throw ("Event payload must be an object");
             });
 
             it("should throw an exception if the payload object is null, not an object", function() {
                 expect(function() {
                     contextInstance.dispatch("foo", null);
-                } ).to.throw("Event payload must be an object");
+                }).to.
+                throw ("Event payload must be an object");
             });
 
             it("should pass the foo event when listened from the parent view", function() {
                 var parentFooSpy = sinon.spy();
                 contextInstance.listen(parentView, "foo", parentFooSpy);
                 contextInstance.dispatch("foo");
-                expect(fooSpy.callCount ).to.equal(1);
-                expect(parentFooSpy.callCount ).to.equal(1);
+                expect(fooSpy.callCount).to.equal(1);
+                expect(parentFooSpy.callCount).to.equal(1);
             });
 
             it("should not fire the foo event after the child view is closed", function() {
                 childViewInstance.remove();
                 contextInstance.dispatch("foo");
-                expect(fooSpy.callCount ).to.equal(0);
+                expect(fooSpy.callCount).to.equal(0);
             });
 
             it("should not fire the foo event when listened from the parent view and the parent view is closed", function() {
@@ -172,7 +178,7 @@ define( [
                 contextInstance.listen(parentView, "foo", parentFooSpy);
                 parentView.close();
                 contextInstance.dispatch("foo");
-                expect(parentFooSpy.callCount ).to.equal(0);
+                expect(parentFooSpy.callCount).to.equal(0);
             });
         });
 
@@ -186,7 +192,7 @@ define( [
             var fooChildSpy;
             var barChildSpy;
 
-            beforeEach(function(){
+            beforeEach(function() {
                 fooParentSpy = sinon.spy();
                 barParentSpy = sinon.spy();
                 fooChildSpy = sinon.spy();
@@ -215,7 +221,7 @@ define( [
                     context: contextDefinition
                 });
 
-                expect( parentView.context ).to.exist;
+                expect(parentView.context).to.exist;
 
                 var childViewDef = Backbone.View.extend({
 
@@ -253,34 +259,34 @@ define( [
 
             it("should trigger the foo response function when registered as a string", function() {
                 contextInstance.dispatch("foo");
-                expect(fooParentSpy.callCount ).to.equal(1);
-                expect(fooChildSpy.callCount ).to.equal(1);
+                expect(fooParentSpy.callCount).to.equal(1);
+                expect(fooChildSpy.callCount).to.equal(1);
             });
 
             it("should trigger the bar response function when registered as a function", function() {
                 contextInstance.dispatch("bar");
-                expect(barParentSpy.callCount ).to.equal(1);
-                expect(barChildSpy.callCount ).to.equal(1);
+                expect(barParentSpy.callCount).to.equal(1);
+                expect(barChildSpy.callCount).to.equal(1);
             });
 
             it("should remove the parent foo listener when the parent view is closed", function() {
                 contextInstance.dispatch("foo");
-                expect(fooParentSpy.callCount ).to.equal(1);
-                expect(fooChildSpy.callCount ).to.equal(1);
+                expect(fooParentSpy.callCount).to.equal(1);
+                expect(fooChildSpy.callCount).to.equal(1);
                 parentView.close();
                 contextInstance.dispatch("foo");
-                expect(fooParentSpy.callCount ).to.equal(1);
-                expect(fooChildSpy.callCount ).to.equal(2);
+                expect(fooParentSpy.callCount).to.equal(1);
+                expect(fooChildSpy.callCount).to.equal(2);
             });
 
             it("should remove the child foo listener when the child view is closed", function() {
                 contextInstance.dispatch("foo");
-                expect(fooParentSpy.callCount ).to.equal(1);
-                expect(fooChildSpy.callCount ).to.equal(1);
+                expect(fooParentSpy.callCount).to.equal(1);
+                expect(fooChildSpy.callCount).to.equal(1);
                 childViewInstance.remove();
                 contextInstance.dispatch("foo");
-                expect(fooParentSpy.callCount ).to.equal(2);
-                expect(fooChildSpy.callCount ).to.equal(1);
+                expect(fooParentSpy.callCount).to.equal(2);
+                expect(fooChildSpy.callCount).to.equal(1);
             });
         });
 
@@ -305,61 +311,78 @@ define( [
             it("should throw an error if only one argument is provided", function() {
                 expect(function() {
                     context.listen(view);
-                }).to.throw("Expected 3 arguments (target, eventName, callback)");
+                }).to.
+                throw ("Expected 3 arguments (target, eventName, callback)");
             });
 
             it("should throw an error if only two arguments are provided", function() {
                 expect(function() {
                     context.listen(view, "foo");
-                }).to.throw("Expected 3 arguments (target, eventName, callback)");
+                }).to.
+                throw ("Expected 3 arguments (target, eventName, callback)");
             });
 
             it("should not throw an error if three proper arguments are provided", function() {
-                expect(function(){
+                expect(function() {
                     context.listen(view, "foo", function() {});
-                }).not.to.throw();
+                }).not.to.
+                throw ();
             });
 
             it("should throw an error if the target object does not have a 'listenTo' method", function() {
                 expect(function() {
-                    context.listen({stopListening: function() {}}, "foo", function(){});
-                }).to.throw("Target for listen() must define a 'listenTo' and 'stopListening' function");
+                    context.listen({
+                        stopListening: function() {}
+                    }, "foo", function() {});
+                }).to.
+                throw ("Target for listen() must define a 'listenTo' and 'stopListening' function");
             });
 
             it("should throw an error if the target object does not have a 'stopListening' method", function() {
                 expect(function() {
-                    context.listen({listenTo: function() {}}, "foo", function(){});
-                }).to.throw("Target for listen() must define a 'listenTo' and 'stopListening' function");
+                    context.listen({
+                        listenTo: function() {}
+                    }, "foo", function() {});
+                }).to.
+                throw ("Target for listen() must define a 'listenTo' and 'stopListening' function");
             });
 
             it("should not throw an error if the target object has both a 'listenTo' and 'stopListening' method", function() {
-                expect(function(){
-                    context.listen({listenTo: function(){}, stopListening: function(){}}, "foo", function(){});
-                }).not.to.throw();
+                expect(function() {
+                    context.listen({
+                        listenTo: function() {},
+                        stopListening: function() {}
+                    }, "foo", function() {});
+                }).not.to.
+                throw ();
             });
 
             it("should throw an error if the event name is not provided", function() {
                 expect(function() {
-                    context.listen(view, null, function(){});
-                }).to.throw("eventName must be a String");
+                    context.listen(view, null, function() {});
+                }).to.
+                throw ("eventName must be a String");
             });
 
             it("should throw an error if the event name is not a string", function() {
                 expect(function() {
-                    context.listen(view, 5, function(){});
-                }).to.throw("eventName must be a String");
+                    context.listen(view, 5, function() {});
+                }).to.
+                throw ("eventName must be a String");
             });
 
             it("should throw an error if the callback function is not provided", function() {
                 expect(function() {
                     context.listen(view, "foo", null);
-                }).to.throw("callback must be a function");
+                }).to.
+                throw ("callback must be a function");
             });
 
             it("should throw an error if the callback function is not a function", function() {
                 expect(function() {
                     context.listen(view, "foo", "bar");
-                }).to.throw("callback must be a function");
+                }).to.
+                throw ("callback must be a function");
             });
 
         });
@@ -376,19 +399,19 @@ define( [
             var abcSpy;
             var xyzSpy;
 
-            beforeEach(function(){
+            beforeEach(function() {
                 abcSpy = sinon.spy();
-                AbcCommand = function(){};
+                AbcCommand = function() {};
                 AbcCommand.prototype.execute = abcSpy;
 
                 xyzSpy = sinon.spy();
-                XyzCommand = function(){};
+                XyzCommand = function() {};
                 XyzCommand.prototype.execute = xyzSpy;
 
                 contextDefinition = Geppetto.Context.extend({
-                    initialize:function () {
-                        this.mapCommand( "abcEvent", AbcCommand );
-                        this.mapCommand( "xyzEvent", XyzCommand );
+                    initialize: function() {
+                        this.mapCommand("abcEvent", AbcCommand);
+                        this.mapCommand("xyzEvent", XyzCommand);
                     }
                 });
 
@@ -407,8 +430,8 @@ define( [
             it("should fire AbcCommand when abcEvent is dispatched", function() {
                 myView.context.dispatch("abcEvent");
 
-                expect( abcSpy.called ).to.be.true;
-                expect( xyzSpy.called ).to.be.false;
+                expect(abcSpy.called).to.be.true;
+                expect(xyzSpy.called).to.be.false;
             });
 
             it("should not fire AbcCommand after the associated view is closed", function() {
@@ -416,14 +439,15 @@ define( [
                 myView.close();
                 myView.context.dispatch("abcEvent");
 
-                expect( abcSpy.called ).to.be.false;
-                expect( xyzSpy.called ).to.be.false;
+                expect(abcSpy.called).to.be.false;
+                expect(xyzSpy.called).to.be.false;
             });
 
-            it("should throw an error if the command is not a function", function(){
-                expect(function(){
+            it("should throw an error if the command is not a function", function() {
+                expect(function() {
                     myView.context.mapCommand("failEvent", {});
-                }).to.throw("Command must be constructable");
+                }).to.
+                throw ("Command must be constructable");
             });
         });
 
@@ -439,13 +463,13 @@ define( [
             var abcSpy;
             var xyzSpy;
 
-            beforeEach(function(){
+            beforeEach(function() {
                 abcSpy = sinon.spy();
-                AbcCommand = function(){};
+                AbcCommand = function() {};
                 AbcCommand.prototype.execute = abcSpy;
 
                 xyzSpy = sinon.spy();
-                XyzCommand = function(){};
+                XyzCommand = function() {};
                 XyzCommand.prototype.execute = xyzSpy;
 
                 contextDefinition = Geppetto.Context.extend({
@@ -474,8 +498,8 @@ define( [
             it("should fire AbcCommand when abcEvent is dispatched", function() {
                 myView.context.dispatch("abcEvent");
 
-                expect( abcSpy.called ).to.be.true;
-                expect( xyzSpy.called ).to.be.false;
+                expect(abcSpy.called).to.be.true;
+                expect(xyzSpy.called).to.be.false;
             });
 
             it("should not fire AbcCommand after the associated view is closed", function() {
@@ -483,14 +507,14 @@ define( [
                 myView.close();
                 myView.context.dispatch("abcEvent");
 
-                expect( abcSpy.called ).to.be.false;
-                expect( xyzSpy.called ).to.be.false;
+                expect(abcSpy.called).to.be.false;
+                expect(xyzSpy.called).to.be.false;
             });
 
-            it("should fire all commands registered as array", function(){
+            it("should fire all commands registered as array", function() {
                 myView.context.dispatch("abcxyzEvent");
-                expect( abcSpy.called ).to.be.true;
-                expect( xyzSpy.called ).to.be.true;
+                expect(abcSpy.called).to.be.true;
+                expect(xyzSpy.called).to.be.true;
             });
         });
 
@@ -693,7 +717,7 @@ define( [
             it("should track the number of events", function() {
                 Geppetto.setDebug(true);
                 expect(Geppetto.debug.countEvents()).to.equal(0);
-                context.listen(view, "foo", function(){});
+                context.listen(view, "foo", function() {});
                 expect(Geppetto.debug.countEvents()).to.equal(1);
 
                 var otherViewDef = Backbone.View.extend();
@@ -705,13 +729,13 @@ define( [
 
                 expect(Geppetto.debug.countEvents()).to.equal(1);
 
-                context.listen(otherView, "bar", function(){});
+                context.listen(otherView, "bar", function() {});
                 expect(Geppetto.debug.countEvents()).to.equal(2);
 
-                otherContext.listen(otherView, "baz", function(){});
+                otherContext.listen(otherView, "baz", function() {});
                 expect(Geppetto.debug.countEvents()).to.equal(3);
 
-                otherContext.listen(view, "abc", function(){});
+                otherContext.listen(view, "abc", function() {});
                 expect(Geppetto.debug.countEvents()).to.equal(4);
 
                 otherView.close();
