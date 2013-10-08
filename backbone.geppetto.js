@@ -22,11 +22,149 @@
         throw "Please include Backbone before Geppetto";
     }
 
+
+    var NO_MAPPING_FOUND = 'no mapping found for key: ';
+    var TYPES = {
+        SINGLETON: 'singleton',
+        VIEW: 'view',
+        OTHER: 'other'
+    };
+
+    var Injector = function(context) {
+        this._mappings = {};
+        this._context = context;
+        this.parent = undefined;
+    };
+    Injector.prototype = {
+        _createAndSetupInstance: function(key, Clazz) {
+            var instance = new Clazz();
+            this.injectInto(instance, key);
+            return instance;
+        },
+
+        _retrieveFromCacheOrCreate: function(key, overrideRules) {
+            var output;
+            if (this._mappings.hasOwnProperty(key)) {
+                var config = this._mappings[key];
+                if (!overrideRules && config.type === TYPES.SINGLETON) {
+                    if (!config.object) {
+                        config.object = this._createAndSetupInstance(key, config.clazz);
+                    }
+                    output = config.object;
+                } else {
+                    if (config.type === TYPES.VIEW) {
+                        output = config.clazz;
+                    } else if (config.clazz) {
+                        output = this._createAndSetupInstance(key, config.clazz);
+                    }
+                }
+            } else if (this.parent && this.parent.hasMapping(key)) {
+                output = this.parent._retrieveFromCacheOrCreate(key, overrideRules);
+            } else {
+                throw new Error(NO_MAPPING_FOUND + key);
+            }
+            return output;
+        },
+
+        _wrapViewConstructor: function(ViewConstructor) {
+
+            var context = this._context;
+
+            var WrappedConstructor = ViewConstructor.extend({
+                initialize: function() {
+                    context.injector.injectInto(this);
+                    ViewConstructor.prototype.initialize.call(this, arguments);
+                }
+            });
+
+            return WrappedConstructor;
+        },
+
+        createChildInjector: function() {
+            var child = new Injector(this._context);
+            child.parent = this;
+            return child;
+        },
+
+        getObject: function(key) {
+            return this._retrieveFromCacheOrCreate(key, false);
+        },
+
+        mapValue: function(key, useValue) {
+            this._mappings[key] = {
+                clazz: null,
+                object: useValue,
+                type: TYPES.SINGLETON
+            };
+            return this;
+        },
+
+        hasMapping: function(key) {
+            return this._mappings.hasOwnProperty(key) || ( !! this.parent && this.parent.hasMapping(key));
+        },
+
+        mapClass: function(key, clazz) {
+            this._mappings[key] = {
+                clazz: clazz,
+                object: null,
+                type: TYPES.OTHER
+            };
+            return this;
+        },
+
+        mapView: function(key, clazz) {
+            this._mappings[key] = {
+                clazz: this._wrapViewConstructor(clazz),
+                object: null,
+                type: TYPES.VIEW
+            };
+            return this;
+        },
+
+        mapSingleton: function(key, clazz) {
+            this._mappings[key] = {
+                clazz: clazz,
+                object: null,
+                type: TYPES.SINGLETON
+            };
+            return this;
+        },
+
+        instantiate: function(key) {
+            return this._retrieveFromCacheOrCreate(key, true);
+        },
+
+        injectInto: function(instance) {
+            if ((typeof instance === 'object') && 'injections' in instance) {
+                _.each(instance.injections, function(key, index) {
+                    instance[key] = this.getObject(key);
+                }, this);
+            }
+            this.addPubSub(instance);
+            return this;
+        },
+        addPubSub: function(instance) {
+            instance.listen = _.bind(this._context.listen, this._context);
+            instance.dispatch = _.bind(this._context.dispatch, this._context);
+        },
+        unmap: function(key) {
+            delete this._mappings[key];
+
+            return this;
+        },
+        unmapAll: function() {
+            this._mappings = {};
+            return this;
+        }
+    };
+
     var Geppetto = {};
 
     Geppetto.version = '0.6.3';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
+
+    Geppetto.Injector = Injector;
 
     var contexts = {};
 
@@ -34,6 +172,11 @@
 
         this.options = options || {};
         this.parentContext = this.options.parentContext;
+        if (this.parentContext) {
+            this.injector = this.parentContext.injector.createChildInjector();
+        } else {
+            this.injector = new Injector(this);
+        }
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
         if (_.isFunction(this.initialize)) {
@@ -74,6 +217,7 @@
         }
 
         view.context = context;
+        context.injector.injectInto(view);
 
         // map context events
         _.each(view.contextEvents, function(callback, eventName) {
@@ -145,6 +289,7 @@
             commandInstance.context = _this;
             commandInstance.eventName = eventName;
             commandInstance.eventData = eventData;
+            _this.injector.injectInto(commandInstance);
             if (_.isFunction(commandInstance.execute)) {
                 commandInstance.execute();
             }
@@ -167,6 +312,7 @@
 
     Geppetto.Context.prototype.unmapAll = function unmapAll() {
         this.vent.stopListening();
+        this.injector.unmapAll();
 
         delete contexts[this._contextId];
 

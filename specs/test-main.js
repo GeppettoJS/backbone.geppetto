@@ -34,7 +34,8 @@ require(
         "underscore",
         "backbone",
         "geppetto",
-        "geppetto-specs"
+        "geppetto-specs",
+        "injector-specs"
 
     ], function() {
         mocha.run();
