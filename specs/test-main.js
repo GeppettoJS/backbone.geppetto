@@ -35,7 +35,7 @@ require(
         "backbone",
         "geppetto",
         "geppetto-specs",
-        "injector-specs"
+        "resolver-specs"
 
     ], function() {
         mocha.run();

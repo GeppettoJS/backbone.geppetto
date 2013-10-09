@@ -290,14 +290,14 @@ return Geppetto.Context.extend( {
 
 ### Registering Commands
 
-**Option 1: Using the `mapCommand` function:**
+**Option 1: Using the `wireCommand` function:**
 
 ```javascript
 return Geppetto.Context.extend( {
 	initialize: function () {
-		this.mapCommand( "appEventFoo", FooCommand );
-		this.mapCommand( "appEventBar", BarCommand );
-		this.mapCommand( "appEventBaz", BazCommand );
+		this.wireCommand( "appEventFoo", FooCommand );
+		this.wireCommand( "appEventBar", BarCommand );
+		this.wireCommand( "appEventBaz", BazCommand );
 	}
 });
 ```
@@ -391,7 +391,7 @@ context.dispatch( "fooEvent",
 
 ```javascript
 // this is done automatically when a Context is destroyed, so you normally would not do this manually.
-context.unmapAll();
+context.destroy();
 ```
 
 ### Destroying a Context
@@ -557,8 +557,8 @@ Source code available in the `examples` directory in the Github Repo.
 
 ## Tests
 ### About
-Geppetto test specs are written using [Mocha](http://visionmedia.github.io/mocha/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development) 
-syntax provided by the [Chai](http://chaijs.com/) plugin.  
+Geppetto test specs are written using [Mocha](http://visionmedia.github.io/mocha/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development)
+syntax provided by the [Chai](http://chaijs.com/) plugin.
 Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
 
 ### Specs
@@ -586,7 +586,7 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 ### 0.6
 *Released 2 June 2013*
 
-* When registering commands on a Context, you can now declare a `commands` object instead of using the `mapCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* When registering commands on a Context, you can now declare a `commands` object instead of using the `wireCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
 * Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
 * To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
 * Added test coverage enforcement to Grunt task using the [grunt-blanket-qunit](https://npmjs.org/package/grunt-blanket-qunit) plugin.

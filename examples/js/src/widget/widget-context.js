@@ -13,11 +13,10 @@ define( [
                 widgetId:_.uniqueId( "Widget " )
             } );
 
-            this.mapCommand( "sendLocalMessage", SendMessageCommand );
-            this.mapCommand( "sendParentMessage", SendMessageCommand );
-            this.mapCommand( "sendGlobalMessage", SendMessageCommand );
-            this.mapCommand( "changeColor", ChangeColorCommand );
+            this.wireCommand( "sendLocalMessage", SendMessageCommand );
+            this.wireCommand( "sendParentMessage", SendMessageCommand );
+            this.wireCommand( "sendGlobalMessage", SendMessageCommand );
+            this.wireCommand( "changeColor", ChangeColorCommand );
         }
     } );
 } );
-  

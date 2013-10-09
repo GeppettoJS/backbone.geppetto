@@ -2,109 +2,152 @@
 /* jshint -W024 */
 /* jshint expr:true */
 define([
-    "underscore",
-    "backbone",
-    "geppetto"
+    "underscore", "backbone", "geppetto"
 ], function(_, Backbone, Geppetto) {
     var expect = chai.expect;
-    describe("Backbone.Geppetto.Injector", function() {
+    describe("Backbone.Geppetto.Resolver", function() {
         var context;
-        var injector;
+        var resolver;
         beforeEach(function() {
             context = new Geppetto.Context();
-            injector = context.injector;
+            resolver = context.resolver;
         });
         afterEach(function() {
-            context.unmapAll();
+            context.destroy();
             context = undefined;
-            injector = undefined;
+            resolver = undefined;
         });
         describe("declaration", function() {
             it("should be defined as a property on the Geppetto object", function() {
-                expect(Geppetto.Injector).not.to.be.null;
+                expect(Geppetto.Resolver).not.to.be.null;
             });
         });
         describe("when retrieving objects", function() {
             it("should throw an error if no corresponding mapping was found", function() {
                 expect(function() {
-                    injector.getObject('unregistered key');
+                    resolver.getObject('unregistered key');
                 }).to.
                 throw (/no mapping found/);
+            });
+        });
+        describe("when resolving dependencies", function() {
+            var key1 = 'key1';
+            var value1 = {};
+            var key2 = 'key2';
+            var value2 = {};
+            beforeEach(function() {
+                resolver.wireValue(key1, value1);
+                resolver.wireValue(key2, value2);
+            });
+            it("should accept an array for wiring config", function() {
+                var depender = {
+                    wiring: [key1, key2]
+                };
+                resolver.resolve(depender);
+                expect(depender.key1).to.equal(value1);
+                expect(depender.key2).to.equal(value2);
+            });
+            it("should accept a map for wiring config", function() {
+                var depender = {
+                    wiring: {
+                        k1: key1,
+                        k2: key2
+                    }
+                };
+                resolver.resolve(depender);
+                expect(depender.k1).to.equal(value1);
+                expect(depender.k2).to.equal(value2);
             });
         });
         describe("when mapping a singleton", function() {
             var key = 'a singleton';
             var SingletonClass = function() {};
+            SingletonClass.prototype.wiring = ['foo'];
+            var foo = {};
             beforeEach(function() {
-                injector.mapSingleton(key, SingletonClass);
+                resolver.wireValue('foo', foo);
+                resolver.wireSingleton(key, SingletonClass);
             });
             it('should be determinable', function() {
-                expect(injector.hasMapping(key)).to.be.true;
+                expect(resolver.hasWiring(key)).to.be.true;
             });
             it('should produce an instance of the mapped class', function() {
-                var actual = injector.getObject(key);
+                var actual = resolver.getObject(key);
                 expect(actual).to.be.an.instanceOf(SingletonClass);
             });
             it('should produce a single, unique instance', function() {
-                var first = injector.getObject(key);
-                var second = injector.getObject(key);
+                var first = resolver.getObject(key);
+                var second = resolver.getObject(key);
                 expect(second).to.equal(first);
             });
             it("should be instantiatable by brute force", function() {
-                var first = injector.getObject(key);
-                var second = injector.instantiate(key);
+                var first = resolver.getObject(key);
+                var second = resolver.instantiate(key);
                 expect(second).to.not.equal(first);
             });
             it("should be injected with its dependencies when instantiated", function() {
-                SingletonClass.prototype.injections = ['foo'];
-                var foo = {};
-                injector.mapValue('foo', foo);
-                var actual = injector.getObject(key);
+                var actual = resolver.getObject(key);
                 expect(actual.foo).to.equal(foo);
+            });
+            it("should optionally allow wiring configuration", function() {
+                var dependerClass = function() {};
+                resolver.wireSingleton('depender', dependerClass, {
+                    dependency: key
+                });
+                var depender = resolver.getObject('depender');
+                expect(depender.dependency).to.equal(resolver.getObject(key));
             });
         });
         describe("when mapping a value", function() {
             var key = 'a value';
             var value = {};
             beforeEach(function() {
-                injector.mapValue(key, value);
+                resolver.wireValue(key, value);
             });
             it('should be determinable', function() {
-                expect(injector.hasMapping(key)).to.be.true;
+                expect(resolver.hasWiring(key)).to.be.true;
             });
             it("should be retrievable", function() {
-                expect(injector.getObject(key)).to.equal(value);
+                expect(resolver.getObject(key)).to.equal(value);
             });
             it("it should always return the same value", function() {
-                var first = injector.getObject(key);
-                var second = injector.getObject(key);
+                var first = resolver.getObject(key);
+                var second = resolver.getObject(key);
                 expect(second).to.equal(first);
             });
         });
         describe("when mapping a class", function() {
             var key = 'a class';
             var clazz = function() {};
+            clazz.prototype.wiring = ['foo'];
+            var foo = {};
             beforeEach(function() {
-                injector.mapClass(key, clazz);
+                resolver.wireValue('foo', foo);
+                resolver.wireClass(key, clazz);
             });
             it('should be determinable', function() {
-                expect(injector.hasMapping(key)).to.be.true;
+                expect(resolver.hasWiring(key)).to.be.true;
             });
             it('should produce an instance of the mapped class', function() {
-                var actual = injector.getObject(key);
+                var actual = resolver.getObject(key);
                 expect(actual).to.be.an.instanceOf(clazz);
             });
             it('should produce a new instance every time', function() {
-                var first = injector.getObject(key);
-                var second = injector.getObject(key);
+                var first = resolver.getObject(key);
+                var second = resolver.getObject(key);
                 expect(second).to.not.equal(first);
             });
             it("should be injected with its dependencies when instantiated", function() {
-                clazz.prototype.injections = ['foo'];
-                var foo = {};
-                injector.mapValue('foo', foo);
-                var actual = injector.getObject(key);
+                var actual = resolver.getObject(key);
                 expect(actual.foo).to.equal(foo);
+            });
+            it("should optionally allow wiring configuration", function() {
+                var dependerClass = function() {};
+                resolver.wireClass('depender', dependerClass, {
+                    dependency: key
+                });
+                var depender = resolver.getObject('depender');
+                expect(depender.dependency).to.be.an.instanceOf(clazz);
             });
         });
         describe("when mapping a view", function() {
@@ -113,18 +156,18 @@ define([
             beforeEach(function() {
                 clazz = Backbone.View.extend();
 
-                injector.mapView(key, clazz);
+                resolver.wireView(key, clazz);
             });
             it('should be determinable', function() {
-                expect(injector.hasMapping(key)).to.be.true;
+                expect(resolver.hasWiring(key)).to.be.true;
             });
             it('should extend the view constructor', function() {
-                var actual = injector.getObject(key);
+                var actual = resolver.getObject(key);
                 expect(actual).to.be.a("function");
             });
             it('should retrieve the same class every time', function() {
-                var first = injector.getObject(key);
-                var second = injector.getObject(key);
+                var first = resolver.getObject(key);
+                var second = resolver.getObject(key);
                 expect(second).to.equal(first);
             });
             it("should call the view's original 'initialize' function when instantiated", function() {
@@ -133,25 +176,25 @@ define([
                 clazz.prototype.initialize = function() {
                     initializeSpy();
                 };
-                var ViewConstructor = injector.getObject(key);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(initializeSpy).to.have.been.calledOnce;
             });
             it("should be injected with its dependencies when instantiated", function() {
-                clazz.prototype.injections = ['foo'];
+                clazz.prototype.wiring = ['foo'];
                 var foo = {};
-                injector.mapValue('foo', foo);
-                var ViewConstructor = injector.getObject(key);
+                resolver.wireValue('foo', foo);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(viewInstance.foo).to.equal(foo);
             });
             it("should be injected with the context's 'listen' method when instantiated", function() {
-                var ViewConstructor = injector.getObject(key);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(viewInstance.listen).to.be.a("function");
             });
             it("should be injected with the context's 'dispatch' method when instantiated", function() {
-                var ViewConstructor = injector.getObject(key);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(viewInstance.dispatch).to.be.a("function");
             });
@@ -160,7 +203,7 @@ define([
                 var myContextStub = sinon.stub(context, "listen");
                 var otherContextStub = sinon.stub(otherContext, "listen");
 
-                var ViewConstructor = injector.getObject(key);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(myContextStub).not.to.have.been.called;
                 expect(otherContextStub).not.to.have.been.called;
@@ -170,14 +213,14 @@ define([
                 expect(myContextStub).to.have.been.calledOnce;
                 expect(otherContextStub).not.to.have.been.called;
 
-                otherContext.unmapAll();
+                otherContext.destroy();
             });
             it("should call injected 'dispatch' only on its own context", function() {
                 var otherContext = new Geppetto.Context();
                 var myContextStub = sinon.stub(context, "dispatch");
                 var otherContextStub = sinon.stub(otherContext, "dispatch");
 
-                var ViewConstructor = injector.getObject(key);
+                var ViewConstructor = resolver.getObject(key);
                 var viewInstance = new ViewConstructor();
                 expect(myContextStub).not.to.have.been.called;
                 expect(otherContextStub).not.to.have.been.called;
@@ -187,17 +230,28 @@ define([
                 expect(myContextStub).to.have.been.calledOnce;
                 expect(otherContextStub).not.to.have.been.called;
 
-                otherContext.unmapAll();
+                otherContext.destroy();
+            });
+            it("should optionally allow wiring configuration", function() {
+                var value = {};
+                resolver.wireValue('value', value);
+                resolver.release(key);
+                resolver.wireView(key, clazz, {
+                    dependency: 'value'
+                });
+                var ViewCtor = resolver.getObject(key);
+                var view = new ViewCtor();
+                expect(view.dependency).to.equal(value);
             });
         });
         describe("when injecting objects", function() {
             var key = 'a value';
             var value = {};
             it("should have its dependencies fulfilled", function() {
-                value.injections = ['foo'];
+                value.wiring = ['foo'];
                 var foo = {};
-                injector.mapValue('foo', foo);
-                injector.injectInto(value);
+                resolver.wireValue('foo', foo);
+                resolver.resolve(value);
                 expect(value.foo).to.equal(foo);
             });
         });
@@ -205,31 +259,30 @@ define([
             var key = 'a value';
             var value = {};
             beforeEach(function() {
-                injector.mapValue(key, value);
-                injector.unmap(key);
+                resolver.wireValue(key, value);
+                resolver.release(key);
             });
             it('should be determinable', function() {
-                expect(injector.hasMapping(key)).to.be.false;
+                expect(resolver.hasWiring(key)).to.be.false;
             });
             it("should not be retrievable", function() {
                 expect(function() {
-                    injector.getObject(key);
+                    resolver.getObject(key);
                 }).to.
                 throw (/no mapping found/);
             });
         });
-        describe("when creating childInjectors", function() {
-            var parent,
-                child;
+        describe("when creating childResolvers", function() {
+            var parent, child;
             var key1 = 'key 1';
             var value1 = {};
             var key2 = 'key 2';
             var value2 = {};
             beforeEach(function() {
-                parent = new Geppetto.Injector(context);
-                parent.mapValue(key1, value1);
-                child = parent.createChildInjector();
-                child.mapValue(key2, value2);
+                parent = new Geppetto.Resolver(context);
+                parent.wireValue(key1, value1);
+                child = parent.createChildResolver();
+                child.wireValue(key2, value2);
             });
             it("should populate the child's parent property", function() {
                 expect(child.parent).to.equal(parent);
