@@ -5,8 +5,7 @@ define( [
 
     return Geppetto.Context.extend( {
         initialize:function () {
-            this.mapCommand( "addWidget", AddWidgetCommand );
+            this.wireCommand( "addWidget", AddWidgetCommand );
         }
     } );
 } );
-  

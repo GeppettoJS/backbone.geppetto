@@ -2,9 +2,7 @@
 /* jshint -W024 */
 /* jshint expr:true */
 define([
-    "underscore",
-    "backbone",
-    "geppetto"
+    "underscore", "backbone", "geppetto"
 ], function(_, Backbone, Geppetto) {
 
     var expect = chai.expect;
@@ -29,16 +27,35 @@ define([
                 context = new Geppetto.Context();
             });
             afterEach(function() {
-                context.unmapAll();
+                context.destroy();
             });
-            it("should create an injector", function() {
-                expect(context.injector).to.be.an.instanceOf(Geppetto.Injector);
+            it("should create an resolver", function() {
+                expect(context.resolver).to.be.an.instanceOf(Geppetto.Resolver);
             });
-            it("should unmap its injectors mappings upon shutdown", function() {
+            it("should release its resolvers wirings upon shutdown", function() {
                 var unmapperSpy = sinon.spy();
-                context.injector.unmapAll = unmapperSpy;
-                context.unmapAll();
+                context.resolver.releaseAll = unmapperSpy;
+                context.destroy();
                 expect(unmapperSpy).to.have.been.calledOnce;
+            });
+            it("should wrap the resolver's methods", function() {
+                var wrapped = [
+                    "wireView",
+                    "wireSingleton",
+                    "wireValue",
+                    "wireClass",
+                    "hasWiring",
+                    "getObject",
+                    "instantiate",
+                    "resolve",
+                    "release",
+                    "releaseAll"
+                ];
+                _.each(wrapped, function(methodName) {
+                    var stub = sinon.stub(context.resolver, methodName);
+                    context[methodName].call(context);
+                    expect(stub).to.have.been.calledOnce;
+                });
             });
         });
 
@@ -387,7 +404,7 @@ define([
 
         });
 
-        describe("when registering commands individually using mapCommand", function() {
+        describe("when registering commands individually using wireCommand", function() {
 
             var myView;
 
@@ -410,8 +427,8 @@ define([
 
                 contextDefinition = Geppetto.Context.extend({
                     initialize: function() {
-                        this.mapCommand("abcEvent", AbcCommand);
-                        this.mapCommand("xyzEvent", XyzCommand);
+                        this.wireCommand("abcEvent", AbcCommand);
+                        this.wireCommand("xyzEvent", XyzCommand);
                     }
                 });
 
@@ -445,9 +462,55 @@ define([
 
             it("should throw an error if the command is not a function", function() {
                 expect(function() {
-                    myView.context.mapCommand("failEvent", {});
+                    myView.context.wireCommand("failEvent", {});
                 }).to.
                 throw ("Command must be constructable");
+            });
+
+        });
+
+        describe("when triggering commands", function() {
+            var context;
+            var resolver;
+            var CommandClass;
+            var command;
+            beforeEach(function() {
+                var ContextDefinition = Geppetto.Context.extend({});
+                context = new ContextDefinition();
+                resolver = context.resolver;
+                CommandClass = function() {};
+                CommandClass.prototype.execute = function() {
+                    command = this;
+                };
+
+            });
+            afterEach(function() {
+                context.destroy();
+                context = null;
+                resolver = null;
+                executionSpy = null;
+                CommandClass = null;
+                command = null;
+            });
+            it("should resolve dependencies passed to the wireCommand", function() {
+                var value = {};
+                resolver.wireValue('value', value);
+                context.wireCommand('foo', CommandClass, {
+                    dependency: 'value'
+                });
+                context.dispatch('foo');
+                expect(command.dependency).to.equal(value);
+            });
+
+            it("should resolve dependencies declared in the command", function() {
+                var value = {};
+                resolver.wireValue('value', value);
+                CommandClass.prototype.wiring = {
+                    dependency: 'value'
+                };
+                context.wireCommand('foo', CommandClass);
+                context.dispatch('foo');
+                expect(command.dependency).to.equal(value);
             });
         });
 
@@ -477,8 +540,7 @@ define([
                         "abcEvent": AbcCommand,
                         "xyzEvent": XyzCommand,
                         "abcxyzEvent": [
-                            AbcCommand,
-                            XyzCommand
+                            AbcCommand, XyzCommand
                         ]
                     }
                 });
@@ -515,6 +577,29 @@ define([
                 myView.context.dispatch("abcxyzEvent");
                 expect(abcSpy.called).to.be.true;
                 expect(xyzSpy.called).to.be.true;
+            });
+        });
+
+        describe("when registering commands in batch using wireCommands", function() {
+            var context;
+            var FooCommand;
+            var executionSpy;
+            beforeEach(function() {
+                executionSpy = sinon.spy();
+                FooCommand = function() {
+                    this.execute = executionSpy;
+                };
+                context = new Geppetto.Context();
+            });
+            afterEach(function() {
+                context.destroy();
+            });
+            it("should fire FooCommand after dispatch", function() {
+                context.wireCommands({
+                    'foo': FooCommand
+                });
+                context.dispatch('foo');
+                expect(executionSpy).to.have.been.calledOnce;
             });
         });
 
@@ -575,8 +660,8 @@ define([
                 expect(spy.callCount).to.equal(1);
             });
 
-            it("should have an injector which is a child injector of the parent", function() {
-                expect(childContext.injector.parent).to.equal(parentContext.injector);
+            it("should have an resolver which is a child resolver of the parent", function() {
+                expect(childContext.resolver.parent).to.equal(parentContext.resolver);
             });
 
         });
@@ -664,9 +749,7 @@ define([
                 expect(spy3.callCount).to.equal(1);
             });
 
-
         });
-
 
         describe("when debug mode is enabled", function() {
 
@@ -746,7 +829,5 @@ define([
             });
 
         });
-
-
     });
 });
