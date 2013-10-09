@@ -6,38 +6,38 @@
 // Allow QUnit to use global scope, which RequireJS needs to inject dependencies
 //QUnit.specify.globalApi = true;
 
-require.config( {
-    paths:{
-        jquery:'../dependencies/jquery',
-        underscore:'../dependencies/underscore',
-        backbone:'../dependencies/backbone',
-        geppetto:'../backbone.geppetto',
-        text:'../dependencies/text'
+require.config({
+    paths: {
+        jquery: '../dependencies/jquery',
+        underscore: '../dependencies/underscore',
+        backbone: '../dependencies/backbone',
+        geppetto: '../backbone.geppetto',
+        text: '../dependencies/text'
     },
 
     shim: {
-		underscore: {
-			exports: '_'
-		},
-		backbone: {
-			deps: ['underscore'],
-			exports: 'Backbone'
-		}
+        underscore: {
+            exports: '_'
+        },
+        backbone: {
+            deps: ['underscore', 'jquery'],
+            exports: 'Backbone'
+        }
     }
-} );
+});
 
 require(
-        [
-            // external libraries with AMD support
+    [
+        // external libraries with AMD support
 
-            "jquery",
-            "underscore",
-            "backbone",
-            "geppetto",
-            "geppetto-specs",
-			"resolver-specs"
+        "jquery",
+        "underscore",
+        "backbone",
+        "geppetto",
+        "geppetto-specs",
+        "resolver-specs"
 
-        ], function () {
-            mocha.run();
-        }
+    ], function() {
+        mocha.run();
+    }
 );
