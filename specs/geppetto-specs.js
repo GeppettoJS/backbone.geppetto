@@ -514,69 +514,77 @@ define([
             });
         });
 
-        describe("when registering commands in batch using the commands map", function() {
+        describe("when wiring dependencies in batch using the Context 'wiring' parameter", function() {
 
-            var myView;
-
-            var contextDefinition;
+            var context;
 
             var AbcCommand;
-            var XyzCommand;
 
             var abcSpy;
-            var xyzSpy;
+
+            var wiring;
 
             beforeEach(function() {
                 abcSpy = sinon.spy();
                 AbcCommand = function() {};
                 AbcCommand.prototype.execute = abcSpy;
-
-                xyzSpy = sinon.spy();
-                XyzCommand = function() {};
-                XyzCommand.prototype.execute = xyzSpy;
-
-                contextDefinition = Geppetto.Context.extend({
+                wiring = {
                     commands: {
-                        "abcEvent": AbcCommand,
-                        "xyzEvent": XyzCommand,
-                        "abcxyzEvent": [
-                            AbcCommand, XyzCommand
-                        ]
+                        "abcEvent": AbcCommand
+                    },
+                    singletons: {
+                        "singleton": function() {
+
+                        }
+                    },
+                    classes: {
+                        "clazz": function() {
+
+                        }
+                    },
+                    values: {
+                        "value": "value"
+                    },
+                    views: {
+                        "view": Backbone.View.extend()
+                    }
+                };
+
+                var ContextDefinition = Geppetto.Context.extend({
+                    wiring: wiring,
+                    resolver: {
+                        wireSingleton: sinon.spy(),
+                        wireClass: sinon.spy(),
+                        wireValue: sinon.spy(),
+                        wireView: sinon.spy(),
+                        resolve: sinon.spy(),
+                        releaseAll: sinon.spy()
                     }
                 });
 
-                myView = new Backbone.View();
-
-                Geppetto.bindContext({
-                    view: myView,
-                    context: contextDefinition
-                });
+                context = new ContextDefinition();
             });
 
             afterEach(function() {
-                myView.close();
+                context.destroy();
             });
 
-            it("should fire AbcCommand when abcEvent is dispatched", function() {
-                myView.context.dispatch("abcEvent");
+            it("should wire commands", function() {
+                context.dispatch("abcEvent");
 
                 expect(abcSpy.called).to.be.true;
-                expect(xyzSpy.called).to.be.false;
             });
-
-            it("should not fire AbcCommand after the associated view is closed", function() {
-
-                myView.close();
-                myView.context.dispatch("abcEvent");
-
-                expect(abcSpy.called).to.be.false;
-                expect(xyzSpy.called).to.be.false;
+            it("should wire singletons", function() {
+                expect(context.resolver.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
             });
-
-            it("should fire all commands registered as array", function() {
-                myView.context.dispatch("abcxyzEvent");
-                expect(abcSpy.called).to.be.true;
-                expect(xyzSpy.called).to.be.true;
+            it("should wire classes", function() {
+                expect(context.resolver.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
+            });
+            it("should wire values", function() {
+                expect(context.resolver.wireValue).to.be.calledWith("value", wiring.values.value);
+            });
+            it("should wire views", function() {
+                expect(context.resolver.wireView).to.be.calledWith("view", wiring.views.view);
             });
         });
 
@@ -600,6 +608,15 @@ define([
                 });
                 context.dispatch('foo');
                 expect(executionSpy).to.have.been.calledOnce;
+            });
+            it("should fire all commands mapped as Array", function() {
+                context.wireCommands({
+                    'foo': [
+                        FooCommand, FooCommand, FooCommand
+                    ]
+                });
+                context.dispatch('foo');
+                expect(executionSpy).to.have.been.calledThrice;
             });
         });
 
