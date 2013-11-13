@@ -94,6 +94,14 @@ module.exports = function(grunt) {
                 src: [
                     'package.json', 'bower.json', '<%= pkg.name %>.js'
                 ]
+            },
+            banner: {
+                src: [
+                    '<%= pkg.name %>.js'
+                ],
+                options: {
+                    prefix: "^\/\/ <%= pkg.name %> "
+                }
             }
         },
         "jsbeautifier": {

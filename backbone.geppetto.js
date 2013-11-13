@@ -1,6 +1,6 @@
-// Backbone.Geppetto
+// backbone.geppetto 0.7.0-rc1
 //
-// Copyright (C) 2013 Model N, Inc.
+// Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
 //
 // Documentation and full license available at:
@@ -163,7 +163,7 @@
 
     var Geppetto = {};
 
-    Geppetto.version = '0.6.3';
+    Geppetto.version = '0.7.0-rc1';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 

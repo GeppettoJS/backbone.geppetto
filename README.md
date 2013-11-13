@@ -12,12 +12,26 @@ Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backb
 
 The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
+### How will Geppetto help my project?
+
+Geppetto might be a good fit for your project if:
+
+* your project is heavy on client-side business logic.  Maybe you've got a lot of logic that computes
+
 ### Why Another Framework?
 Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.
 
 More commonly, in Backbone applications you'll find business logic implemented directly in Backbone.View components, or sometimes in the Model.  For smaller apps, it's convenient to declare your "events" and your callback functions in the same place.  But as applications grow, and business logic needs to be reused across separate view components, this practice starts to get messy.
 
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.
+
+### Heads Up!
+
+Geppetto is currently undergoing some major API changes.  A new Dependency Injection API is being introduced.  The docs 
+are current as of the 0.6.3 release, but the latest changes in the 0.7.x release have not all been documented yet.  For
+the most stable and well-documented version, please use 0.6.3.
+
+You can read more about the DI changes [here](https://github.com/ModelN/backbone.geppetto/issues/24).
 
 ### Getting Geppetto
 
@@ -26,6 +40,12 @@ To solve this issue, Geppetto implements a scalable **Controller** architecture 
 * Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.3/dist/backbone.geppetto.min.js)
 * Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.3/backbone.geppetto.js)
 * Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.3.zip).
+
+*Latest Dependency Injection Release Candidate: 0.7.0-rc1*
+
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0-rc1/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0-rc1/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0-rc1.zip).
 
 *Unreleased Edge Version (master)*
 
