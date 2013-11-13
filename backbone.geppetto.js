@@ -175,11 +175,15 @@
 
         this.options = options || {};
         this.parentContext = this.options.parentContext;
-        if (this.parentContext) {
+
+        if (this.options.resolver) {
+            this.resolver = this.options.resolver;
+        } else if (this.parentContext) {
             this.resolver = this.parentContext.resolver.createChildResolver();
-        } else {
+        } else if (!this.resolver) {
             this.resolver = new Resolver(this);
         }
+
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
         if (_.isFunction(this.initialize)) {
@@ -188,7 +192,10 @@
         this._contextId = _.uniqueId("Context");
         contexts[this._contextId] = this;
 
-        this.wireCommands(this.commands);
+        var wiring = this.wiring || this.options.wiring;
+        if (wiring) {
+            this._configureWirings(wiring);
+        }
     };
 
     Geppetto.bindContext = function bindContext(options) {
@@ -232,6 +239,22 @@
         });
 
         return context;
+    };
+
+    Geppetto.Context.prototype._configureWirings = function _configureWirings(wiring) {
+        _.each(wiring.singletons, function(singletonDef, key) {
+            this.wireSingleton(key, singletonDef);
+        }, this);
+        _.each(wiring.classes, function(classDef, key) {
+            this.wireClass(key, classDef);
+        }, this);
+        _.each(wiring.values, function(value, key) {
+            this.wireValue(key, value);
+        }, this);
+        _.each(wiring.views, function(viewDef, key) {
+            this.wireView(key, viewDef);
+        }, this);
+        this.wireCommands(wiring.commands);
     };
 
     Geppetto.Context.prototype.listen = function listen(target, eventName, callback) {
