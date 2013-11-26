@@ -144,8 +144,8 @@ module.exports = function(grunt) {
             all: {
                 options: {
                     urls: ["http://localhost:9001/specs/sauce.html"],
-                    build: process.env.TRAVIS_JOB_ID,
-                    concurrency: 3,
+                    build: process.env.TRAVIS_JOB_ID || new Date().getTime(),
+                    concurrency: 1,
                     detailedError: true,
                     browsers: browsers,
                     testname: "Backbone.Geppetto",
@@ -163,7 +163,7 @@ module.exports = function(grunt) {
     grunt.registerTask('beautify', ['jsbeautifier:fix']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('coverage', ['blanket_mocha']);
-    grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha', 'connect', 'saucelabs-mocha']);
+    grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha', 'connect']);
     grunt.registerTask("sauce", ['connect', 'saucelabs-mocha']);
 
     grunt.registerTask('default', ['version', 'jsbeautifier:fix', 'uglify', 'jshint', 'blanket_mocha']);
