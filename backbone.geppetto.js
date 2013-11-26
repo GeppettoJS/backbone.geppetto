@@ -1,4 +1,4 @@
-// backbone.geppetto 0.7.0-rc1
+// backbone.geppetto 0.7.0-rc2
 //
 // Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
@@ -65,14 +65,14 @@
             return output;
         },
 
-        _wrapViewConstructor: function(ViewConstructor, wiring) {
+        _wrapConstructor: function(OriginalConstructor, wiring) {
 
             var context = this._context;
 
-            var WrappedConstructor = ViewConstructor.extend({
+            var WrappedConstructor = OriginalConstructor.extend({
                 initialize: function() {
                     context.resolver.resolve(this, wiring);
-                    ViewConstructor.prototype.initialize.call(this, arguments);
+                    OriginalConstructor.prototype.initialize.call(this, arguments);
                 }
             });
 
@@ -114,7 +114,7 @@
 
         wireView: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: this._wrapViewConstructor(clazz, wiring),
+                clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.VIEW
             };
@@ -122,8 +122,11 @@
         },
 
         wireSingleton: function(key, clazz, wiring) {
+
+            var constructor = (clazz.prototype.initialize ? this._wrapConstructor(clazz, wiring) : clazz);
+
             this._mappings[key] = {
-                clazz: clazz,
+                clazz: constructor,
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
@@ -241,18 +244,29 @@
         return context;
     };
 
+    var extractConfig = function(def, key) {
+        var thisCtor, thisWiring;
+        if (def.hasOwnProperty("ctor")) {
+            thisCtor = def.ctor;
+            thisWiring = def.wiring;
+        } else {
+            thisCtor = def;
+        }
+        return [key, thisCtor, thisWiring];
+    };
+
     Geppetto.Context.prototype._configureWirings = function _configureWirings(wiring) {
-        _.each(wiring.singletons, function(singletonDef, key) {
-            this.wireSingleton(key, singletonDef);
+        _.each(wiring.singletons, function(def, key) {
+            this.wireSingleton.apply(this, extractConfig(def, key));
         }, this);
-        _.each(wiring.classes, function(classDef, key) {
-            this.wireClass(key, classDef);
+        _.each(wiring.classes, function(def, key) {
+            this.wireClass.apply(this, extractConfig(def, key));
         }, this);
         _.each(wiring.values, function(value, key) {
             this.wireValue(key, value);
         }, this);
-        _.each(wiring.views, function(viewDef, key) {
-            this.wireView(key, viewDef);
+        _.each(wiring.views, function(def, key) {
+            this.wireView.apply(this, extractConfig(def, key));
         }, this);
         this.wireCommands(wiring.commands);
     };
@@ -391,6 +405,27 @@
 
         this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
     };
+
+    var _deprecationWarning = false;
+
+    Geppetto.setDeprecationWarning = function(warn) {
+        _deprecationWarning = warn;
+    };
+
+    var deprecate = function(func, msg) {
+        return function() {
+            if (_deprecationWarning) {
+                console.log("[Geppetto] " + msg);
+            }
+            func.apply(this, arguments);
+        };
+    };
+
+    Geppetto.Context.prototype.unmapAll = deprecate(
+        Geppetto.Context.prototype.destroy, "Context.unmapAll is deprecated.  Please use Context.destroy");
+
+    Geppetto.Context.prototype.mapCommand = deprecate(
+        Geppetto.Context.prototype.wireCommand, "Context.mapCommand is deprecated.  Please use Context.wireCommand");
 
     Geppetto.Context.extend = Backbone.View.extend;
 

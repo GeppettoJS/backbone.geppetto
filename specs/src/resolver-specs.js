@@ -243,6 +243,17 @@ define([
                 var view = new ViewCtor();
                 expect(view.dependency).to.equal(value);
             });
+            it("should optionally allow wiring configuration via the mappings", function() {
+                var value = {};
+                resolver.wireValue('value', value);
+                resolver.release(key);
+                resolver.wireView(key, clazz, {
+                    dependency: 'value'
+                });
+                var ViewCtor = resolver.getObject(key);
+                var view = new ViewCtor();
+                expect(view.dependency).to.equal(value);
+            });            
         });
         describe("when injecting objects", function() {
             var key = 'a value';

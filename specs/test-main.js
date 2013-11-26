@@ -1,10 +1,4 @@
-/*globals QUnit require*/
-
-// Defer QUnit startup until dependencies have been loaded with RequireJS
-//QUnit.config.autostart = false;
-
-// Allow QUnit to use global scope, which RequireJS needs to inject dependencies
-//QUnit.specify.globalApi = true;
+/*globals require*/
 
 require.config({
     paths: {
@@ -26,18 +20,14 @@ require.config({
     }
 });
 
-require(
-    [
-        // external libraries with AMD support
-
-        "jquery",
-        "underscore",
-        "backbone",
-        "geppetto",
-        "geppetto-specs",
-        "resolver-specs"
-
-    ], function() {
-        mocha.run();
-    }
-);
+require([
+    "jquery",
+    "underscore",
+    "backbone",
+    "geppetto",
+    "src/geppetto-specs",
+    "src/resolver-specs",
+    "src/deprecation-specs"
+], function() {
+    mocha.run();
+});

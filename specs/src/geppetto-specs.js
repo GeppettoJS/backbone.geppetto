@@ -533,20 +533,35 @@ define([
                         "abcEvent": AbcCommand
                     },
                     singletons: {
-                        "singleton": function() {
-
+                        "singleton": function() {},
+                        "customWiredSingleton": {
+                            ctor: function(){},
+                            wiring: {
+                                "customValue": "value"
+                            }
                         }
                     },
                     classes: {
-                        "clazz": function() {
-
+                        "clazz": function() {},
+                        "customWiredClass": {
+                            ctor: function(){},
+                            wiring: {
+                                "customValue": "value"
+                            }
                         }
                     },
                     values: {
                         "value": "value"
                     },
                     views: {
-                        "view": Backbone.View.extend()
+                        "view": Backbone.View.extend(),
+                        "customWiredView": {
+                            ctor: function(){},
+                            wiring: {
+                                "customValue": "value"
+                            }
+                        }
+
                     }
                 };
 
@@ -577,14 +592,26 @@ define([
             it("should wire singletons", function() {
                 expect(context.resolver.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
             });
+            it("should wire custom-mapped singletons", function() {
+                expect(context.resolver.wireSingleton).to.be.calledWith("customWiredSingleton", 
+                        wiring.singletons.customWiredSingleton.ctor, wiring.singletons.customWiredSingleton.wiring);
+            });
             it("should wire classes", function() {
                 expect(context.resolver.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
+            });
+            it("should wire custom-mapped classes", function() {
+                expect(context.resolver.wireClass).to.be.calledWith("customWiredClass",
+                        wiring.classes.customWiredClass.ctor, wiring.classes.customWiredClass.wiring);
             });
             it("should wire values", function() {
                 expect(context.resolver.wireValue).to.be.calledWith("value", wiring.values.value);
             });
             it("should wire views", function() {
                 expect(context.resolver.wireView).to.be.calledWith("view", wiring.views.view);
+            });
+            it("should wire custom-mapped views", function() {
+                expect(context.resolver.wireView).to.be.calledWith("customWiredView",
+                        wiring.views.customWiredView.ctor, wiring.views.customWiredView.wiring);
             });
         });
 
@@ -846,5 +873,6 @@ define([
             });
 
         });
+    
     });
 });
