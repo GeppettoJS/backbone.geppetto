@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto) [![devDependency Status](https://david-dm.org/ModelN/backbone.geppetto/dev-status.png)](https://david-dm.org/ModelN/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
+Tested on these browsers:
+
+[![Browser Test Results](https://saucelabs.com/browser-matrix/backbone-geppetto.svg)](https://saucelabs.com/u/backbone-geppetto)
+
 ## About
 ### What is it?
 Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.  Geppetto is lightweight, weighing in around half a kilobyte minified and gzipped.
