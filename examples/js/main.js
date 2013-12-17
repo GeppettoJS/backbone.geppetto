@@ -2,24 +2,26 @@
 
 require.config( {
     paths:{
-        jquery:'../../dependencies/jquery',
-        underscore:'../../dependencies/underscore',
-        backbone:'../../dependencies/backbone',
-        marionette:'lib/example-dependencies/backbone.marionette',
-        'backbone.wreqr':'lib/example-dependencies/backbone.wreqr',
-        'backbone.babysitter':'lib/example-dependencies/backbone.babysitter',
-        geppetto:'../../backbone.geppetto',
-        text:'../../dependencies/text',
-        myapp:"src/my-app"
+        jquery: '../../bower_components/jquery/jquery',
+        underscore: '../../bower_components/underscore/underscore',
+        backbone: '../../bower_components/backbone/backbone',
+        marionette: '../../bower_components/marionette/lib/backbone.marionette',
+        geppetto: '../../backbone.geppetto',
+        text: '../../bower_components/requirejs-text/text',
+        myapp: 'src/my-app'
     },
 	shim: {
 		underscore: {
 			exports: '_'
 		},
 		backbone: {
-			deps: ['underscore'],
+			deps: ['underscore', 'jquery'],
 			exports: 'Backbone'
-		}
+		},
+        marionette: {
+            deps: ['backbone'],
+            exports: 'Marionette'
+        }
 	}
 
 } );

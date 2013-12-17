@@ -1,10 +1,24 @@
 {
   "name": "backbone.geppetto",
-  "version": "0.7.0-rc1",
+  "version": "0.7.0-rc3pre",
   "main": "backbone.geppetto.js",
   "ignore": [
     "**/.*",
     "node_modules",
     "components"
-  ]
+  ],
+  "dependencies": {
+    "jquery": "~2.0.3",
+    "backbone": "~1.0.0",
+    "underscore": "~1.4.3",
+    "requirejs": "~2.1.9",
+    "requirejs-text": "~2.0.10",
+    "mocha": "~1.12.1",
+    "chai": "~1.8.1",
+    "sinon-chai": "~2.4.0",
+    "blanket": "~1.1.5",
+    "sinon.js": "~1.7.3",
+    "sinonjs": "~1.7.3",
+    "marionette": "~1.4.1"
+  }
 }

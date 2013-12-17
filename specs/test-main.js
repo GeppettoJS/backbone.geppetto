@@ -2,11 +2,11 @@
 
 require.config({
     paths: {
-        jquery: '../dependencies/jquery',
-        underscore: '../dependencies/underscore',
-        backbone: '../dependencies/backbone',
+        jquery: '../bower_components/jquery/jquery',
+        underscore: '../bower_components/underscore/underscore',
+        backbone: '../bower_components/backbone/backbone',
         geppetto: '../backbone.geppetto',
-        text: '../dependencies/text'
+        text: '../bower_components/requirejs-text/text'
     },
 
     shim: {
@@ -26,8 +26,10 @@ require([
     "backbone",
     "geppetto",
     "src/geppetto-specs",
-    "src/resolver-specs",
-    "src/deprecation-specs"
+    "src/resolver-specs"
 ], function() {
+
+    chai.Assertion.includeStack = true;
+
     mocha.run();
 });

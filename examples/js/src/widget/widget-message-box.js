@@ -8,9 +8,12 @@ define( [
     return Backbone.View.extend( {
 
         className:"messages",
-
+        constructor: function(options) {
+            this.options = options;
+            return Backbone.View.apply(this, arguments);
+        },
         initialize:function () {
-            _.bindAll( this );
+            _.bindAll.apply(_, [this].concat(_.functions(this)));
 
             this.context = this.options.context;
             this.context.listen( this, "messageSent", this.onMessageSent );

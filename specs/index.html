@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Mocha Tests</title>
-    <link rel="stylesheet" href="mocha/mocha.css" />
+    <link rel="stylesheet" href="../bower_components/mocha/mocha.css" />
     <style>
         #fixture {
             position: absolute;
@@ -10,18 +11,18 @@
             left: -9999;
         };
     </style>
-    <script src="mocha/chai.js"></script>
-    <script src="mocha/mocha.js"></script>
-    <script src="mocha/sinon-chai.js"></script>
+    <script src="../bower_components/chai/chai.js"></script>
+    <script src="../bower_components/mocha/mocha.js"></script>
+    <script src="../bower_components/sinon-chai/lib/sinon-chai.js"></script>
 
-    <script data-main="test-main" src="../dependencies/require.js"></script>
+    <script data-main="test-main" src="../bower_components/requirejs/require.js"></script>
 
-    <script type="text/javascript" src="lib/blanket.js"
+    <script type="text/javascript" src="../bower_components/blanket/dist/qunit/blanket.js"
             data-cover-only="//../backbone.geppetto/"></script>
 
     <script type="text/javascript" src="../node_modules/grunt-blanket-mocha/support/mocha-blanket.js"></script>
 
-    <script type="text/javascript" src="lib/sinon.js"></script>
+    <script type="text/javascript" src="../bower_components/sinonjs/sinon.js"></script>
 
     <script>
 
@@ -39,3 +40,5 @@
 </div>
 </body>
 </html>
+        
+        

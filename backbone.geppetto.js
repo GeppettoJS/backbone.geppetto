@@ -1,4 +1,4 @@
-// backbone.geppetto 0.7.0-rc2
+// backbone.geppetto 0.7.0-rc3pre pre
 //
 // Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
@@ -166,7 +166,7 @@
 
     var Geppetto = {};
 
-    Geppetto.version = '0.7.0-rc1';
+    Geppetto.version = '0.7.0-rc3pre';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
@@ -405,27 +405,6 @@
 
         this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
     };
-
-    var _deprecationWarning = false;
-
-    Geppetto.setDeprecationWarning = function(warn) {
-        _deprecationWarning = warn;
-    };
-
-    var deprecate = function(func, msg) {
-        return function() {
-            if (_deprecationWarning) {
-                console.log("[Geppetto] " + msg);
-            }
-            func.apply(this, arguments);
-        };
-    };
-
-    Geppetto.Context.prototype.unmapAll = deprecate(
-        Geppetto.Context.prototype.destroy, "Context.unmapAll is deprecated.  Please use Context.destroy");
-
-    Geppetto.Context.prototype.mapCommand = deprecate(
-        Geppetto.Context.prototype.wireCommand, "Context.mapCommand is deprecated.  Please use Context.wireCommand");
 
     Geppetto.Context.extend = Backbone.View.extend;
 

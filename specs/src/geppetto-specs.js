@@ -105,9 +105,12 @@ define([
                 expect(parentView.context).to.exist;
 
                 var childViewDef = Backbone.View.extend({
-
+                    constructor: function(options) {
+                        this.options = options;
+                        return Backbone.View.apply(this, arguments);
+                    },
                     initialize: function(options) {
-                        _.bindAll(this);
+                        _.bindAll.apply(_, [this].concat(_.functions(this)));
                         Geppetto.bindContext({
                             view: this,
                             context: this.options.context
@@ -219,7 +222,7 @@ define([
 
                 var ParentViewDef = Backbone.View.extend({
                     initialize: function() {
-                        _.bindAll(this);
+                        _.bindAll.apply(_, [this].concat(_.functions(this)));
                     },
                     contextEvents: {
                         "foo": "handleFoo",
@@ -251,9 +254,12 @@ define([
                     handleFoo: function() {
                         fooChildSpy();
                     },
-
+                    constructor: function(options) {
+                        this.options = options;
+                        return Backbone.View.apply(this, arguments);
+                    },
                     initialize: function(options) {
-                        _.bindAll(this);
+                        _.bindAll.apply(_, [this].concat(_.functions(this)));
                         Geppetto.bindContext({
                             view: this,
                             context: this.options.context

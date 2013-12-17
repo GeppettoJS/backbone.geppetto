@@ -22,7 +22,7 @@ define( [
         },
 
         initialize:function () {
-            _.bindAll( this );
+            _.bindAll.apply(_, [this].concat(_.functions(this)));
             
             Geppetto.bindContext({
                 view: this,
