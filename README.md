@@ -596,7 +596,7 @@ Run the current Geppetto Test Specs in your browser [here](http://modeln.github.
 
 Geppetto is used in production by these organizations.  
 
-[![Revvy](http://c940564.r64.cf2.rackcdn.com/0/1384488374386587/ce5ffbfc924fe337fc2b82e70283d7b0.png)](http://revvy.com)
+[![Revvy](http://i.imgur.com/nyA0jnR.png)](http://revvy.com)
 
 [![Face IT](http://play.faceit.com/wp-content/themes/faceitv2/images/small-logo.png)](http://faceit.com)
 
