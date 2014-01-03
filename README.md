@@ -698,3 +698,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ModelN/backbone.geppetto/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
+[![Analytics](https://ga-beacon.appspot.com/UA-35812735-2/backbone.geppetto/readme?pixel)](https://github.com/igrigorik/ga-beacon)
