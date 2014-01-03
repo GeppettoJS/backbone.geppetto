@@ -1,4 +1,4 @@
-// backbone.geppetto 0.7.0-rc3pre pre
+// backbone.geppetto 0.7.0-rc4
 //
 // Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
@@ -166,7 +166,7 @@
 
     var Geppetto = {};
 
-    Geppetto.version = '0.7.0-rc3pre';
+    Geppetto.version = '0.7.0-rc4';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
@@ -271,11 +271,7 @@
         this.wireCommands(wiring.commands);
     };
 
-    Geppetto.Context.prototype.listen = function listen(target, eventName, callback) {
-
-        if (arguments.length !== 3) {
-            throw "Expected 3 arguments (target, eventName, callback)";
-        }
+    var validateListen = function(target, eventName, callback) {
 
         if (!_.isObject(target) || !_.isFunction(target.listenTo) || !_.isFunction(target.stopListening)) {
             throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
@@ -288,8 +284,16 @@
         if (!_.isFunction(callback)) {
             throw "callback must be a function";
         }
+    };
 
+    Geppetto.Context.prototype.listen = function listen(target, eventName, callback) {
+        validateListen(target, eventName, callback);
         return target.listenTo(this.vent, eventName, callback, target);
+    };
+
+    Geppetto.Context.prototype.listenToOnce = function listenToOnce(target, eventName, callback) {
+        validateListen(target, eventName, callback);
+        return target.listenToOnce(this.vent, eventName, callback, target);
     };
 
     Geppetto.Context.prototype.dispatch = function dispatch(eventName, eventData) {

@@ -8,15 +8,22 @@ Tested on these browsers:
 
 ## About
 ### What is it?
-Geppetto is an extension for [Backbone.js](http://documentcloud.github.com/backbone/) that implements an event-driven Command framework, decoupling your View/Presenter code from your app's business logic.  Geppetto is lightweight, weighing in around half a kilobyte minified and gzipped.
 
-The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
+As client-side applications grow, they often turn into tangled messes of spaghetti and copy/pasted code.  Geppetto helps large-scale, multi-module Backbone applications to avoid these pitfalls by introducing these features:
+
+* **Commands**: Single-purpose units of work invoked with events.  Decouples your View/Presenter code from your app's client-side business logic.  
+* **Dependency-Injection**: Allows components to remain loosely-coupled without resorting to standard JS "hacks" such as namespacing and manually passing dependencies from parent to child.
+* **The "Context"**: Provides a private pub/sub channel for related components to talk to each other, keeping your app from getting too noisy.  Also provides a place to wire up depenency injection mappings for specific areas of your app.
+
+### How big is it?
+Geppetto is tiny, weighing in just over 1KB minified and gzipped.  Much of the value of Geppetto comes from the design philosophy that it prescribes, not from the code in the framework, itself.
 
 ### How will Geppetto help my project?
 
 Geppetto might be a good fit for your project if:
 
-* your project is heavy on client-side business logic.  Maybe you've got a lot of logic that computes
+* **...your project is heavy on client-side business logic.** Maybe you've got a lot of logic that computes previews of calculations before sending updates to the server.  Traditionally, Backbone would have you put this logic in the View or Model.  But what if this logic needs to be shared between multiple Views and Models? Geppetto gives complex client-side logic a place to live.
+* **...your project uses a "composite design."** For example, your components are composed of smaller sub-components, and those sub-components might be reused across many different parent components.  Commonly this is seen in Marionette-based applications, which are composed of Layouts, Composite Views, Item Views, Collection Views, etc.  Manually managing dependencies between these views can be tedious, and Geppetto helps.  
 
 ### Why Another Framework?
 Backbone has been [called an MV* framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/), because it's not strictly MVC, MVP, nor any other MV-something.  Sure, the Backbone Router can be made to act "controllery," but it's not really a good idea to tie all your business logic to URL change events.
@@ -25,13 +32,12 @@ More commonly, in Backbone applications you'll find business logic implemented d
 
 To solve this issue, Geppetto implements a scalable **Controller** architecture for Backbone, prescribing an MVC-style separation of concerns.  This makes it possible to write code that is loosely-coupled, easy-to-reuse, and highly-testable.
 
-### Heads Up!
+The architecture of Geppetto was greatly inspired by the popular [Robotlegs](http://robotlegs.org) framework for Actionscript.
 
-Geppetto is currently undergoing some major API changes.  A new Dependency Injection API is being introduced.  The docs 
-are current as of the 0.6.3 release, but the latest changes in the 0.7.x release have not all been documented yet.  For
-the most stable and well-documented version, please use 0.6.3.
+### What's in a name?
+Geppetto works especially well with [MarionetteJS](http://marionettejs.com), and that's [where the name came from](http://en.wikipedia.org/wiki/Mister_Geppetto).  
 
-You can read more about the DI changes [here](https://github.com/ModelN/backbone.geppetto/issues/24).
+While Marionette is not a dependency, if you're already using Marionette, your design philosophy is already pointed in the right direction for Geppetto to be helpful!
 
 ### Getting Geppetto
 
@@ -572,9 +578,6 @@ Fun?  Probably just as much as Farmville!
 
 Source code available in the `examples` directory in the Github Repo.
 
-## Related articles
-* [Developing modular apps with backbone and Geppetto](http://niki4810.github.io/blog/2013/05/26/building-modular-apps-using-backbone-and-geppetto/)
-
 ## Tests
 ### About
 Geppetto test specs are written using [Mocha](http://visionmedia.github.io/mocha/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development)
@@ -583,6 +586,21 @@ Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.o
 
 ### Specs
 Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
+
+## Buzz
+### Articles and Blogs
+* [Developing modular apps with backbone and Geppetto](http://niki4810.github.io/blog/2013/05/26/building-modular-apps-using-backbone-and-geppetto/) - Nikhilesh Katakam
+* [Backbone and Pinocchio](http://lazywithclass.tumblr.com/post/44717340559/backbone-and-pinocchio) - Alberto Zaccagni 
+
+### Who uses Geppetto?
+
+Geppetto is used in production by these organizations.  
+
+[![Revvy](http://c940564.r64.cf2.rackcdn.com/0/1384488374386587/ce5ffbfc924fe337fc2b82e70283d7b0.png)](http://revvy.com)
+
+[![Face IT](http://play.faceit.com/wp-content/themes/faceitv2/images/small-logo.png)](http://faceit.com)
+
+To add your logo, please open an issue.  Include a link to a hosted .png image of your logo no wider than 200px and no taller than 70px.  We'd also love to hear a quick story about how Geppetto has helped you out!
 
 ## Version History
 

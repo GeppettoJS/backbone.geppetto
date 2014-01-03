@@ -179,6 +179,25 @@ define([
                 throw ("Event payload must be an object");
             });
 
+            it("should fire the callback multiple times when the event is dispatched multiple times", function() {
+                var multiDispatchSpy = sinon.spy();
+                contextInstance.listen(parentView, "foo", multiDispatchSpy);
+                contextInstance.dispatch("foo");
+                expect(multiDispatchSpy.callCount).to.equal(1);
+                contextInstance.dispatch("foo");
+                expect(multiDispatchSpy.callCount).to.equal(2);
+            });
+
+            it("should fire the callback only once when using listenToOnce and the event is dispatched multiple times", function() {
+                var multiDispatchSpy = sinon.spy();
+                contextInstance.listenToOnce(parentView, "foo", multiDispatchSpy);
+                contextInstance.dispatch("foo");
+                expect(fooSpy.callCount).to.equal(1);
+                expect(multiDispatchSpy.callCount).to.equal(1);
+                contextInstance.dispatch("foo");
+                expect(multiDispatchSpy.callCount).to.equal(1);
+            });
+            
             it("should pass the foo event when listened from the parent view", function() {
                 var parentFooSpy = sinon.spy();
                 contextInstance.listen(parentView, "foo", parentFooSpy);
@@ -329,27 +348,6 @@ define([
 
             afterEach(function() {
                 view.close();
-            });
-
-            it("should throw an error if only one argument is provided", function() {
-                expect(function() {
-                    context.listen(view);
-                }).to.
-                throw ("Expected 3 arguments (target, eventName, callback)");
-            });
-
-            it("should throw an error if only two arguments are provided", function() {
-                expect(function() {
-                    context.listen(view, "foo");
-                }).to.
-                throw ("Expected 3 arguments (target, eventName, callback)");
-            });
-
-            it("should not throw an error if three proper arguments are provided", function() {
-                expect(function() {
-                    context.listen(view, "foo", function() {});
-                }).not.to.
-                throw ();
             });
 
             it("should throw an error if the target object does not have a 'listenTo' method", function() {
