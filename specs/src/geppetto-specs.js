@@ -59,7 +59,7 @@ define([
             });
         });
 
-        describe("when binding a context", function() {
+        describe("when binding a context to a view that does not support dependency injection", function() {
 
             var contextDefinition;
             var contextInstance;
@@ -73,17 +73,18 @@ define([
                 var MyViewDef = Backbone.View.extend();
                 var myView = new MyViewDef();
 
-                Geppetto.bindContext({
+                var returnedContext = Geppetto.bindContext({
                     view: myView,
                     context: contextDefinition
                 });
 
                 expect(myView.context).to.exist;
+                expect(returnedContext).to.equal(myView.context);
 
                 myView.close();
-            });
+            });            
         });
-
+        
         describe("when a Backbone View adds an event listener to a context", function() {
             var parentView;
             var contextDefinition;

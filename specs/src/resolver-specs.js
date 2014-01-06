@@ -5,6 +5,43 @@ define([
     "underscore", "backbone", "geppetto"
 ], function(_, Backbone, Geppetto) {
     var expect = chai.expect;
+
+    describe("when binding a context to a view that supports dependency injection", function() {
+
+        var contextDefinition;
+        var contextInstance;
+
+        beforeEach(function() {
+            contextDefinition = Geppetto.Context.extend({
+                wiring: {
+                    singletons: {
+                        "foo": Backbone.Model
+                    }                    
+                }
+            });
+        });
+
+        it("should not include a reference ", function() {
+
+            var MyViewDef = Backbone.View.extend({
+                wiring: [
+                    "foo"
+                ]
+            });
+            var myView = new MyViewDef();
+
+            var returnedContext = Geppetto.bindContext({
+                view: myView,
+                context: contextDefinition
+            });
+
+            expect(myView.context).not.to.exist;
+            expect(returnedContext).not.to.exist;
+
+            myView.close();
+        });
+    });    
+    
     describe("Backbone.Geppetto.Resolver", function() {
         var context;
         var resolver;

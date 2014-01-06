@@ -229,7 +229,6 @@
             context = this.options.context;
         }
 
-        view.context = context;
         context.resolver.resolve(view);
 
         // map context events
@@ -241,7 +240,17 @@
             }
         });
 
-        return context;
+        var returnValue;
+
+        // only set a reference to the context on the view if the view
+        // is a pre-0.7.0 component that does not use dependency injection. 
+        // this will be removed in a future release...
+        if (!view.wiring) {
+            view.context = context;
+            returnValue = context;
+        }
+
+        return returnValue;
     };
 
     var extractConfig = function(def, key) {
