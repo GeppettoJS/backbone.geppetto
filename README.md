@@ -574,9 +574,22 @@ Pointless?  Yes.
 Easy-to-understand?  I hope so!
 Fun?  Probably just as much as Farmville!
 
-[Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/).
+[Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/widgets/).
 
 Source code available in the `examples` directory in the Github Repo.
+
+To run it from this repository, you can simply use from the main directory:
+
+   $ python -m SimpleHTTPServer
+
+Now, the example is running at:  `http://0.0.0.0:8000/examples/widgets/`
+
+
+### Movies
+Often, you want to provide a user interface to browse data, combined with easy filtering and sorting. The movies example show how to combine a context with commands, and where to place the dependencies of the context.
+
+[Give it a whirl here](http://jsbin.com/uleXOjOx/15).
+
 
 ## Tests
 ### About
