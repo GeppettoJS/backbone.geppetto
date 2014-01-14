@@ -9,11 +9,11 @@ define([
 
    ApplicationContext = Backbone.Geppetto.Context.extend({
            initialize: function () {
-                this.wireCommand( "LoadMoviesEvent", LoadMoviesCommand );      
-                this.wireCommand( "LoadGenresEvent", LoadGenresCommand );  
+                this.wireCommand( "LoadMoviesEvent", LoadMoviesCommand );
+                this.wireCommand( "LoadGenresEvent", LoadGenresCommand );
                 this.wireCommand( "SortMovieList",   SortMoviesCommand );
                 this.wireCommand("FilterMovieList",  FilterMoviesCommand);
-                
+
            }
    });
 

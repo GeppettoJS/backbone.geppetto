@@ -14,11 +14,10 @@ define([
 
      template : Handlebars.compile(MoviesListTemplate),
 
-     initialize : function(){
+     initialize : function(options) {
        _.bindAll.apply(_, [this].concat(_.functions(this)));
        //context passed from content view
-       this.context = this.options.context;
-       console.log(this.options);
+       this.context = options.context;
        this.context.listen(this,"ReloadMoviesEvent",this.reloadMovies);
      },
 
@@ -36,6 +35,6 @@ define([
          this.$el.append(html);
      }
    })
+
+   return MovieListView;
 });
-
-

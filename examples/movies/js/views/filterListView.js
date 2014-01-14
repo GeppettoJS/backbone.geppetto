@@ -18,10 +18,10 @@ define([
         'click li > a' :'handleFilterClick'
       },
 
-      initialize : function(){
+      initialize : function(options) {
         _.bindAll.apply(_, [this].concat(_.functions(this)));
         //context passed from content view
-        this.context = this.options.context;
+        this.context = options.context;
       },
 
       handleFilterClick : function(e){
@@ -35,10 +35,11 @@ define([
       },
 
       render : function(){
-        var html = this.template(this.model.toJSON());
+        var html = this.template({genres: this.collection.toJSON()});
         this.$el.append(html);
       }
     });
+
     return FilterListView;
 });
 

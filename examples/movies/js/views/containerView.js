@@ -8,7 +8,7 @@ define(
   'views/sortListView',
   'views/filterListView',
   'text!templates/containerView.hbs',
-  ], function(_, Backbone, Handlebars, Geppetto, ApplicationContext, MoviesListView, SortListView, FilterListView, ContainerViewTemplate) {
+  ], function(_, Backbone, Handlebars, Geppetto, ApplicationContext, MovieListView, SortListView, FilterListView, ContainerViewTemplate) {
 
 
    var ContainerView = Backbone.View.extend({
@@ -31,11 +31,11 @@ define(
        },
 
        render : function(){
-        var html = this.template();
-        this.$el.append(html);
-        this.constructSortListView();
-        this.context.dispatch("LoadMoviesEvent");
-        this.context.dispatch("LoadGenresEvent");
+         var html = this.template();
+         this.$el.append(html);
+         this.constructSortListView();
+         this.context.dispatch("LoadMoviesEvent");
+         this.context.dispatch("LoadGenresEvent");
       },
 
       constructMovieListView : function(result){
@@ -46,7 +46,7 @@ define(
           }),
               context : this.context
         });
-        
+
         movieListView.render();
         this.$('.content-section').append(movieListView.$el);
       },
@@ -54,19 +54,16 @@ define(
       constructSortListView : function(){
         var sortListView = new SortListView({
           context : this.context
-        }); 
+        });
         sortListView.render();
         this.$('.sort-section').append(sortListView.$el);
       },
 
       constructFilterListView : function(result){
-        
         var filterListView = new FilterListView({
-            model : new Backbone.Model({
-            genres : result.data
-        }),
+            collection: result.data,
             context : this.context
-        });  
+        });
         filterListView.render();
         this.$('.filters-section').append(filterListView.$el);
       }
