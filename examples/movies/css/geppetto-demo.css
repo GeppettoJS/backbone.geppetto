@@ -1,0 +1,74 @@
+body {
+    padding: 10px;
+}
+
+#loadingSpinner {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -16px;
+    margin-top: -16px;
+}
+
+#stats {
+    float:right;
+}
+
+.spacer {
+    width:150px;
+}
+
+#parent-messgae-container {
+    padding-top: 10px; 
+    padding-bottom: 10px;    
+}
+
+#parent-messages {
+    border-style: solid;
+    border-width: 1px;
+    height: 100px;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#widgets {
+
+}
+
+.widget {
+    position:relative;
+    border-style: solid;
+    border-width: 1px;
+    margin: 5px;
+    padding: 10px;
+    display: inline-block;
+    height: 210px;
+    width: 260px;
+}
+
+.widget .widget-header {
+    padding-bottom: 15px;
+}
+
+.widget .close-button {
+    position:absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.widget input {
+    width: 180px;
+    margin-bottom: 5px;
+}
+
+.widget .messages {
+    position: absolute;
+    margin-top: 10px;
+    height: 110px;
+    width: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}

@@ -1,0 +1,23 @@
+<div class="row">
+
+  {{#each movies}}
+
+      <div class="col-sm-6 col-md-4">
+          <div class="thumbnail">
+              <img alt="300x200"  src="{{image}}">
+              <div class="caption">
+                   <h3>{{title}}</h3>
+
+                  <p>Rating : {{rating}}/5</p>
+                  
+                  <p> 
+                      {{#each genres}}
+                        <span class="label label-primary">{{this}}</span>
+                      {{/each}}
+                  </p>
+              </div>
+          </div>
+      </div>  
+
+    {{/each}}
+</div>
