@@ -2,12 +2,12 @@
 
 require.config( {
     paths:{
-        jquery: '../../bower_components/jquery/jquery',
-        underscore: '../../bower_components/underscore/underscore',
-        backbone: '../../bower_components/backbone/backbone',
-        marionette: '../../bower_components/marionette/lib/backbone.marionette',
-        geppetto: '../../backbone.geppetto',
-        text: '../../bower_components/requirejs-text/text',
+        jquery: '../../../bower_components/jquery/jquery',
+        underscore: '../../../bower_components/underscore/underscore',
+        backbone: '../../../bower_components/backbone/backbone',
+        marionette: '../../../bower_components/marionette/lib/backbone.marionette',
+        geppetto: '../../../backbone.geppetto',
+        text: '../../../bower_components/requirejs-text/text',
         myapp: 'src/my-app'
     },
 	shim: {
