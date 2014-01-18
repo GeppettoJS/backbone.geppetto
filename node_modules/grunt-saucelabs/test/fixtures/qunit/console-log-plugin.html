@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+      "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <link rel="stylesheet" href="qunit.css" type="text/css"/>
+    <script src="http://code.jquery.com/jquery-1.4.2.js"> </script>
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript">
+      // selector plugin
+      $.fn.log = function() {
+        return this.each(function() {
+            console.log($(this));
+        });
+      };
+    </script>
+    <script type="text/javascript">
+      var loggedItems = []
+          oldConsoleLog = console.log;
+
+      console.log = function(whatever) {
+        loggedItems.push(whatever.get());
+        oldConsoleLog(whatever);
+      }
+
+      QUnit.testStart = function(name) {
+        loggedItems = [];
+      };
+      test("console logging", function() {
+          $("div.workspace").log();
+
+          same(loggedItems,
+              [$("div.workspace").get()],
+              "logged items should contain workspace")
+      });
+    </script>
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit example</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests">
+    </ol>
+    <div class="workspace"></div>
+  </body>
+</html>

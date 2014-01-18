@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+      "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <link rel="stylesheet" href="qunit.css" type="text/css"/>
+    <script src="http://code.jquery.com/jquery-1.4.2.js"> </script>
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript">
+      // selector plugin
+      $.fn.opaque = function() {
+        return this.each(function() {
+            var newOpacity = parseFloat($(this).css("opacity")) * 0.7;
+            $(this).css({opacity: newOpacity});
+        });
+      };
+    </script>
+    <script type="text/javascript">
+      QUnit.testStart = function(name) {
+        $(".workspace")
+          .append("<div class='test'></div><p class='test'></p>");
+      };
+      QUnit.testDone = function(name) {
+        $(".workspace").html("");
+      };
+      test("opaque", function() {
+          equals(typeof $('*').opaque,
+            'function',
+            'opaque should be a function');
+      });
+      test("opaque run once", function() {
+          $(".workspace div").opaque();
+          equals(0.7,
+            parseFloat($(".workspace div").css("opacity")),
+            "div opacity should be 0.7");
+          equals(1.0,
+            parseFloat($(".workspace p").css("opacity")),
+            "p opacity should not change");
+      });
+      test("opaque run multiple times", function() {
+          $(".workspace div").opaque().opaque();
+          equals(parseFloat($(".workspace div").css("opacity")),
+            0.49,
+            "div opacity should be 0.49");
+          equals(parseFloat($(".workspace p").css("opacity")),
+            1.0,
+            "p opacity should not change");
+          $(".workspace div").opaque();
+          equals(parseFloat($(".workspace div").css("opacity")),
+            0.343,
+            "div opacity should be 0.343");
+          equals(parseFloat($(".workspace p").css("opacity")),
+            1.0,
+            "p opacity should not change");
+      });
+    </script>
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit example</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests">
+    </ol>
+    <div class="workspace"></div>
+  </body>
+</html>
+
