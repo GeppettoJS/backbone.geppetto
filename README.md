@@ -13,7 +13,7 @@ As client-side applications grow, they often turn into tangled messes of spaghet
 
 * **Commands**: Single-purpose units of work invoked with events.  Decouples your View/Presenter code from your app's client-side business logic.  
 * **Dependency-Injection**: Allows components to remain loosely-coupled without resorting to standard JS "hacks" such as namespacing and manually passing dependencies from parent to child.
-* **The "Context"**: Provides a private pub/sub channel for related components to talk to each other, keeping your app from getting too noisy.  Also provides a place to wire up depenency injection mappings for specific areas of your app.
+* **The "Context"**: Provides a private pub/sub channel for related components to talk to each other, keeping your app from getting too noisy.  Also provides a place to wire up depenency injection mappings for specific areas of your app. 
 
 ### How big is it?
 Geppetto is tiny, weighing in just over 1KB minified and gzipped.  Much of the value of Geppetto comes from the design philosophy that it prescribes, not from the code in the framework, itself.
@@ -41,17 +41,23 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 ### Getting Geppetto
 
+**Note about 0.7.0 Release Candidate**:
+
+Geppetto recently introduced a dependency injection (DI) system for promoting even better loose-coupling.  This feature is targeted for version 0.7.0.
+
+The docs are not quite up to date yet, and the API might undergo some minor changes.  Version 0.7.0 is in "release candidate" stage, and will be released once the docs and API are finalized.  If you would prefer to work with a fully-documented API, and don't need the DI, [please use 0.6.3](https://github.com/ModelN/backbone.geppetto/tree/0.6.3) for the time being. 
+
 *Latest Stable Release: 0.6.3*
 
 * Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.3/dist/backbone.geppetto.min.js)
 * Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.3/backbone.geppetto.js)
 * Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.3.zip).
 
-*Latest Dependency Injection Release Candidate: 0.7.0-rc1*
+*Latest Dependency Injection Release Candidate: 0.7.0-rc5*
 
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0-rc1/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0-rc1/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0-rc1.zip).
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0-rc5/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0-rc5/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0-rc5.zip).
 
 *Unreleased Edge Version (master)*
 
@@ -138,7 +144,7 @@ The Grunt build is run automatically using [Travis-CI](travis-ci.org) upon every
 You'll need to include the following projects for Geppetto to work:
 
 ### Backbone
-[Backbone v0.9.10](http://documentcloud.github.com/backbone/) is required for its eventing system.
+[Backbone v0.9.10](http://documentcloud.github.com/backbone/) or higher is required for its eventing system.
 
 ## Recommended Libraries
 
@@ -194,13 +200,19 @@ The last two points are the key differences between Geppetto Applications and tr
 Geppetto implements the Controller piece using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
 
 ## Geppetto.Context
-`Geppetto.Context` has many jobs, all of which involve providing a central place to share data and communication between related components.
+Metaphorically speaking, if different modules of your app could be considered separate *living entities*, the `Geppetto.Context` would be like each being's *central nervous system*.  The Context is responsible for facilitating communication and sharing data between components *within a given module*, providing encapsulation so that this sharing does not extend past the boundaries of that module.
+
+The Context's specific jobs are:
+
+### Job #1: Dependency Injection
+
+The Context contains mappings for wiring Singletons, Classes, Views, and Values for injection into other components.  This means that instead of dependent components needing to "reach out and grab" their dependencies, Geppetto will inject them automatically.  This also has the advantage of dependent components being able to have different dependencies injected depending on the module.  
 
 ### Job #1: Event Bus
 
-Each Context has an instance of Backbone.Events, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.
+Each Context acts as an event bus, using the `Backbone.Events` system.  While the event bus is not exposed directly to components, each dependent component associated with a given Context is injected with a `dispatch` and `listen` function, which can be used to communicate with other components on the same Context.  You can think of this like each dependent component being given a walkie talkie tuned to the same frequency.  This pattern promotes loose-coupling between components.
 
-### Job #2: Command Registry
+### Job #3: Command Registry
 
 Do you have any business logic in your app that doesn't necessarily belong to a view?  For instance, you might have some code that loads some backing data which is shared across many views.  Sure, you could place that business logic in your outer-most view, but then that view would be responsible for telling the sub-views whenever new data is available.  Wouldn't it be great if we could completely decouple our shared client business logic from our views?
 
@@ -227,7 +239,7 @@ return Backbone.View.extend({
 // MainContext.js
 return Geppetto.Context.extend( {
 	initialize: function () {
-		// map commands here...
+		// set up injection and command mappings...
 	}
 });
 ```
@@ -243,7 +255,7 @@ If your view requires your context to be fully-initialized when it, itself, is i
 
 For example:
 
-```javascript
+```js
 // instead of using Geppetto.BindContext to create the Context instance,
 // directly call its constructor manually.
 
@@ -264,57 +276,81 @@ Geppetto.bindContext({
     view: collectionViewInstance,
     context: contextInstance
 });
-
 ```
+
 
 ### Assigning a Parent Context
 
-```javascript
-// ShellView.js
-return Backbone.View.extend({
-	initialize: function() {
-		Geppetto.bindContext({
-			view: this,
-			context: ShellContext
-		});
-	},
-	createModule: function() {
-		var moduleView = new ModuleView({
-			parentContext: this.context;
-		});
-		moduleView.render();
-	}
-});
+Feature still under development.
 
-// ShellContext.js
+## Dependency Injection
+
+### Setting up Wiring in the Context
+
+The Context's `wiring` configuration controls how dependencies are injected within the Context.
+
+```js
+
+define([
+	"backbone",
+	"js/product/ProductModel",
+	"js/user/model/UserModel",
+	"js/util/LoggingSvc",
+	"js/user/view/UserView",
+	"js/product/view/ProductView"
+], function(
+	Backbone,
+	ProductModel,
+	UserModel,
+	LoggingSvc,
+	UserView,
+	ProductView
+) {
+
 return Geppetto.Context.extend( {
 	initialize: function () {
-		// map commands here...
+		wiring: {
+			singletons: {
+				"userModel": Backbone.Model,
+				"productModel": ProductModel,
+				"loggingSvc": LoggingSvc
+			},
+			views: {
+				"UserView": UserView,
+				"ProductView": ProductView
+			}
+		}
 	}
 });
-
-// ModuleView.js
-return Backbone.View.extend({
-	initialize: function() {
-		// use "this.options" to access Backbone constructor parameters
-		Geppetto.bindContext({
-			view: this,
-			context: ModuleContext,
-			parentContext: this.options.parentContext
-		});
-	}
-});
-
-// ModuleContext.js
-return Geppetto.Context.extend( {
-	initialize: function () {
-		// map commands here...
-	}
 });
 ```
 
+### Wiring at the Component Level
 
-### Registering Commands
+Example injecting a model into a view.
+
+UserModel.js
+
+```js
+	"backbone"
+], function(
+	Backbone
+) {
+	return Backbone.View.extend({
+		wiring: [
+			"userModel"
+		],
+		initialize: function() {
+			// since "userModel" is in the wiring list, Geppetto
+			// will inject it as "this.userModel" before initialize() is called
+			var myValue = this.userModel.get("myValue"); 
+		}
+	)
+});
+});
+```
+
+## Commands
 
 **Option 1: Using the `wireCommand` function:**
 
@@ -346,13 +382,22 @@ return Geppetto.Context.extend( {
 
 ```
 
-### Listening to Events
+## Events
+
+### Event Bus
+The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
+
+### Injection of Communication Methods
+
+Any component mapped for injection will also have `listen` and `dispatch` methods injected into it.
+
+### Listening
 
 **Option 1: Using the `listen` method:**
 
 ```javascript
 // this usually goes in View code... to respond to an event fired by a Command finishing its job
-context.listen(this, "fooCompleted", handleFooCompleted);
+this.listen(this, "fooCompleted", handleFooCompleted);
 
 var handleFooCompleted = function() {
 	// update the view or something...
@@ -375,28 +420,25 @@ var handleFooCompleted = function() {
 }
 ```
 
-### Event Bus
-The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
-
 ### Dispatching Local Events
 
 ```javascript
 // Event only sent to Local Context
-context.dispatch( "fooEvent");
+this.dispatch( "fooEvent");
 ```
 
 ### Dispatching Parent Events
 
 ```javascript
 // Event only sent to Parent Context
-context.dispatchToParent( "fooEvent");
+this.dispatchToParent( "fooEvent");
 ```
 
 ### Dispatching Global Events
 
 ```javascript
 // Event sent to every registered Context
-context.dispatchGlobally( "fooEvent");
+this.dispatchGlobally( "fooEvent");
 ```
 
 ### Dispatching Events with a Payload
@@ -405,7 +447,7 @@ If your event has some associated data that should be available to the consumer 
 pass that event as an object as the second parameter of the call to `dispatch` like so:
 
 ```javascript
-context.dispatch( "fooEvent",
+this.dispatch( "fooEvent",
 						{
 							payloadPropertyFoo: "payloadValueFoo",
 							payloadPropertyBar: true,
@@ -616,6 +658,17 @@ Geppetto is used in production by these organizations.
 To add your logo, please open an issue.  Include a link to a hosted .png image of your logo no wider than 200px and no taller than 70px.  We'd also love to hear a quick story about how Geppetto has helped you out!
 
 ## Version History
+
+### 0.7.0 RC5
+*Released 18 Jan 2014*
+
+* Bug fixes for DI
+* Update docs with first pass at DI APIs (work in progress)
+
+### 0.7.0 RC1
+*Released 17 Nov 2013*
+
+* Initial pre-release with dependency injection support
 
 ### 0.6.3
 *Released 31 July 2013*

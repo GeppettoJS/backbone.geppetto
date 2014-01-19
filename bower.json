@@ -1,6 +1,6 @@
 {
   "name": "backbone.geppetto",
-  "version": "0.7.0-rc4",
+  "version": "0.7.0-rc5",
   "main": "backbone.geppetto.js",
   "ignore": [
     "**/.*",
