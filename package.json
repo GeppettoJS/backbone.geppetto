@@ -1,7 +1,7 @@
 {
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
-  "version": "0.7.0-rc5",
+  "version": "0.7.0",
   "homepage": "https://github.com/ModelN/backbone.geppetto",
   "author": {
     "name": "Dave Cadwallader",
@@ -30,19 +30,19 @@
     "test": "grunt travis --verbose"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-blanket-mocha": "~0.3.1",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-version": "~0.2.2",
-    "mocha-unfunk-reporter": "~0.4.0",
-    "grunt-contrib-connect": "~0.6.0",
-    "grunt-concurrent": "~0.4.0",
-    "grunt-open": "~0.2.2",
-    "grunt-jsbeautifier": "~0.2.2",
-    "grunt-saucelabs": "~4.1.2",
     "backbone": "~1.1.0",
-    "jquery": "~1.8.3"
+    "grunt": "~0.4.1",
+    "grunt-blanket-mocha": "^0.4.0",
+    "grunt-concurrent": "^0.5.0",
+    "grunt-contrib-connect": "^0.7.1",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-jsbeautifier": "~0.2.2",
+    "grunt-open": "~0.2.2",
+    "grunt-saucelabs": "^5.1.2",
+    "grunt-version": "0.2.2",
+    "jquery": "^2.1.0",
+    "mocha-unfunk-reporter": "~0.4.0"
   },
   "keywords": [
     "backbone",

@@ -1,4 +1,4 @@
-// backbone.geppetto 0.7.0-rc5
+// backbone.geppetto 0.7.0
 //
 // Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
@@ -69,14 +69,12 @@
 
             var context = this._context;
 
-            var WrappedConstructor = OriginalConstructor.extend({
+            return OriginalConstructor.extend({
                 initialize: function() {
                     context.resolver.resolve(this, wiring);
                     OriginalConstructor.prototype.initialize.call(this, arguments);
                 }
             });
-
-            return WrappedConstructor;
         },
 
         createChildResolver: function() {
@@ -166,7 +164,7 @@
 
     var Geppetto = {};
 
-    Geppetto.version = '0.7.0-rc5';
+    Geppetto.version = '0.7.0';
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
@@ -322,7 +320,7 @@
 
     Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally(eventName, eventData) {
 
-        _.each(contexts, function(context, contextId) {
+        _.each(contexts, function(context) {
             context.vent.trigger(eventName, eventData);
         });
     };

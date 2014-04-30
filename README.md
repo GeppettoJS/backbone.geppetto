@@ -41,23 +41,11 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 ### Getting Geppetto
 
-**Note about 0.7.0 Release Candidate**:
+*Latest Stable Release: 0.7.0*
 
-Geppetto recently introduced a dependency injection (DI) system for promoting even better loose-coupling.  This feature is targeted for version 0.7.0.
-
-The docs are not quite up to date yet, and the API might undergo some minor changes.  Version 0.7.0 is in "release candidate" stage, and will be released once the docs and API are finalized.  If you would prefer to work with a fully-documented API, and don't need the DI, [please use 0.6.3](https://github.com/ModelN/backbone.geppetto/tree/0.6.3) for the time being. 
-
-*Latest Stable Release: 0.6.3*
-
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.3/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.3/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.3.zip).
-
-*Latest Dependency Injection Release Candidate: 0.7.0-rc5*
-
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0-rc5/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0-rc5/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0-rc5.zip).
+* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.7.0.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0.zip).
 
 *Unreleased Edge Version (master)*
 
@@ -658,6 +646,13 @@ Geppetto is used in production by these organizations.
 To add your logo, please open an issue.  Include a link to a hosted .png image of your logo no wider than 200px and no taller than 70px.  We'd also love to hear a quick story about how Geppetto has helped you out!
 
 ## Version History
+
+### 0.7.0
+*Released 29 Apr 2014*
+
+* Official release for DI features
+* Fix bower config
+* Happy 2-year Geppettiversary!
 
 ### 0.7.0 RC5
 *Released 18 Jan 2014*
