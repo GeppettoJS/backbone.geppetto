@@ -187,15 +187,15 @@
 
         this.vent = {};
         _.extend(this.vent, Backbone.Events);
-        if (_.isFunction(this.initialize)) {
-            this.initialize.apply(this, arguments);
-        }
         this._contextId = _.uniqueId("Context");
         contexts[this._contextId] = this;
 
         var wiring = this.wiring || this.options.wiring;
         if (wiring) {
             this._configureWirings(wiring);
+        }
+        if (_.isFunction(this.initialize)) {
+            this.initialize.apply(this, arguments);
         }
     };
 
