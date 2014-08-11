@@ -528,6 +528,8 @@ define([
             var abcSpy;
 
             var wiring;
+            
+            var isWiredBeforeInitialization;
 
             beforeEach(function() {
                 abcSpy = sinon.spy();
@@ -569,6 +571,8 @@ define([
 
                     }
                 };
+                
+                isWiredBeforeInitialization = false;
 
                 var ContextDefinition = Geppetto.Context.extend({
                     wiring: wiring,
@@ -579,7 +583,8 @@ define([
                         wireView: sinon.spy(),
                         resolve: sinon.spy(),
                         releaseAll: sinon.spy()
-                    }
+                    },
+                    initialize : sinon.spy()
                 });
 
                 context = new ContextDefinition();
@@ -617,6 +622,9 @@ define([
             it("should wire custom-mapped views", function() {
                 expect(context.resolver.wireView).to.be.calledWith("customWiredView",
                         wiring.views.customWiredView.ctor, wiring.views.customWiredView.wiring);
+            });
+            it("should wire everything before initialization", function(){
+                expect(context.resolver.wireSingleton).to.be.calledBefore(context.initialize);
             });
         });
 
