@@ -296,19 +296,17 @@ define([
 ) {
 
 return Geppetto.Context.extend( {
-	initialize: function () {
-		wiring: {
-			singletons: {
-				"userModel": Backbone.Model,
-				"productModel": ProductModel,
-				"loggingSvc": LoggingSvc
-			},
-			views: {
-				"UserView": UserView,
-				"ProductView": ProductView
-			}
-		}
-	}
+    wiring: {
+        singletons: {
+            "userModel": Backbone.Model,
+            "productModel": ProductModel,
+            "loggingSvc": LoggingSvc
+        },
+        views: {
+            "UserView": UserView,
+            "ProductView": ProductView
+        }
+    }
 });
 });
 ```
@@ -356,16 +354,18 @@ return Geppetto.Context.extend( {
 
 ```javascript
 return Geppetto.Context.extend( {
-	commands: {
-	    "appEventFoo":          FooCommand,
-		"appEventBar":          BarCommand,
-		"appEventBaz":          BazCommand,
-		"appEventFooBarBaz":    [
-		    FooCommand,
-		    BarCommand,
-		    BazCommand
-		]
-	}
+    wiring : {
+        commands: {
+            "appEventFoo":          FooCommand,
+            "appEventBar":          BarCommand,
+            "appEventBaz":          BazCommand,
+            "appEventFooBarBaz":    [
+                FooCommand,
+                BarCommand,
+                BazCommand
+            ]
+        }
+    }
 });
 
 ```
