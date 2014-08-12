@@ -335,7 +335,7 @@
 
         this.vent.listenTo(this.vent, eventName, function(eventData) {
 
-            var commandInstance = new CommandConstructor();
+            var commandInstance = new CommandConstructor(_this, eventName, eventData);
 
             commandInstance.context = _this;
             commandInstance.eventName = eventName;

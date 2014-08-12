@@ -483,7 +483,9 @@ define([
                 var ContextDefinition = Geppetto.Context.extend({});
                 context = new ContextDefinition();
                 resolver = context.resolver;
-                CommandClass = function() {};
+                CommandClass = function() {
+                    this.ctorArgs = _.toArray(arguments);
+                };
                 CommandClass.prototype.execute = function() {
                     command = this;
                 };
@@ -516,6 +518,12 @@ define([
                 context.wireCommand('foo', CommandClass);
                 context.dispatch('foo');
                 expect(command.dependency).to.equal(value);
+            });
+            
+            it("should pass context and event data to the command constructor", function(){
+                context.wireCommand('foo', CommandClass);
+                context.dispatch('foo');
+                expect(command.ctorArgs).to.contain(context);
             });
         });
 
