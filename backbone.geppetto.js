@@ -7,7 +7,10 @@
 // http://modeln.github.com/backbone.geppetto/
 
 (function(factory) {
-    if (typeof define === "function" && define.amd) {
+    // CommonJS
+    if (typeof exports === "object") {
+        module.exports = factory(require('underscore'), require('backbone'));
+    } else if (typeof define === "function" && define.amd) {
         // Register as an AMD module if available...
         define(["underscore", "backbone"], factory);
     } else {

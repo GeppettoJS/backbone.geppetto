@@ -22,7 +22,7 @@
       "url": "https://github.com/ModelN/backbone.geppetto/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "Gruntfile.js",
+  "main": "backbone.geppetto.js",
   "engines": {
     "node": ">= 0.8.0"
   },
@@ -30,7 +30,6 @@
     "test": "grunt travis --verbose"
   },
   "devDependencies": {
-    "backbone": "~1.1.0",
     "grunt": "~0.4.1",
     "grunt-blanket-mocha": "^0.4.0",
     "grunt-concurrent": "^0.5.0",
@@ -49,5 +48,9 @@
     "plugin",
     "command",
     "mvc"
-  ]
+  ],
+  "dependencies": {
+    "backbone": "~1.1.0",
+    "underscore": "^1.6.0"
+  }
 }
