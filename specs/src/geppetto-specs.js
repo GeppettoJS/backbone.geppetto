@@ -537,8 +537,6 @@ define([
 
             var wiring;
             
-            var isWiredBeforeInitialization;
-
             beforeEach(function() {
                 abcSpy = sinon.spy();
                 AbcCommand = function() {};
@@ -580,8 +578,6 @@ define([
                     }
                 };
                 
-                isWiredBeforeInitialization = false;
-
                 var ContextDefinition = Geppetto.Context.extend({
                     wiring: wiring,
                     resolver: {
