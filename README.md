@@ -525,6 +525,23 @@ command.prototype.updateModel = function(theModel) {
 return command;
 ```
 
+### Dependency declaration
+
+Declare any additional dependencies of commands as you would in other objects, using the `wiring` property:
+ 
+```js
+var command = function () {};
+
+command.prototype.wiring = [
+    'userModel',
+    'loginService'
+];
+
+command.prototype.execute = function(){
+    this.loginService.authenticate(this.userModel.getAuth());
+}
+```
+
 ### Shallow Commands
 
 The context, event name and event data aren't only injected as properties of the command instance, but they're also passed as parameters to the constructor function of the command.
