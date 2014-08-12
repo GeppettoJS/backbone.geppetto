@@ -558,6 +558,30 @@ return function FooCommand(context, eventName, eventData){
 N.B.: We'd strongly advise against using the context as a service locator inside commands. 
 If your command requires any additional dependencies it's best practice to turn it into a "real" command (which exposes an `execute` method and declares its dependencies through the `wiring` property.)
 
+### Use underscore to reduce boilerplate
+
+You can use the underscore `extend` method to conform your command declarations to your other object declarations:
+
+```
+require(
+	"underscore"
+], function(
+	_
+) {
+    var Command = function(){
+    };
+	return _.extend(Command.prototype, {
+	    wiring: [
+	        'userModel',
+	        'loginService'
+	    ],
+	    execute: function(){
+	        this.loginService.authenticate(this.userModel.getAuth());
+	    }
+    });
+});
+```
+
 ### Responsibilities of a Command
 
 * **Single Purpose**: A Command should have one purpose and one purpose only.  This makes understanding and testing the command very easy.
