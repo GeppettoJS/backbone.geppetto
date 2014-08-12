@@ -525,6 +525,22 @@ command.prototype.updateModel = function(theModel) {
 return command;
 ```
 
+### Shallow Commands
+
+The context, event name and event data aren't only injected as properties of the command instance, but they're also passed as parameters to the constructor function of the command.
+This allows you to create "shallow commands" which do not expose an `execute` method, but simply consist out of the constructor function.
+
+```js
+return function FooCommand(context, eventName, eventData){
+    console.log('event received:', eventName, eventData);
+    
+    context.dispatch('foo:completed');
+}
+```
+
+N.B.: We'd strongly advise against using the context as a service locator inside commands. 
+If your command requires any additional dependencies it's best practice to turn it into a "real" command (which exposes an `execute` method and declares its dependencies through the `wiring` property.)
+
 ### Responsibilities of a Command
 
 * **Single Purpose**: A Command should have one purpose and one purpose only.  This makes understanding and testing the command very easy.
