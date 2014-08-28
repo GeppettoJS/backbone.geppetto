@@ -75,7 +75,7 @@
             return OriginalConstructor.extend({
                 initialize: function() {
                     context.resolver.resolve(this, wiring);
-                    OriginalConstructor.prototype.initialize.call(this, arguments);
+                    OriginalConstructor.prototype.initialize.apply(this, arguments);
                 }
             });
         },
