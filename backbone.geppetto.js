@@ -325,7 +325,7 @@
 
         _.each(contexts, function(context) {
             if (!context) {
-                return true
+                return true;
             }
             context.vent.trigger(eventName, eventData);
         });
