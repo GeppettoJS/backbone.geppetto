@@ -324,6 +324,9 @@
     Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally(eventName, eventData) {
 
         _.each(contexts, function(context) {
+            if (!context){
+                return true
+            }
             context.vent.trigger(eventName, eventData);
         });
     };
