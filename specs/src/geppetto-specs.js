@@ -810,6 +810,35 @@ define([
                 expect(spy3.callCount).to.equal(1);
             });
 
+            it("should skip any context that have been destroyed when looping through list of all contexts to trigger event on each", function() {
+                var spy1 = sinon.spy();
+                var spy2 = sinon.spy();
+                var spy3 = sinon.spy();
+
+                var spyDispatchGlobally = sinon.spy(context1, 'dispatchGlobally');
+
+                context1.listen(view1, "foo", function(){
+                    context2.destroy();
+                });
+
+                context1.listen(view1, "foo", spy1);
+                context2.listen(view2, "foo", spy2);
+                context3.listen(view3, "foo", spy3);
+
+                expect(spy1.callCount).to.equal(0);
+                expect(spy2.callCount).to.equal(0);
+                expect(spy3.callCount).to.equal(0);
+
+                context1.dispatchGlobally('foo');
+
+                expect(spy1.callCount).to.equal(1);
+                expect(spy2.callCount).to.equal(0);
+                expect(spy3.callCount).to.equal(1);
+
+                expect(spyDispatchGlobally.threw()).to.equal(false);
+
+            });
+
         });
 
         describe("when debug mode is enabled", function() {
