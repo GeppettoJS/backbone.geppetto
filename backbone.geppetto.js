@@ -124,10 +124,8 @@
 
         wireSingleton: function(key, clazz, wiring) {
 
-            var constructor = (clazz.prototype.initialize ? this._wrapConstructor(clazz, wiring) : clazz);
-
             this._mappings[key] = {
-                clazz: constructor,
+                clazz: clazz,
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
