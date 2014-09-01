@@ -363,6 +363,24 @@ define([
                 throw (/no mapping found/);
             });
         });
+        describe('when used with Backbone objects', function(){
+            var clazzInstantiated;
+            var clazz = function(){
+                clazzInstantiated++;
+            };
+            var singleton = Backbone.Model.extend({
+                wiring : ['clazz']
+            });
+            beforeEach(function(){
+                clazzInstantiated=0;
+                resolver.wireClass('clazz', clazz);
+                resolver.wireSingleton('singleton', singleton);
+            });
+            it("should not resolve singleton dependencies twice, see #51", function(){
+                var actual = resolver.getObject('singleton');
+                expect(clazzInstantiated ).to.equal(1);
+            });
+        });
     });
 
 });
