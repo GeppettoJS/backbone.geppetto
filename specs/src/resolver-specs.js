@@ -292,6 +292,24 @@ define([
                 expect(view.dependency).to.equal(value);
             });            
         });
+        describe("when wrapping a constructor", function() {
+            it("should allow wrapped constructor to handle initialization parameters in similar fashion as unwrapped constructor)", function() {
+                var obj1 = {value: 'foo'};
+                var obj2 = {value: 'bar'};
+                var clazz = Backbone.Model.extend({
+                    initialize: function (obj1, obj2) {
+                        this.obj1 = obj1;
+                        this.obj2 = obj2;
+                    }
+                });
+                var originalModel = new clazz(obj1, obj2);
+                var wrappedClazz = resolver._wrapConstructor(clazz, null);
+                var wrappedModel = new wrappedClazz(obj1, obj2);
+                expect(originalModel.obj1).to.eql(wrappedModel.obj1);
+                expect(originalModel.obj2).to.eql(wrappedModel.obj2)
+            });
+
+        });
         describe("when injecting objects", function() {
             var key = 'a value';
             var value = {};
