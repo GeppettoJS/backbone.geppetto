@@ -143,6 +143,18 @@ define([
                 var depender = resolver.getObject('depender');
                 expect(depender.dependency).to.equal(resolver.getObject(key));
             });
+            it("should map context events when instantiated", function(){
+                var contextEventSpy = sinon.spy();
+                _.extend(SingletonClass.prototype, Backbone.Events);
+                SingletonClass.prototype.contextEvents = {
+                    "event:foo" : function(){
+                        contextEventSpy();
+                    }
+                };
+                var actual = resolver.getObject(key);
+                context.dispatch('event:foo');
+                expect(contextEventSpy).to.have.been.called;
+            });
         });
         describe("when mapping a value", function() {
             var key = 'a value';
@@ -194,6 +206,18 @@ define([
                 });
                 var depender = resolver.getObject('depender');
                 expect(depender.dependency).to.be.an.instanceOf(clazz);
+            });
+            it("should map context events when instantiated", function(){
+                var contextEventSpy = sinon.spy();
+                _.extend(clazz.prototype, Backbone.Events);
+                clazz.prototype.contextEvents = {
+                    "event:foo" : function(){
+                        contextEventSpy();
+                    }
+                };
+                var actual = resolver.getObject(key);
+                context.dispatch('event:foo');
+                expect(contextEventSpy).to.have.been.called;
             });
         });
         describe("when mapping a view", function() {
@@ -300,6 +324,18 @@ define([
                 var view = new ViewCtor();
                 expect(view.dependency).to.equal(value);
             });            
+            it("should map context events when instantiated", function(){
+                var contextEventSpy = sinon.spy();
+                clazz.prototype.contextEvents = {
+                    "event:foo" : function(){
+                        contextEventSpy();
+                    }
+                };
+                var ViewCtor = resolver.getObject(key);
+                var view = new ViewCtor();
+                context.dispatch('event:foo');
+                expect(contextEventSpy).to.have.been.called;
+            });
         });
         describe("when wrapping a constructor", function() {
             it("should allow wrapped constructor to handle initialization parameters in similar fashion as unwrapped constructor)", function() {

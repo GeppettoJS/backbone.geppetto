@@ -104,6 +104,15 @@
             }
         },
 
+        _mapContextEvents: function(obj) {
+            _.each(obj.contextEvents, function(callback, eventName) {
+                if (_.isFunction(callback)) {
+                    this._context.listen(obj, eventName, callback);
+                } else if (_.isString(callback)) {
+                    this._context.listen(obj, eventName, obj[callback]);
+                }
+            }, this);
+        },
 
         getObject: function(key) {
             return this._retrieveFromCacheOrCreate(key, false);
@@ -165,6 +174,7 @@
                 }, this);
             }
             this.addPubSub(instance);
+            this._mapContextEvents(instance);
             return this;
         },
         addPubSub: function(instance) {
@@ -260,15 +270,6 @@
         }
 
         context.resolver.resolve(view);
-
-        // map context events
-        _.each(view.contextEvents, function(callback, eventName) {
-            if (_.isFunction(callback)) {
-                context.listen(view, eventName, callback);
-            } else if (_.isString(callback)) {
-                context.listen(view, eventName, view[callback]);
-            }
-        });
 
         var returnValue;
 
