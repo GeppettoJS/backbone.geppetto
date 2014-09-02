@@ -368,8 +368,12 @@ define([
             var clazz = function(){
                 clazzInstantiated++;
             };
+            var resolvedDependency;
             var singleton = Backbone.Model.extend({
-                wiring : ['clazz']
+                wiring : ['clazz'],
+                initialize : function(){
+                    resolvedDependency = this.clazz;
+                }
             });
             beforeEach(function(){
                 clazzInstantiated=0;
@@ -379,6 +383,10 @@ define([
             it("should not resolve singleton dependencies twice, see #51", function(){
                 var actual = resolver.getObject('singleton');
                 expect(clazzInstantiated ).to.equal(1);
+            });
+            it("should resolve dependencies before initialization", function(){
+                var actual = resolver.getObject('singleton');
+                expect(resolvedDependency ).to.be.instanceOf(clazz);
             });
         });
     });
