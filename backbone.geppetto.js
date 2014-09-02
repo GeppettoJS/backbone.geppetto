@@ -40,7 +40,9 @@
     Resolver.prototype = {
         _createAndSetupInstance: function(Clazz, wiring) {
             var instance = new Clazz();
-            this.resolve(instance, wiring);
+            if (!instance.initialize) {
+                this.resolve(instance, wiring);
+            }
             return instance;
         },
 
@@ -69,15 +71,18 @@
         },
 
         _wrapConstructor: function(OriginalConstructor, wiring) {
+            if (OriginalConstructor.prototype.initialize) {
+                var context = this._context;
 
-            var context = this._context;
-
-            return OriginalConstructor.extend({
-                initialize: function() {
-                    context.resolver.resolve(this, wiring);
-                    OriginalConstructor.prototype.initialize.apply(this, arguments);
-                }
-            });
+                return OriginalConstructor.extend({
+                    initialize: function() {
+                        context.resolver.resolve(this, wiring);
+                        OriginalConstructor.prototype.initialize.apply(this, arguments);
+                    }
+                });
+            } else {
+                return OriginalConstructor;
+            }
         },
 
         createChildResolver: function() {
@@ -105,7 +110,7 @@
 
         wireClass: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: clazz,
+                clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.OTHER,
                 wiring: wiring
@@ -125,7 +130,7 @@
         wireSingleton: function(key, clazz, wiring) {
 
             this._mappings[key] = {
-                clazz: clazz,
+                clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
