@@ -469,6 +469,9 @@ var handleFooCompleted = function() {
 }
 ```
 
+`contextEvents` maps are parsed for all components wired as singleton, class, view or command (even though commands should not be around long enough to be receiving any additional system events). 
+But not for components wired as values, since these are not constructed by the DI container.  
+
 ### Dispatching Local Events
 
 ```javascript
