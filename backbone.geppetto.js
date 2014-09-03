@@ -32,16 +32,35 @@
         OTHER: 'other'
     };
 
+    //based on http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
+
+    function applyToConstructor(constructor, argArray) {
+        var args = [constructor].concat(argArray);
+        var FactoryFunction = _.partial.apply(null, args);
+        return new FactoryFunction();
+    }
+
     var Resolver = function(context) {
         this._mappings = {};
         this._context = context;
         this.parent = undefined;
     };
     Resolver.prototype = {
-        _createAndSetupInstance: function(Clazz, wiring) {
-            var instance = new Clazz();
+        _createAndSetupInstance: function(config) {
+            var instance;
+            if (config.params) {
+                var params = _.map(config.params, function(param) {
+                    if (_.isFunction(param)) {
+                        param = param(this._context);
+                    }
+                    return param;
+                }, this);
+                instance = applyToConstructor(config.clazz, params);
+            } else {
+                instance = new config.clazz();
+            }
             if (!instance.initialize) {
-                this.resolve(instance, wiring);
+                this.resolve(instance, config.wiring);
             }
             return instance;
         },
@@ -52,14 +71,14 @@
                 var config = this._mappings[key];
                 if (!overrideRules && config.type === TYPES.SINGLETON) {
                     if (!config.object) {
-                        config.object = this._createAndSetupInstance(config.clazz, config.wiring);
+                        config.object = this._createAndSetupInstance(config);
                     }
                     output = config.object;
                 } else {
                     if (config.type === TYPES.VIEW) {
                         output = config.clazz;
                     } else if (config.clazz) {
-                        output = this._createAndSetupInstance(config.clazz, config.wiring);
+                        output = this._createAndSetupInstance(config);
                     }
                 }
             } else if (this.parent && this.parent.hasWiring(key)) {
@@ -165,6 +184,16 @@
         releaseAll: function() {
             this._mappings = {};
             return this;
+        },
+        configure: function(key) {
+            var mapping = this._mappings[key];
+            if (typeof mapping === 'undefined') {
+                throw new Error(NO_MAPPING_FOUND + key);
+            }
+            if (!mapping.clazz || mapping.type === TYPES.VIEW) {
+                throw new Error("Cannot configure " + key + ": only possible for wirings of type singleton or class");
+            }
+            mapping.params = _.toArray(arguments).slice(1);
         }
     };
 
