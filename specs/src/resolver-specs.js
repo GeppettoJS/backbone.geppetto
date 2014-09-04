@@ -60,6 +60,15 @@ define([
             });
         });
         describe("when retrieving objects", function() {
+            it("should poll the parent resolver if no corresponding mapping was found", function(){
+                var value = {};
+                var child = new Geppetto.Context({
+                    parentContext : context
+                });
+                resolver.wireValue('value', value);
+                var actual = child.resolver.getObject('value');
+                expect(actual).to.equal(value);
+            });
             it("should throw an error if no corresponding mapping was found", function() {
                 expect(function() {
                     resolver.getObject('unregistered key');
@@ -334,31 +343,6 @@ define([
             it("should not be retrievable", function() {
                 expect(function() {
                     resolver.getObject(key);
-                }).to.
-                throw (/no mapping found/);
-            });
-        });
-        describe("when creating childResolvers", function() {
-            var parent, child;
-            var key1 = 'key 1';
-            var value1 = {};
-            var key2 = 'key 2';
-            var value2 = {};
-            beforeEach(function() {
-                parent = new Geppetto.Resolver(context);
-                parent.wireValue(key1, value1);
-                child = parent.createChildResolver();
-                child.wireValue(key2, value2);
-            });
-            it("should populate the child's parent property", function() {
-                expect(child.parent).to.equal(parent);
-            });
-            it("should allow to retrieve objects mapped to the parent through the child", function() {
-                expect(child.getObject(key1)).to.equal(value1);
-            });
-            it("should not allow to retrieve objects mapped to the child through the parent", function() {
-                expect(function() {
-                    parent.getObject(key2);
                 }).to.
                 throw (/no mapping found/);
             });
