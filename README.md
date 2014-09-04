@@ -311,13 +311,50 @@ return Geppetto.Context.extend( {
 });
 ```
 
+### Setting up wiring through the API
+
+(Documentation still under construction.)
+
+The context exposes methods for wiring a
+
+#### Singleton
+
+```js
+context.wireSingleton("userModel", Backbone.Model);
+```
+
+These are the "good" kind of singletons, w/o any of the problems troubling the Singleton pattern. Once a singleton is instantiated the same instance is injected into all dependants.
+
+#### Class
+
+```js
+context.wireClass("twitterService", TwitterService);
+```
+
+All dependants are injected with a new instance when their dependencies are resolved.
+
+#### View
+
+```js
+context.wireView("LoginView", LoginView);
+```
+
+Dependants are injected with the wired constructor function (i.e. NOT an instance !)
+
+#### Values
+
+```js
+context.wireValue("answerToLifeTheUniverseAndEverything", 42);
+```
+
+Dependants are injected with the value itself.
+
 ### Wiring at the Component Level
 
 Example injecting a model into a view.
 
-UserModel.js
-
 ```js
+require( [
 	"backbone"
 ], function(
 	Backbone
@@ -331,10 +368,34 @@ UserModel.js
 			// will inject it as "this.userModel" before initialize() is called
 			var myValue = this.userModel.get("myValue"); 
 		}
-	)
-});
+	);
 });
 ```
+
+### Configuration of lazily instantiated components
+
+Since wired components are lazily instantiated it's necessary to be able to delay the configuration as well.
+
+```js
+//UserModel.js
+return Backbone.Model.extend({
+	defaults : {
+		foo : "bar"
+	}
+});
+```
+```js
+//bootstrap
+context.wireSingleton('userModel', UserModel);
+context.configure('userModel', {
+	foo : "qux"
+});
+```
+
+Once the UserModel instance is created its constructor function (or `initialize` method) will receive all arguments of the `configure` call as parameters.
+
+`configure` also accepts functions as arguments which are called upon instantiation and their results passed on to the constructor function.
+
 
 ## Commands
 
