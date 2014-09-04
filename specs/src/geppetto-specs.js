@@ -57,6 +57,13 @@ define([
                     expect(stub).to.have.been.calledOnce;
                 });
             });
+            it("should use the optionally provided resolver", function(){
+                var child = new Geppetto.Context({
+                    resolver: context.resolver
+                });
+                expect(child.resolver).to.equal(context.resolver);
+                child.destroy();
+            });
         });
 
         describe("when binding a context to a view that does not support dependency injection", function() {
@@ -723,6 +730,7 @@ define([
 
             it("should have an resolver which is a child resolver of the parent", function() {
                 expect(childContext.resolver.parent).to.equal(parentContext.resolver);
+                expect(childContext.resolver).not.to.equal(parentContext.resolver);
             });
 
         });
@@ -847,6 +855,7 @@ define([
             var context;
 
             beforeEach(function() {
+                
                 var viewDef = Backbone.View.extend();
                 view = new viewDef();
                 context = Geppetto.bindContext({

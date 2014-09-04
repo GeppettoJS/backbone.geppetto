@@ -85,11 +85,6 @@
             }
         },
 
-        createChildResolver: function() {
-            var child = new Resolver(this._context);
-            child.parent = this;
-            return child;
-        },
 
         getObject: function(key) {
             return this._retrieveFromCacheOrCreate(key, false);
@@ -185,10 +180,12 @@
 
         if (this.options.resolver) {
             this.resolver = this.options.resolver;
-        } else if (this.parentContext) {
-            this.resolver = this.parentContext.resolver.createChildResolver();
         } else if (!this.resolver) {
             this.resolver = new Resolver(this);
+        }
+
+        if (this.parentContext) {
+            this.resolver.parent = this.parentContext.resolver;
         }
 
         this.vent = {};
