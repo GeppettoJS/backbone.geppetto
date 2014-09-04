@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-
+    require('jit-grunt')(grunt);
     var browsers = [{
         browserName: "firefox",
         version: "25",
@@ -143,16 +143,13 @@ module.exports = function(grunt) {
         }
     });
 
-    // Loading dependencies
-    for (var key in grunt.file.readJSON("package.json").devDependencies) {
-        if (key !== "grunt" && key.indexOf("grunt") === 0) grunt.loadNpmTasks(key);
-    }
-
     grunt.registerTask('beautify', ['jsbeautifier:fix']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('coverage', ['blanket_mocha']);
     grunt.registerTask('travis', ['jsbeautifier:check', 'jshint', 'blanket_mocha', 'connect']);
     grunt.registerTask("sauce", ['connect', 'saucelabs-mocha']);
 
-    grunt.registerTask('default', ['version', 'jsbeautifier:fix', 'uglify', 'jshint', 'blanket_mocha']);
+    grunt.registerTask('test', ['jsbeautifier:fix', 'jshint', 'blanket_mocha']);
+    grunt.registerTask('build', ['test', 'version', 'uglify']);
+    grunt.registerTask('default', ['test']);
 };
