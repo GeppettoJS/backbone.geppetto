@@ -8,7 +8,7 @@ define([
     var expect = chai.expect;
     describe("Backbone.Geppetto", function() {
 
-        describe("when loading Geppettoooo", function() {
+        describe("when loading Geppetto", function() {
 
             it("should be defined as an AMD module", function() {
                 expect(Geppetto).not.to.be.null;
@@ -664,7 +664,7 @@ define([
             });
         });
 
-        describe("when a context has a parent contexttttt", function() {
+        describe("when a context has a parent context", function() {
 
             var parentView;
             var parentContext;
