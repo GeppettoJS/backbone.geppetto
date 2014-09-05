@@ -793,10 +793,10 @@ define([
 
                 childContext.dispatchToParents('foo');
 
-                expect(spyC).callCount(0);
-                expect(spyP).callCount(1);
-                expect(spyGP).callCount(1);
-                expect(spyGGP).callCount(1);
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(1);
 
             });
             it("should pass data payload all ancestors", function () {
@@ -884,10 +884,10 @@ define([
 
                 childContext.dispatchToParents("foo", {"any": "object"});
 
-                expect(spyC).callCount(0);
-                expect(spyP).callCount(1);
-                expect(spyGP).callCount(1);
-                expect(spyGGP).callCount(0);
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
 
             });
             it("should not crash if an ancestor destroys its own ancestor while bubbling", function() {
@@ -912,10 +912,10 @@ define([
 
                 childContext.dispatchToParents("foo");
 
-                expect(spyC).callCount(0);
-                expect(spyP).callCount(1);
-                expect(spyGP).callCount(1);
-                expect(spyGGP).callCount(0);
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
             });
 
 
