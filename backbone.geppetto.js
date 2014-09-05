@@ -323,7 +323,7 @@
     };
 
     Geppetto.Context.prototype.dispatchToParents = function dispatchToParents(eventName, eventData) {
-        if (this.parentContext && !(eventData && eventData.stopPropagation)) {
+        if (this.parentContext && !(eventData && eventData.propagationDisabled)) {
             this.parentContext.vent.trigger(eventName, eventData);
             if (this.parentContext) {
                 this.parentContext.dispatchToParents(eventName, eventData);
