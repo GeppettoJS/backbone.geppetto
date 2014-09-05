@@ -182,10 +182,13 @@
 
         if (this.options.resolver) {
             this.resolver = this.options.resolver;
-        } else if (this.parentContext) {
-            this.resolver = this.parentContext.resolver.createChildResolver();
+            //} else if (this.parentContext) {
+            //    this.resolver = this.parentContext.resolver.createChildResolver();
         } else if (!this.resolver) {
             this.resolver = new Resolver(this);
+        }
+        if (this.parentContext) {
+            this.resolver.parent = this.parentContext.resolver;
         }
 
         this.vent = {};
@@ -318,6 +321,15 @@
     Geppetto.Context.prototype.dispatchToParent = function dispatchToParent(eventName, eventData) {
         if (this.parentContext) {
             this.parentContext.vent.trigger(eventName, eventData);
+        }
+    };
+
+    Geppetto.Context.prototype.dispatchToParents = function dispatchToParents(eventName, eventData) {
+        if (this.parentContext && !(eventData && eventData.stopPropagation)) {
+            this.parentContext.vent.trigger(eventName, eventData);
+            if (this.parentContext) {
+                this.parentContext.dispatchToParents(eventName, eventData);
+            }
         }
     };
 
