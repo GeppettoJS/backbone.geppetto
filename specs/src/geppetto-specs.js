@@ -854,7 +854,7 @@ define([
                 parentView.listen(parentView, "foo", spyP);
                 childView.listen(childView, "foo", spyC);
 
-                payload = {"foo": 1};
+                var payload = {"foo": 1};
 
                 childContext.dispatchToParents('foo', payload);
 
@@ -868,7 +868,7 @@ define([
 
             it("should stop bubbling when payload extended with {stopPropagation:true}", function () {
 
-                stopBubbling = function(object) {
+                var stopBubbling = function(object) {
                     object.stopPropagation = true;
                 };
 
