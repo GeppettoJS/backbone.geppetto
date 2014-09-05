@@ -533,6 +533,52 @@ define([
                 expect(command.ctorArgs).to.contain(context);
             });
         });
+        
+        describe('when executing commands', function(){
+            var context;
+            var CommandClass;
+            var command;
+            beforeEach(function() {
+                var ContextDefinition = Geppetto.Context.extend({});
+                context = new ContextDefinition();
+                CommandClass = function() {
+                    this.ctorArgs = _.toArray(arguments);
+                };
+                CommandClass.prototype.execute = function() {
+                    command = this;
+                };
+
+            });
+            afterEach(function() {
+                context.destroy();
+                context = null;
+                CommandClass = null;
+                command = null;
+            });
+            it("should resolve dependencies", function(){
+                var value = {};
+                context.wireValue('value', value);
+                CommandClass.prototype.wiring = ['value'];
+                context.executeCommand(CommandClass);
+                expect(command.value).to.equal(value);
+            });
+            it("should inject event parameter as members", function(){
+                var eventName = "test:event";
+                var eventData = {
+                    foo : "foo"
+                };
+                context.executeCommand(CommandClass, {
+                    eventName : eventName,
+                    eventData : eventData
+                });
+                expect(command.eventName).to.equal(eventName);
+                expect(command.eventData).to.equal(eventData);
+            });
+            it("should inject the context", function(){
+                context.executeCommand(CommandClass);
+                expect(command.context).to.equal(context);
+            });
+        });
 
         describe("when wiring dependencies in batch using the Context 'wiring' parameter", function() {
 

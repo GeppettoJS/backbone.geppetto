@@ -360,6 +360,25 @@
         });
     };
 
+    Geppetto.Context.prototype._executeCommand = function(CommandConstructor, eventName, eventData, wiring) {
+        var commandInstance = new CommandConstructor(this, eventName, eventData);
+
+        commandInstance.context = this;
+        commandInstance.eventName = eventName;
+        commandInstance.eventData = eventData;
+        this.resolver.resolve(commandInstance, wiring);
+        if (_.isFunction(commandInstance.execute)) {
+            commandInstance.execute();
+        }
+    };
+
+    Geppetto.Context.prototype.executeCommand = function(CommandConstructor, event) {
+        if (!event) {
+            event = {};
+        }
+        this._executeCommand(CommandConstructor, event.eventName, event.eventData);
+    };
+
     Geppetto.Context.prototype.wireCommand = function wireCommand(eventName, CommandConstructor, wiring) {
 
         var _this = this;
@@ -369,17 +388,7 @@
         }
 
         this.vent.listenTo(this.vent, eventName, function(eventData) {
-
-            var commandInstance = new CommandConstructor(_this, eventName, eventData);
-
-            commandInstance.context = _this;
-            commandInstance.eventName = eventName;
-            commandInstance.eventData = eventData;
-            _this.resolver.resolve(commandInstance, wiring);
-            if (_.isFunction(commandInstance.execute)) {
-                commandInstance.execute();
-            }
-
+            _this._executeCommand(CommandConstructor, eventName, eventData, wiring);
         }, this);
     };
 
