@@ -866,10 +866,10 @@ define([
 
             });
 
-            it("should stop bubbling when payload extended with {stopPropagation:true}", function () {
+            it("should stop bubbling when payload extended with {propagationDisabled:true}", function () {
 
                 var stopBubbling = function(object) {
-                    object.stopPropagation = true;
+                    object.propagationDisabled = true;
                 };
 
                 var spyGGP = sinon.spy();
