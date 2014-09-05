@@ -182,8 +182,6 @@
 
         if (this.options.resolver) {
             this.resolver = this.options.resolver;
-            //} else if (this.parentContext) {
-            //    this.resolver = this.parentContext.resolver.createChildResolver();
         } else if (!this.resolver) {
             this.resolver = new Resolver(this);
         }
