@@ -892,7 +892,7 @@ define([
             });
             it("should not crash if an ancestor destroys its own ancestor while bubbling", function() {
 
-                destroyGGP = function() {
+                var destroyGGP = function() {
                     if (greatGrandParentView.close) {
                         greatGrandParentView.close();
                     } else if (greatGrandParentView.destroy){
