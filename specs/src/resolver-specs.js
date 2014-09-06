@@ -409,59 +409,6 @@ define([
                 expect(resolvedDependency ).to.be.instanceOf(clazz);
             });
         });
-        describe('when configuring wirings', function(){
-            var key = "key";
-            var passed;
-            var ctor = function(){
-                passed = _.toArray(arguments);
-            };
-            beforeEach(function(){
-                passed = null;
-                resolver.wireClass(key, ctor);
-            });
-            it("should throw an error if no corresponding mapping was found", function() {
-                expect(function() {
-                    resolver.configure('unregistered key');
-                }).to.
-                throw (/no mapping found/);
-            });
-            it("should throw an error for wired values", function() {
-                resolver.wireValue('value', {});
-                expect(function() {
-                    resolver.configure('value');
-                }).to.
-                throw (/only possible for wirings of type singleton or class/);
-            });
-            it("should throw an error for wired views", function() {
-                resolver.wireView('view', function(){});
-                expect(function() {
-                    resolver.configure('view');
-                }).to.
-                throw (/only possible for wirings of type singleton or class/);
-            });
-            it('should pass an object as payload to the constructor function', function(){
-                var payload = {};
-                resolver.configure(key, payload);
-                resolver.getObject(key);
-                expect(passed[0]).to.equal(payload);
-            });
-            it('should call a function and pass its results as payload to the constructor function', function(){
-                var payload = {};
-                resolver.configure(key, function(){
-                    return payload;
-                });
-                resolver.getObject(key);
-                expect(passed[0]).to.equal(payload);
-            });
-            it('should pass all arguments as payload to the constructor function', function(){
-                var a = {};
-                var b = {};
-                resolver.configure(key, a, b);
-                resolver.getObject(key);
-                expect(passed[0]).to.equal(a);
-                expect(passed[1]).to.equal(b);
-            });
-        });
     });
 
 });
