@@ -456,6 +456,11 @@
         return this;
     };
 
+    Geppetto.Context.prototype.configure = function(key) {
+        this.resolver.configure.apply(this.resolver, arguments);
+        return this;
+    };
+
     Geppetto.Context.prototype.destroy = function destroy() {
         this.vent.stopListening();
         this.resolver.releaseAll();
