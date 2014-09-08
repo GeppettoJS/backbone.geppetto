@@ -472,40 +472,63 @@ var handleFooCompleted = function() {
 `contextEvents` maps are parsed for all components wired as singleton, class, view or command (even though commands should not be around long enough to be receiving any additional system events). 
 But not for components wired as values, since these are not constructed by the DI container.  
 
-### Dispatching Local Events
+
+### Dispatching Events
+
+Each context uses the Backbone events module to handle events. All events have a name, and are accompanied
+by an optional data payload in the form of an object.
+
+### Dispatching Locally
 
 ```javascript
 // Event only sent to Local Context
-this.dispatch( "fooEvent");
+this.dispatch( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Parent Events
+
+```javascript
+// Example with payload (valid for all dispatching types):
+this.dispatch( "fooEvent",
+			{
+				payloadPropertyFoo: "payloadValueFoo",
+				payloadPropertyBar: true,
+				payloadPropertyBaz: 12345
+			} );
+```
+
+### Dispatching to Parent
 
 ```javascript
 // Event only sent to Parent Context
-this.dispatchToParent( "fooEvent");
+this.dispatchToParent( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Global Events
+### Dispatching to Parents
+
+```javascript
+// Event sent to Parent Context, Parent's parent, and so on
+this.dispatchToParents( "fooEvent"[, dataPayload] );
+```
+Similarly to the stopPropagation function typically used to stop event bubbling,
+the payload may be extended with { propagationDisabled: true } and the context within
+which this is done will end the chain of transmission.  The name of this property was
+chosen for its closeness to the familiar stopPropagation function, while sounding more 
+suitable for a property than a function.
+
+Note that when the payload is updated in a context, it is received thus transformed 
+by the context's parent. When the event has finished bubbling, the issuer of
+`dispatchToParents` may observe the payload object in its final state (e.g. can
+be informed of what ancestor reacted to the event and what whas done).
+
+
+
+### Dispatching Globally
 
 ```javascript
 // Event sent to every registered Context
-this.dispatchGlobally( "fooEvent");
+this.dispatchGlobally( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Events with a Payload
-
-If your event has some associated data that should be available to the consumer of your event, you can
-pass that event as an object as the second parameter of the call to `dispatch` like so:
-
-```javascript
-this.dispatch( "fooEvent",
-						{
-							payloadPropertyFoo: "payloadValueFoo",
-							payloadPropertyBar: true,
-							payloadPropertyBaz: 12345
-						} );
-```
 
 ### Un-Registering Commands
 
