@@ -222,6 +222,9 @@
         } else if (!this.resolver) {
             this.resolver = new Resolver(this);
         }
+        if (this.parentContext) {
+            this.resolver.parent = this.parentContext.resolver;
+        }
 
         if (this.parentContext) {
             this.resolver.parent = this.parentContext.resolver;
@@ -348,6 +351,15 @@
     Geppetto.Context.prototype.dispatchToParent = function dispatchToParent(eventName, eventData) {
         if (this.parentContext) {
             this.parentContext.vent.trigger(eventName, eventData);
+        }
+    };
+
+    Geppetto.Context.prototype.dispatchToParents = function dispatchToParents(eventName, eventData) {
+        if (this.parentContext && !(eventData && eventData.propagationDisabled)) {
+            this.parentContext.vent.trigger(eventName, eventData);
+            if (this.parentContext) {
+                this.parentContext.dispatchToParents(eventName, eventData);
+            }
         }
     };
 

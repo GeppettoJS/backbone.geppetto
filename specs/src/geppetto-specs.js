@@ -734,6 +734,200 @@ define([
             });
 
         });
+        describe("when calling dispatchToParents on a context with multiple levels of ancestry", function() {
+
+            var greatGrandParentView;
+            var greatGrandParentContext;
+
+            var grandParentView;
+            var grandParentContext;
+
+            var parentView;
+            var parentContext;
+
+            var childView;
+            var childContext;
+
+            beforeEach(function () {
+                var ViewDef = Backbone.View.extend();
+
+                greatGrandParentView = new ViewDef();
+                greatGrandParentContext = Geppetto.bindContext({
+                    view: greatGrandParentView,
+                    context: Geppetto.Context.extend()
+                });
+
+                grandParentView = new ViewDef();
+                grandParentContext = Geppetto.bindContext({
+                    view: grandParentView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: greatGrandParentContext
+                });
+
+                parentView = new ViewDef();
+                parentContext = Geppetto.bindContext({
+                    view: parentView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: grandParentContext
+                });
+
+                childView = new ViewDef();
+                childContext = Geppetto.bindContext({
+                    view: childView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: parentContext
+                });
+
+
+            });
+
+            afterEach(function () {
+                childView.close();
+                parentView.close();
+                grandParentView.close();
+                greatGrandParentView.close();
+            });
+
+            it("should pass event without data payload to all ancestors", function () {
+                var spyGGP = sinon.spy();
+                var spyGP = sinon.spy();
+                var spyP = sinon.spy();
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents('foo');
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(1);
+
+            });
+            it("should pass data payload all ancestors", function () {
+                var dataGGP;
+                var dataGP;
+                var dataP;
+                var dataC;
+
+                var spyGGP = sinon.spy(function (data) {
+                    dataGGP = data
+                });
+                var spyGP = sinon.spy(function (data) {
+                    dataGP = data
+                });
+                var spyP = sinon.spy(function (data) {
+                    dataP = data;
+                });
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents('foo', {"foo": "bar"});
+
+                expect(dataGGP).to.eql({"foo": "bar"});
+                expect(dataGP).to.eql({"foo": "bar"});
+                expect(dataP).to.eql({"foo": "bar"});
+
+            });
+
+            it("should pass same data payload to all ancestors, not cloned objects", function () {
+                var dataGGP;
+                var dataGP;
+                var dataP;
+                var dataC;
+
+                var spyGGP = sinon.spy(function (data) {
+                    dataGGP = data.foo;
+                    data.foo++;
+                });
+                var spyGP = sinon.spy(function (data) {
+                    dataGP = data.foo;
+                    data.foo++;
+                });
+                var spyP = sinon.spy(function (data) {
+                    dataP = data.foo;
+                    data.foo++;
+                });
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                var payload = {"foo": 1};
+
+                childContext.dispatchToParents('foo', payload);
+
+                expect(dataGGP).to.equal(3);
+                expect(dataGP).to.equal(2);
+                expect(dataP).to.equal(1);
+
+                expect(payload).to.eql({"foo": 4});
+
+            });
+
+            it("should stop bubbling when payload extended with {propagationDisabled:true}", function () {
+
+                var stopBubbling = function(object) {
+                    object.propagationDisabled = true;
+                };
+
+                var spyGGP = sinon.spy();
+                var spyGP = sinon.spy(stopBubbling);
+                var spyP = sinon.spy();
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents("foo", {"any": "object"});
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
+
+            });
+            it("should not crash if an ancestor destroys its own ancestor while bubbling", function() {
+
+                var destroyGGP = function() {
+                    if (greatGrandParentView.close) {
+                        greatGrandParentView.close();
+                    } else if (greatGrandParentView.destroy){
+                        greatGrandParentView.destroy();
+                    }
+                };
+
+                var spyGGP =    sinon.spy();
+                var spyGP =     sinon.spy();
+                var spyP =      sinon.spy(destroyGGP);
+                var spyC =      sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents("foo");
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
+            });
+
+
+        });
 
         describe("when dispatching globally", function() {
 
