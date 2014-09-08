@@ -645,6 +645,21 @@ return function FooCommand(context, eventName, eventData){
 N.B.: We'd strongly advise against using the context as a service locator inside commands. 
 If your command requires any additional dependencies it's best practice to turn it into a "real" command (which exposes an `execute` method and declares its dependencies through the `wiring` property.)
 
+### Direct command execution
+
+It's also possible to execute commands directly, without dispatching an event.
+
+```js
+context.executeCommand(ComplexUpdateMechanicCommand, {
+    eventName : "update:complex:mechanic",
+    eventData: {
+        importantStuff: "Holy shizzles!"
+    }
+} );
+```
+
+This will execute the command in exactly the same vein as when triggered by an event.
+
 ### Use underscore to reduce boilerplate
 
 You can use the underscore `extend` method to conform your command declarations to your other object declarations:
