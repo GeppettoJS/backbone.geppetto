@@ -29,40 +29,11 @@ define([
             afterEach(function() {
                 context.destroy();
             });
-            it("should create an resolver", function() {
-                expect(context.resolver).to.be.an.instanceOf(Geppetto.Resolver);
-            });
-            it("should release its resolvers wirings upon shutdown", function() {
+            it("should release its wirings upon shutdown", function() {
                 var unmapperSpy = sinon.spy();
-                context.resolver.releaseAll = unmapperSpy;
+                context.releaseAll = unmapperSpy;
                 context.destroy();
                 expect(unmapperSpy).to.have.been.calledOnce;
-            });
-            it("should wrap the resolver's methods", function() {
-                var wrapped = [
-                    "wireView",
-                    "wireSingleton",
-                    "wireValue",
-                    "wireClass",
-                    "hasWiring",
-                    "getObject",
-                    "instantiate",
-                    "resolve",
-                    "release",
-                    "releaseAll"
-                ];
-                _.each(wrapped, function(methodName) {
-                    var stub = sinon.stub(context.resolver, methodName);
-                    context[methodName].call(context);
-                    expect(stub).to.have.been.calledOnce;
-                });
-            });
-            it("should use the optionally provided resolver", function(){
-                var child = new Geppetto.Context({
-                    resolver: context.resolver
-                });
-                expect(child.resolver).to.equal(context.resolver);
-                child.destroy();
             });
         });
 
@@ -483,13 +454,11 @@ define([
 
         describe("when triggering commands", function() {
             var context;
-            var resolver;
             var CommandClass;
             var command;
             beforeEach(function() {
                 var ContextDefinition = Geppetto.Context.extend({});
                 context = new ContextDefinition();
-                resolver = context.resolver;
                 CommandClass = function() {
                     this.ctorArgs = _.toArray(arguments);
                 };
@@ -501,14 +470,12 @@ define([
             afterEach(function() {
                 context.destroy();
                 context = null;
-                resolver = null;
-                executionSpy = null;
                 CommandClass = null;
                 command = null;
             });
             it("should resolve dependencies passed to the wireCommand", function() {
                 var value = {};
-                resolver.wireValue('value', value);
+                context.wireValue('value', value);
                 context.wireCommand('foo', CommandClass, {
                     dependency: 'value'
                 });
@@ -518,7 +485,7 @@ define([
 
             it("should resolve dependencies declared in the command", function() {
                 var value = {};
-                resolver.wireValue('value', value);
+                context.wireValue('value', value);
                 CommandClass.prototype.wiring = {
                     dependency: 'value'
                 };
@@ -587,15 +554,13 @@ define([
                 
                 var ContextDefinition = Geppetto.Context.extend({
                     wiring: wiring,
-                    resolver: {
-                        wireSingleton: sinon.spy(),
-                        wireClass: sinon.spy(),
-                        wireValue: sinon.spy(),
-                        wireView: sinon.spy(),
-                        resolve: sinon.spy(),
-                        releaseAll: sinon.spy()
-                    },
-                    initialize : sinon.spy()
+                    initialize : sinon.spy(),
+                    wireSingleton: sinon.spy(),
+                    wireClass: sinon.spy(),
+                    wireValue: sinon.spy(),
+                    wireView : sinon.spy(),
+                    resolve: sinon.spy(),
+                    releaseAll: sinon.spy()
                 });
 
                 context = new ContextDefinition();
@@ -611,31 +576,31 @@ define([
                 expect(abcSpy.called).to.be.true;
             });
             it("should wire singletons", function() {
-                expect(context.resolver.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
+                expect(context.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
             });
             it("should wire custom-mapped singletons", function() {
-                expect(context.resolver.wireSingleton).to.be.calledWith("customWiredSingleton", 
+                expect(context.wireSingleton).to.be.calledWith("customWiredSingleton", 
                         wiring.singletons.customWiredSingleton.ctor, wiring.singletons.customWiredSingleton.wiring);
             });
             it("should wire classes", function() {
-                expect(context.resolver.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
+                expect(context.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
             });
             it("should wire custom-mapped classes", function() {
-                expect(context.resolver.wireClass).to.be.calledWith("customWiredClass",
+                expect(context.wireClass).to.be.calledWith("customWiredClass",
                         wiring.classes.customWiredClass.ctor, wiring.classes.customWiredClass.wiring);
             });
             it("should wire values", function() {
-                expect(context.resolver.wireValue).to.be.calledWith("value", wiring.values.value);
+                expect(context.wireValue).to.be.calledWith("value", wiring.values.value);
             });
             it("should wire views", function() {
-                expect(context.resolver.wireView).to.be.calledWith("view", wiring.views.view);
+                expect(context.wireView).to.be.calledWith("view", wiring.views.view);
             });
             it("should wire custom-mapped views", function() {
-                expect(context.resolver.wireView).to.be.calledWith("customWiredView",
+                expect(context.wireView).to.be.calledWith("customWiredView",
                         wiring.views.customWiredView.ctor, wiring.views.customWiredView.wiring);
             });
             it("should wire everything before initialization", function(){
-                expect(context.resolver.wireSingleton).to.be.calledBefore(context.initialize);
+                expect(context.wireSingleton).to.be.calledBefore(context.initialize);
             });
         });
 
@@ -726,11 +691,6 @@ define([
                 parentContext.listen(parentView, Geppetto.EVENT_CONTEXT_SHUTDOWN, spy);
                 childView.close();
                 expect(spy.callCount).to.equal(1);
-            });
-
-            it("should have an resolver which is a child resolver of the parent", function() {
-                expect(childContext.resolver.parent).to.equal(parentContext.resolver);
-                expect(childContext.resolver).not.to.equal(parentContext.resolver);
             });
 
         });
