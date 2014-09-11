@@ -40,6 +40,12 @@
         return new FactoryFunction();
     }
 
+    function createFactory(clazz) {
+        return function() {
+            return applyToConstructor(clazz, _.toArray(arguments));
+        };
+    }
+
     var Resolver = function(context) {
         this._mappings = {};
         this._context = context;
@@ -89,18 +95,17 @@
             return output;
         },
 
-        _wrapConstructor: function(OriginalConstructor, wiring) {
-            if (OriginalConstructor.prototype.initialize) {
-                var context = this._context;
-
-                return OriginalConstructor.extend({
-                    initialize: function() {
+        _wrapConstructor: function(clazz, wiring) {
+            var context = this._context;
+            if (clazz.extend) {
+                return clazz.extend({
+                    constructor: function() {
                         context.resolver.resolve(this, wiring);
-                        OriginalConstructor.prototype.initialize.apply(this, arguments);
+                        clazz.prototype.constructor.apply(this, arguments);
                     }
                 });
             } else {
-                return OriginalConstructor;
+                return clazz;
             }
         },
 
@@ -143,7 +148,7 @@
 
         wireView: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: this._wrapConstructor(clazz, wiring),
+                clazz: createFactory(this._wrapConstructor(clazz, wiring)),
                 object: null,
                 type: TYPES.VIEW
             };

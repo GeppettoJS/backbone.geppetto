@@ -336,6 +336,29 @@ define([
                 context.dispatch('event:foo');
                 expect(contextEventSpy).to.have.been.called;
             });
+            it("should be a factory method (as well)", function(){
+                var factory = resolver.getObject(key);
+                var view = factory();
+                expect(view).to.be.instanceOf(clazz);
+            });
+            it("should call the factory view's original 'initialize' function when instantiated", function() {
+                var initializeSpy = sinon.spy();
+                expect(initializeSpy).not.to.have.been.called;
+                clazz.prototype.initialize = function() {
+                    initializeSpy();
+                };
+                var factory = resolver.getObject(key);
+                var viewInstance = factory();
+                expect(initializeSpy).to.have.been.calledOnce;
+            });
+            it("should be injected with its dependencies when instantiated by the factory", function() {
+                clazz.prototype.wiring = ['foo'];
+                var foo = {};
+                resolver.wireValue('foo', foo);
+                var factory = resolver.getObject(key);
+                var viewInstance = factory();
+                expect(viewInstance.foo).to.equal(foo);
+            });
         });
         describe("when wrapping a constructor", function() {
             it("should allow wrapped constructor to handle initialization parameters in similar fashion as unwrapped constructor)", function() {
