@@ -222,9 +222,6 @@
         } else if (!this.resolver) {
             this.resolver = new Resolver(this);
         }
-        if (this.parentContext) {
-            this.resolver.parent = this.parentContext.resolver;
-        }
 
         if (this.parentContext) {
             this.resolver.parent = this.parentContext.resolver;
