@@ -35,8 +35,8 @@
     //based on http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
 
     function applyToConstructor(constructor, argArray) {
-        var args = [constructor].concat(argArray);
-        var FactoryFunction = _.partial.apply(null, args);
+        var args = [constructor, null].concat(argArray);
+        var FactoryFunction = _.bind.apply(constructor, args);
         return new FactoryFunction();
     }
 
