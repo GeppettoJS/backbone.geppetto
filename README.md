@@ -41,19 +41,19 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 ### Getting Geppetto
 
-*Latest Stable Release: 0.7.0*
+*Latest Stable Release: 0.7.1*
 
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.7.0.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0.zip).
+* Minified: [backbone.geppetto.min.js](https://github.com/GeppettoJS/backbone.geppetto/blob/0.7.1/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/GeppettoJS/backbone.geppetto/0.7.1/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.7.0.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/0.7.1.zip).
 
 *Unreleased Edge Version (master)*
 
-* Minified: [backbone.geppetto.min.js](https://raw.github.com/ModelN/backbone.geppetto/master/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js)
-* Full Release (Tests, Examples): [master.zip](https://github.com/ModelN/backbone.geppetto/archive/master.zip).
+* Minified: [backbone.geppetto.min.js](https://raw.github.com/GeppettoJS/backbone.geppetto/master/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/GeppettoJS/backbone.geppetto/master/backbone.geppetto.js)
+* Full Release (Tests, Examples): [master.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/master.zip).
 
-Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
+Visit the [project repo](https://github.com/GeppettoJS/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
 ## Get Involved!
 
@@ -748,7 +748,7 @@ Pointless?  Yes.
 Easy-to-understand?  I hope so!
 Fun?  Probably just as much as Farmville!
 
-[Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/widgets/).
+[Give it a whirl here](http://GeppettoJS.github.com/backbone.geppetto/examples/widgets/).
 
 Source code available in the `examples` directory in the Github Repo.
 
@@ -772,7 +772,7 @@ syntax provided by the [Chai](http://chaijs.com/) plugin.
 Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
 
 ### Specs
-Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
+Run the current Geppetto Test Specs in your browser [here](http://GeppettoJS.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Buzz
 ### Articles and Blogs
@@ -845,9 +845,9 @@ To add your logo, please open an issue.  Include a link to a hosted .png image o
 ### 0.6
 *Released 2 June 2013*
 
-* When registering commands on a Context, you can now declare a `commands` object instead of using the `wireCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
-* Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
-* To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* When registering commands on a Context, you can now declare a `commands` object instead of using the `wireCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
+* Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
+* To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
 * Added test coverage enforcement to Grunt task using the [grunt-blanket-qunit](https://npmjs.org/package/grunt-blanket-qunit) plugin.
 * Added JSHint config file to allow tweaking the JSHint flags.
 * Updated Travis-CI config to use Grunt instead of custom Phantom script
@@ -888,7 +888,7 @@ instead of Geppetto managing all the binding/unbinding logic.
 * Refactored internals to work with Backbone v0.9.10.
 * Updated dependencies to latest versions (Backbone, Marionette, jQuery)
 * Added unit tests to cover event cleanup cases.
-* Big thanks to [Kelvin Luck](https://github.com/vitch) for [his help](https://github.com/ModelN/backbone.geppetto/pull/8) with this release!
+* Big thanks to [Kelvin Luck](https://github.com/vitch) for [his help](https://github.com/GeppettoJS/backbone.geppetto/pull/8) with this release!
 
 ### 0.3
 *Released: 7 December 2012*
