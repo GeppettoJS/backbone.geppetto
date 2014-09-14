@@ -2,24 +2,24 @@
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
   "version": "0.7.1",
-  "homepage": "https://github.com/ModelN/backbone.geppetto",
+  "homepage": "https://github.com/GeppettoJS/backbone.geppetto",
   "author": {
     "name": "Dave Cadwallader",
     "email": "dcadwallader@gmail.com",
     "url": "http://geekdave.com"
   },
-  "github": "https://github.com/ModelN/backbone.geppetto",
+  "github": "https://github.com/GeppettoJS/backbone.geppetto",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ModelN/backbone.geppetto.git"
+    "url": "git://github.com/GeppettoJS/backbone.geppetto.git"
   },
   "bugs": {
-    "url": "https://github.com/ModelN/backbone.geppetto/issues"
+    "url": "https://github.com/GeppettoJS/backbone.geppetto/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/ModelN/backbone.geppetto/blob/master/LICENSE-MIT"
+      "url": "https://github.com/GeppettoJS/backbone.geppetto/blob/master/LICENSE-MIT"
     }
   ],
   "main": "backbone.geppetto.js",
@@ -46,9 +46,11 @@
   },
   "keywords": [
     "backbone",
+    "marionette",
     "plugin",
     "command",
-    "mvc"
+    "mvc",
+    "dependency injection"
   ],
   "dependencies": {
     "backbone": "~1.1.0",
