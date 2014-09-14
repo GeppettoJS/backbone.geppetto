@@ -795,16 +795,16 @@ To add your logo, please open an issue.  Include a link to a hosted .png image o
 *Released 14 Sep 2014*
 
 * Full refactor
-* Add factory to view mappings
+* Add factorymethod for view mappings
 * Add Context#configure
 * Add Context#dispatchToParents
 * Add contextEvent mapping for all wirings (except values)
-* Fix bug #54
-* Fix bug #51
-* Fix bug #55
-* Make compatible with CommonJS
-* Pass context, event name and data to command constructors
-* Fix bug #43
+* Fix bug [#54](https://github.com/GeppettoJS/backbone.geppetto/pull/54)
+* Fix bug [#51](https://github.com/GeppettoJS/backbone.geppetto/pull/51)
+* Fix bug [#55](https://github.com/GeppettoJS/backbone.geppetto/pull/55)
+* Make compatible with CommonJS: **Browserify** FTW!
+* Pass context, event name and data to command constructors: allow "shallow commands"
+* Fix bug [#43](https://github.com/GeppettoJS/backbone.geppetto/pull/43)
 
 
 ### 0.7.0
