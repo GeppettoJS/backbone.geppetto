@@ -53,5 +53,17 @@
   "dependencies": {
     "backbone": "~1.1.0",
     "underscore": "^1.6.0"
-  }
+  },
+  "contributors":[
+    "geekdave (https://github.com/geekdave)",
+    "creynders (https://github.com/creynders)",
+    "mtsr (https://github.com/mtsr)",
+    "mmikeyy (https://github.com/mmikeyy)",
+    "mulderp (https://github.com/mulderp)",
+    "pheuter (https://github.com/pheuter)",
+    "schorfES (https://github.com/schorfES)",
+    "niki4810 (https://github.com/niki4810)",
+    "rash-mi (https://github.com/rash-mi)",
+    "toonketels (https://github.com/toonketels)"
+  ]
 }
