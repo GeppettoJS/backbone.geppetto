@@ -1,6 +1,6 @@
 # Backbone Geppetto
 
-[![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto) [![devDependency Status](https://david-dm.org/ModelN/backbone.geppetto/dev-status.png)](https://david-dm.org/ModelN/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+[![Build Status](https://travis-ci.org/GeppettoJS/backbone.geppetto.png)](https://travis-ci.org/GeppettoJS/backbone.geppetto) [![devDependency Status](https://david-dm.org/GeppettoJS/backbone.geppetto/dev-status.png)](https://david-dm.org/GeppettoJS/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 Tested on these browsers:
 
@@ -13,7 +13,7 @@ As client-side applications grow, they often turn into tangled messes of spaghet
 
 * **Commands**: Single-purpose units of work invoked with events.  Decouples your View/Presenter code from your app's client-side business logic.  
 * **Dependency-Injection**: Allows components to remain loosely-coupled without resorting to standard JS "hacks" such as namespacing and manually passing dependencies from parent to child.
-* **The "Context"**: Provides a private pub/sub channel for related components to talk to each other, keeping your app from getting too noisy.  Also provides a place to wire up depenency injection mappings for specific areas of your app.
+* **The "Context"**: Provides a private pub/sub channel for related components to talk to each other, keeping your app from getting too noisy.  Also provides a place to wire up depenency injection mappings for specific areas of your app. 
 
 ### How big is it?
 Geppetto is tiny, weighing in just over 1KB minified and gzipped.  Much of the value of Geppetto comes from the design philosophy that it prescribes, not from the code in the framework, itself.
@@ -41,25 +41,19 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 ### Getting Geppetto
 
-*Latest Stable Release: 0.6.3*
+*Latest Stable Release: 0.7.1*
 
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.6.3/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.6.3/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.6.3.zip).
-
-*Latest Dependency Injection Release Candidate: 0.7.0-rc1*
-
-* Minified: [backbone.geppetto.min.js](https://github.com/ModelN/backbone.geppetto/blob/0.7.0-rc1/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/0.7.0-rc1/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.6.3.zip](https://github.com/ModelN/backbone.geppetto/archive/0.7.0-rc1.zip).
+* Minified: [backbone.geppetto.min.js](https://github.com/GeppettoJS/backbone.geppetto/blob/0.7.1/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/GeppettoJS/backbone.geppetto/0.7.1/backbone.geppetto.js)
+* Full Release (Tests, Examples): [0.7.1.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/0.7.1.zip).
 
 *Unreleased Edge Version (master)*
 
-* Minified: [backbone.geppetto.min.js](https://raw.github.com/ModelN/backbone.geppetto/master/dist/backbone.geppetto.min.js)
-* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/ModelN/backbone.geppetto/master/backbone.geppetto.js)
-* Full Release (Tests, Examples): [master.zip](https://github.com/ModelN/backbone.geppetto/archive/master.zip).
+* Minified: [backbone.geppetto.min.js](https://raw.github.com/GeppettoJS/backbone.geppetto/master/dist/backbone.geppetto.min.js)
+* Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/GeppettoJS/backbone.geppetto/master/backbone.geppetto.js)
+* Full Release (Tests, Examples): [master.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/master.zip).
 
-Visit the [project repo](https://github.com/ModelN/backbone.geppetto) to download the latest unreleased code (may be unstable).
+Visit the [project repo](https://github.com/GeppettoJS/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
 ## Get Involved!
 
@@ -138,7 +132,7 @@ The Grunt build is run automatically using [Travis-CI](travis-ci.org) upon every
 You'll need to include the following projects for Geppetto to work:
 
 ### Backbone
-[Backbone v0.9.10](http://documentcloud.github.com/backbone/) is required for its eventing system.
+[Backbone v0.9.10](http://documentcloud.github.com/backbone/) or higher is required for its eventing system.
 
 ## Recommended Libraries
 
@@ -194,13 +188,19 @@ The last two points are the key differences between Geppetto Applications and tr
 Geppetto implements the Controller piece using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
 
 ## Geppetto.Context
-`Geppetto.Context` has many jobs, all of which involve providing a central place to share data and communication between related components.
+Metaphorically speaking, if different modules of your app could be considered separate *living entities*, the `Geppetto.Context` would be like each being's *central nervous system*.  The Context is responsible for facilitating communication and sharing data between components *within a given module*, providing encapsulation so that this sharing does not extend past the boundaries of that module.
+
+The Context's specific jobs are:
+
+### Job #1: Dependency Injection
+
+The Context contains mappings for wiring Singletons, Classes, Views, and Values for injection into other components.  This means that instead of dependent components needing to "reach out and grab" their dependencies, Geppetto will inject them automatically.  This also has the advantage of dependent components being able to have different dependencies injected depending on the module.  
 
 ### Job #1: Event Bus
 
-Each Context has an instance of Backbone.Events, exposed as the "vent" property on the Context instance.  You can use this "vent" in the same way that you would use any other Event Aggregator, to loosely-couple related parts of your application together with event-based communication.
+Each Context acts as an event bus, using the `Backbone.Events` system.  While the event bus is not exposed directly to components, each dependent component associated with a given Context is injected with a `dispatch` and `listen` function, which can be used to communicate with other components on the same Context.  You can think of this like each dependent component being given a walkie talkie tuned to the same frequency.  This pattern promotes loose-coupling between components.
 
-### Job #2: Command Registry
+### Job #3: Command Registry
 
 Do you have any business logic in your app that doesn't necessarily belong to a view?  For instance, you might have some code that loads some backing data which is shared across many views.  Sure, you could place that business logic in your outer-most view, but then that view would be responsible for telling the sub-views whenever new data is available.  Wouldn't it be great if we could completely decouple our shared client business logic from our views?
 
@@ -227,7 +227,7 @@ return Backbone.View.extend({
 // MainContext.js
 return Geppetto.Context.extend( {
 	initialize: function () {
-		// map commands here...
+		// set up injection and command mappings...
 	}
 });
 ```
@@ -243,7 +243,7 @@ If your view requires your context to be fully-initialized when it, itself, is i
 
 For example:
 
-```javascript
+```js
 // instead of using Geppetto.BindContext to create the Context instance,
 // directly call its constructor manually.
 
@@ -264,57 +264,140 @@ Geppetto.bindContext({
     view: collectionViewInstance,
     context: contextInstance
 });
-
 ```
+
 
 ### Assigning a Parent Context
 
-```javascript
-// ShellView.js
-return Backbone.View.extend({
-	initialize: function() {
-		Geppetto.bindContext({
-			view: this,
-			context: ShellContext
-		});
-	},
-	createModule: function() {
-		var moduleView = new ModuleView({
-			parentContext: this.context;
-		});
-		moduleView.render();
-	}
-});
+Feature still under development.
 
-// ShellContext.js
+## Dependency Injection
+
+### Setting up Wiring in the Context
+
+The Context's `wiring` configuration controls how dependencies are injected within the Context.
+
+```js
+
+define([
+	"backbone",
+	"js/product/ProductModel",
+	"js/user/model/UserModel",
+	"js/util/LoggingSvc",
+	"js/user/view/UserView",
+	"js/product/view/ProductView"
+], function(
+	Backbone,
+	ProductModel,
+	UserModel,
+	LoggingSvc,
+	UserView,
+	ProductView
+) {
+
 return Geppetto.Context.extend( {
-	initialize: function () {
-		// map commands here...
-	}
+    wiring: {
+        singletons: {
+            "userModel": Backbone.Model,
+            "productModel": ProductModel,
+            "loggingSvc": LoggingSvc
+        },
+        views: {
+            "UserView": UserView,
+            "ProductView": ProductView
+        }
+    }
 });
-
-// ModuleView.js
-return Backbone.View.extend({
-	initialize: function() {
-		// use "this.options" to access Backbone constructor parameters
-		Geppetto.bindContext({
-			view: this,
-			context: ModuleContext,
-			parentContext: this.options.parentContext
-		});
-	}
-});
-
-// ModuleContext.js
-return Geppetto.Context.extend( {
-	initialize: function () {
-		// map commands here...
-	}
 });
 ```
 
+### Setting up wiring through the API
 
-### Registering Commands
+(Documentation still under construction.)
+
+The context exposes methods for wiring a
+
+#### Singleton
+
+```js
+context.wireSingleton("userModel", Backbone.Model);
+```
+
+These are the "good" kind of singletons, w/o any of the problems troubling the Singleton pattern. Once a singleton is instantiated the same instance is injected into all dependants.
+
+#### Class
+
+```js
+context.wireClass("twitterService", TwitterService);
+```
+
+All dependants are injected with a new instance when their dependencies are resolved.
+
+#### View
+
+```js
+context.wireView("LoginView", LoginView);
+```
+
+Dependants are injected with the wired constructor function (i.e. NOT an instance !)
+
+#### Values
+
+```js
+context.wireValue("answerToLifeTheUniverseAndEverything", 42);
+```
+
+Dependants are injected with the value itself.
+
+### Wiring at the Component Level
+
+Example injecting a model into a view.
+
+```js
+require( [
+	"backbone"
+], function(
+	Backbone
+) {
+	return Backbone.View.extend({
+		wiring: [
+			"userModel"
+		],
+		initialize: function() {
+			// since "userModel" is in the wiring list, Geppetto
+			// will inject it as "this.userModel" before initialize() is called
+			var myValue = this.userModel.get("myValue"); 
+		}
+	);
+});
+```
+
+### Configuration of lazily instantiated components
+
+Since wired components are lazily instantiated it's necessary to be able to delay the configuration as well.
+
+```js
+//UserModel.js
+return Backbone.Model.extend({
+	defaults : {
+		foo : "bar"
+	}
+});
+```
+```js
+//bootstrap
+context.wireSingleton('userModel', UserModel);
+context.configure('userModel', {
+	foo : "qux"
+});
+```
+
+Once the UserModel instance is created its constructor function (or `initialize` method) will receive all arguments of the `configure` call as parameters.
+
+`configure` also accepts functions as arguments which are called upon instantiation and their results passed on to the constructor function.
+
+
+## Commands
 
 **Option 1: Using the `wireCommand` function:**
 
@@ -332,27 +415,38 @@ return Geppetto.Context.extend( {
 
 ```javascript
 return Geppetto.Context.extend( {
-	commands: {
-	    "appEventFoo":          FooCommand,
-		"appEventBar":          BarCommand,
-		"appEventBaz":          BazCommand,
-		"appEventFooBarBaz":    [
-		    FooCommand,
-		    BarCommand,
-		    BazCommand
-		]
-	}
+    wiring : {
+        commands: {
+            "appEventFoo":          FooCommand,
+            "appEventBar":          BarCommand,
+            "appEventBaz":          BazCommand,
+            "appEventFooBarBaz":    [
+                FooCommand,
+                BarCommand,
+                BazCommand
+            ]
+        }
+    }
 });
 
 ```
 
-### Listening to Events
+## Events
+
+### Event Bus
+The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
+
+### Injection of Communication Methods
+
+Any component mapped for injection will also have `listen` and `dispatch` methods injected into it.
+
+### Listening
 
 **Option 1: Using the `listen` method:**
 
 ```javascript
 // this usually goes in View code... to respond to an event fired by a Command finishing its job
-context.listen(this, "fooCompleted", handleFooCompleted);
+this.listen(this, "fooCompleted", handleFooCompleted);
 
 var handleFooCompleted = function() {
 	// update the view or something...
@@ -375,43 +469,66 @@ var handleFooCompleted = function() {
 }
 ```
 
-### Event Bus
-The Context provides an Event Bus for loosely-coupled communication between components.  When a component dispatches an event onto the Event Bus, it can choose whether that event should be targeted for the local Context, the parent Context, or all Contexts.  This allows inter-module communication when desired, while keeping events neatly segregated otherwise.
+`contextEvents` maps are parsed for all components wired as singleton, class, view or command (even though commands should not be around long enough to be receiving any additional system events). 
+But not for components wired as values, since these are not constructed by the DI container.  
 
-### Dispatching Local Events
+
+### Dispatching Events
+
+Each context uses the Backbone events module to handle events. All events have a name, and are accompanied
+by an optional data payload in the form of an object.
+
+### Dispatching Locally
 
 ```javascript
 // Event only sent to Local Context
-context.dispatch( "fooEvent");
+this.dispatch( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Parent Events
+
+```javascript
+// Example with payload (valid for all dispatching types):
+this.dispatch( "fooEvent",
+			{
+				payloadPropertyFoo: "payloadValueFoo",
+				payloadPropertyBar: true,
+				payloadPropertyBaz: 12345
+			} );
+```
+
+### Dispatching to Parent
 
 ```javascript
 // Event only sent to Parent Context
-context.dispatchToParent( "fooEvent");
+this.dispatchToParent( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Global Events
+### Dispatching to Parents
+
+```javascript
+// Event sent to Parent Context, Parent's parent, and so on
+this.dispatchToParents( "fooEvent"[, dataPayload] );
+```
+Similarly to the stopPropagation function typically used to stop event bubbling,
+the payload may be extended with { propagationDisabled: true } and the context within
+which this is done will end the chain of transmission.  The name of this property was
+chosen for its closeness to the familiar stopPropagation function, while sounding more 
+suitable for a property than a function.
+
+Note that when the payload is updated in a context, it is received thus transformed 
+by the context's parent. When the event has finished bubbling, the issuer of
+`dispatchToParents` may observe the payload object in its final state (e.g. can
+be informed of what ancestor reacted to the event and what whas done).
+
+
+
+### Dispatching Globally
 
 ```javascript
 // Event sent to every registered Context
-context.dispatchGlobally( "fooEvent");
+this.dispatchGlobally( "fooEvent"[, dataPayload] );
 ```
 
-### Dispatching Events with a Payload
-
-If your event has some associated data that should be available to the consumer of your event, you can
-pass that event as an object as the second parameter of the call to `dispatch` like so:
-
-```javascript
-context.dispatch( "fooEvent",
-						{
-							payloadPropertyFoo: "payloadValueFoo",
-							payloadPropertyBar: true,
-							payloadPropertyBaz: 12345
-						} );
-```
 
 ### Un-Registering Commands
 
@@ -495,6 +612,63 @@ command.prototype.updateModel = function(theModel) {
 return command;
 ```
 
+### Dependency declaration
+
+Declare any additional dependencies of commands as you would in other objects, using the `wiring` property:
+ 
+```js
+var command = function () {};
+
+command.prototype.wiring = [
+    'userModel',
+    'loginService'
+];
+
+command.prototype.execute = function(){
+    this.loginService.authenticate(this.userModel.getAuth());
+}
+```
+
+### Shallow Commands
+
+The context, event name and event data aren't only injected as properties of the command instance, but they're also passed as parameters to the constructor function of the command.
+This allows you to create "shallow commands" which do not expose an `execute` method, but simply consist out of the constructor function.
+
+```js
+return function FooCommand(context, eventName, eventData){
+    console.log('event received:', eventName, eventData);
+    
+    context.dispatch('foo:completed');
+}
+```
+
+N.B.: We'd strongly advise against using the context as a service locator inside commands. 
+If your command requires any additional dependencies it's best practice to turn it into a "real" command (which exposes an `execute` method and declares its dependencies through the `wiring` property.)
+
+### Use underscore to reduce boilerplate
+
+You can use the underscore `extend` method to conform your command declarations to your other object declarations:
+
+```
+require(
+	"underscore"
+], function(
+	_
+) {
+    var Command = function(){
+    };
+	return _.extend(Command.prototype, {
+	    wiring: [
+	        'userModel',
+	        'loginService'
+	    ],
+	    execute: function(){
+	        this.loginService.authenticate(this.userModel.getAuth());
+	    }
+    });
+});
+```
+
 ### Responsibilities of a Command
 
 * **Single Purpose**: A Command should have one purpose and one purpose only.  This makes understanding and testing the command very easy.
@@ -574,7 +748,7 @@ Pointless?  Yes.
 Easy-to-understand?  I hope so!
 Fun?  Probably just as much as Farmville!
 
-[Give it a whirl here](http://modeln.github.com/backbone.geppetto/examples/widgets/).
+[Give it a whirl here](http://GeppettoJS.github.com/backbone.geppetto/examples/widgets/).
 
 Source code available in the `examples` directory in the Github Repo.
 
@@ -598,7 +772,7 @@ syntax provided by the [Chai](http://chaijs.com/) plugin.
 Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
 
 ### Specs
-Run the current Geppetto Test Specs in your browser [here](http://modeln.github.com/backbone.geppetto/specs/).  More specs to come!
+Run the current Geppetto Test Specs in your browser [here](http://GeppettoJS.github.com/backbone.geppetto/specs/).  More specs to come!
 
 ## Buzz
 ### Articles and Blogs
@@ -616,6 +790,40 @@ Geppetto is used in production by these organizations.
 To add your logo, please open an issue.  Include a link to a hosted .png image of your logo no wider than 200px and no taller than 70px.  We'd also love to hear a quick story about how Geppetto has helped you out!
 
 ## Version History
+
+### 0.7.1
+*Released 14 Sep 2014*
+
+* Full refactor
+* Add factorymethod for view mappings
+* Add Context#configure
+* Add Context#dispatchToParents
+* Add contextEvent mapping for all wirings (except values)
+* Fix bug [#54](https://github.com/GeppettoJS/backbone.geppetto/pull/54)
+* Fix bug [#51](https://github.com/GeppettoJS/backbone.geppetto/pull/51)
+* Fix bug [#55](https://github.com/GeppettoJS/backbone.geppetto/pull/55)
+* Make compatible with CommonJS: **Browserify** FTW!
+* Pass context, event name and data to command constructors: allow "shallow commands"
+* Fix bug [#43](https://github.com/GeppettoJS/backbone.geppetto/pull/43)
+
+
+### 0.7.0
+*Released 29 Apr 2014*
+
+* Official release for DI features
+* Fix bower config
+* Happy 2-year Geppettiversary!
+
+### 0.7.0 RC5
+*Released 18 Jan 2014*
+
+* Bug fixes for DI
+* Update docs with first pass at DI APIs (work in progress)
+
+### 0.7.0 RC1
+*Released 17 Nov 2013*
+
+* Initial pre-release with dependency injection support
 
 ### 0.6.3
 *Released 31 July 2013*
@@ -637,9 +845,9 @@ To add your logo, please open an issue.  Include a link to a hosted .png image o
 ### 0.6
 *Released 2 June 2013*
 
-* When registering commands on a Context, you can now declare a `commands` object instead of using the `wireCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
-* Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
-* To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/ModelN/backbone.geppetto/pull/13))
+* When registering commands on a Context, you can now declare a `commands` object instead of using the `wireCommand` function.  This is more in line with the "Backbone Way" of preferring configuration over code.  (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
+* Similar to the above, you can register context event listeners on a View, using the `contextEvents` object. (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
+* To facilitate binding an existing context to a sub-view, you can now pass an existing Context instance to `Geppetto.bindContext`, instead of just a Context constructor function. (Thanks, [@mtsr](https://github.com/GeppettoJS/backbone.geppetto/pull/13))
 * Added test coverage enforcement to Grunt task using the [grunt-blanket-qunit](https://npmjs.org/package/grunt-blanket-qunit) plugin.
 * Added JSHint config file to allow tweaking the JSHint flags.
 * Updated Travis-CI config to use Grunt instead of custom Phantom script
@@ -680,7 +888,7 @@ instead of Geppetto managing all the binding/unbinding logic.
 * Refactored internals to work with Backbone v0.9.10.
 * Updated dependencies to latest versions (Backbone, Marionette, jQuery)
 * Added unit tests to cover event cleanup cases.
-* Big thanks to [Kelvin Luck](https://github.com/vitch) for [his help](https://github.com/ModelN/backbone.geppetto/pull/8) with this release!
+* Big thanks to [Kelvin Luck](https://github.com/vitch) for [his help](https://github.com/GeppettoJS/backbone.geppetto/pull/8) with this release!
 
 ### 0.3
 *Released: 7 December 2012*

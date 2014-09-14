@@ -1,4 +1,4 @@
-// backbone.geppetto 0.7.0-rc4
+// backbone.geppetto 0.7.1
 //
 // Copyright (C) 2013 Dave Cadwallader, Model N, Inc.
 // Distributed under the MIT License
@@ -7,7 +7,10 @@
 // http://modeln.github.com/backbone.geppetto/
 
 (function(factory) {
-    if (typeof define === "function" && define.amd) {
+    // CommonJS
+    if (typeof exports === "object") {
+        module.exports = factory(require('underscore'), require('backbone'));
+    } else if (typeof define === "function" && define.amd) {
         // Register as an AMD module if available...
         define(["underscore", "backbone"], factory);
     } else {
@@ -29,15 +32,110 @@
         OTHER: 'other'
     };
 
-    var Resolver = function(context) {
-        this._mappings = {};
-        this._context = context;
-        this.parent = undefined;
+    //based on http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
+
+    function applyToConstructor(constructor, argArray) {
+        var args = [constructor, null].concat(argArray);
+        var FactoryFunction = _.bind.apply(constructor, args);
+        return new FactoryFunction();
+    }
+
+    function createFactory(clazz) {
+        return function() {
+            return applyToConstructor(clazz, _.toArray(arguments));
+        };
+    }
+
+    var extractConfig = function(def, key) {
+        var thisCtor, thisWiring;
+        if (def.hasOwnProperty("ctor")) {
+            thisCtor = def.ctor;
+            thisWiring = def.wiring;
+        } else {
+            thisCtor = def;
+        }
+        return [key, thisCtor, thisWiring];
     };
-    Resolver.prototype = {
-        _createAndSetupInstance: function(Clazz, wiring) {
-            var instance = new Clazz();
-            this.resolve(instance, wiring);
+
+    var validateListen = function(target, eventName, callback) {
+
+        if (!_.isObject(target) || !_.isFunction(target.listenTo) || !_.isFunction(target.stopListening)) {
+            throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
+        }
+
+        if (!_.isString(eventName)) {
+            throw "eventName must be a String";
+        }
+
+        if (!_.isFunction(callback)) {
+            throw "callback must be a function";
+        }
+    };
+
+    var Geppetto = {};
+
+    Geppetto.version = '0.7.1';
+
+    Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
+
+    var contexts = {};
+
+    Geppetto.Context = function Context(options) {
+        this._mappings = {};
+
+        this.options = options || {};
+        this.parentContext = this.options.parentContext;
+
+        this.vent = {};
+        _.extend(this.vent, Backbone.Events);
+        this._contextId = _.uniqueId("Context");
+        contexts[this._contextId] = this;
+
+        var wiring = this.wiring || this.options.wiring;
+        if (wiring) {
+            this._configureWirings(wiring);
+        }
+        if (_.isFunction(this.initialize)) {
+            this.initialize.apply(this, arguments);
+        }
+    };
+
+    Geppetto.Context.extend = Backbone.View.extend;
+
+    _.extend(Geppetto.Context.prototype, {
+
+        _configureWirings: function _configureWirings(wiring) {
+            _.each(wiring.singletons, function(def, key) {
+                this.wireSingleton.apply(this, extractConfig(def, key));
+            }, this);
+            _.each(wiring.classes, function(def, key) {
+                this.wireClass.apply(this, extractConfig(def, key));
+            }, this);
+            _.each(wiring.values, function(value, key) {
+                this.wireValue(key, value);
+            }, this);
+            _.each(wiring.views, function(def, key) {
+                this.wireView.apply(this, extractConfig(def, key));
+            }, this);
+            this.wireCommands(wiring.commands);
+        },
+
+        _createAndSetupInstance: function(config) {
+            var instance;
+            if (config.params) {
+                var params = _.map(config.params, function(param) {
+                    if (_.isFunction(param)) {
+                        param = param(this);
+                    }
+                    return param;
+                }, this);
+                instance = applyToConstructor(config.clazz, params);
+            } else {
+                instance = new config.clazz();
+            }
+            if (!instance.initialize) {
+                this.resolve(instance, config.wiring);
+            }
             return instance;
         },
 
@@ -47,46 +145,131 @@
                 var config = this._mappings[key];
                 if (!overrideRules && config.type === TYPES.SINGLETON) {
                     if (!config.object) {
-                        config.object = this._createAndSetupInstance(config.clazz, config.wiring);
+                        config.object = this._createAndSetupInstance(config);
                     }
                     output = config.object;
                 } else {
                     if (config.type === TYPES.VIEW) {
                         output = config.clazz;
                     } else if (config.clazz) {
-                        output = this._createAndSetupInstance(config.clazz, config.wiring);
+                        output = this._createAndSetupInstance(config);
                     }
                 }
-            } else if (this.parent && this.parent.hasWiring(key)) {
-                output = this.parent._retrieveFromCacheOrCreate(key, overrideRules);
+            } else if (this.parentContext && this.parentContext.hasWiring(key)) {
+                output = this.parentContext._retrieveFromCacheOrCreate(key, overrideRules);
             } else {
                 throw new Error(NO_MAPPING_FOUND + key);
             }
             return output;
         },
 
-        _wrapConstructor: function(OriginalConstructor, wiring) {
+        _wrapConstructor: function(clazz, wiring) {
+            var context = this;
+            if (clazz.extend) {
+                return clazz.extend({
+                    constructor: function() {
+                        context.resolve(this, wiring);
+                        clazz.prototype.constructor.apply(this, arguments);
+                    }
+                });
+            } else {
+                return clazz;
+            }
+        },
 
-            var context = this._context;
+        _mapContextEvents: function(obj) {
+            _.each(obj.contextEvents, function(callback, eventName) {
+                if (_.isFunction(callback)) {
+                    this.listen(obj, eventName, callback);
+                } else if (_.isString(callback)) {
+                    this.listen(obj, eventName, obj[callback]);
+                }
+            }, this);
+        },
 
-            var WrappedConstructor = OriginalConstructor.extend({
-                initialize: function() {
-                    context.resolver.resolve(this, wiring);
-                    OriginalConstructor.prototype.initialize.call(this, arguments);
+        addPubSub: function(instance) {
+            instance.listen = _.bind(this.listen, this);
+            instance.dispatch = _.bind(this.dispatch, this);
+        },
+
+        listen: function listen(target, eventName, callback) {
+            validateListen(target, eventName, callback);
+            return target.listenTo(this.vent, eventName, callback, target);
+        },
+
+        listenToOnce: function listenToOnce(target, eventName, callback) {
+            validateListen(target, eventName, callback);
+            return target.listenToOnce(this.vent, eventName, callback, target);
+        },
+
+        dispatch: function dispatch(eventName, eventData) {
+            if (!_.isUndefined(eventData) && !_.isObject(eventData)) {
+                throw "Event payload must be an object";
+            }
+            eventData = eventData || {};
+            eventData.eventName = eventName;
+            this.vent.trigger(eventName, eventData);
+        },
+
+        dispatchToParent: function dispatchToParent(eventName, eventData) {
+            if (this.parentContext) {
+                this.parentContext.vent.trigger(eventName, eventData);
+            }
+        },
+
+        dispatchToParents: function dispatchToParents(eventName, eventData) {
+            if (this.parentContext && !(eventData && eventData.propagationDisabled)) {
+                this.parentContext.vent.trigger(eventName, eventData);
+                if (this.parentContext) {
+                    this.parentContext.dispatchToParents(eventName, eventData);
+                }
+            }
+        },
+
+        dispatchGlobally: function dispatchGlobally(eventName, eventData) {
+
+            _.each(contexts, function(context) {
+                if (!context) {
+                    return true;
+                }
+                context.vent.trigger(eventName, eventData);
+            });
+        },
+
+        wireCommand: function wireCommand(eventName, CommandConstructor, wiring) {
+
+            var context = this;
+
+            if (!_.isFunction(CommandConstructor)) {
+                throw "Command must be constructable";
+            }
+
+            this.vent.listenTo(this.vent, eventName, function(eventData) {
+
+                var commandInstance = new CommandConstructor(context, eventName, eventData);
+
+                commandInstance.context = context;
+                commandInstance.eventName = eventName;
+                commandInstance.eventData = eventData;
+                context.resolve(commandInstance, wiring);
+                if (_.isFunction(commandInstance.execute)) {
+                    commandInstance.execute();
+                }
+
+            });
+        },
+
+        wireCommands: function wireCommands(commandsMap) {
+            var _this = this;
+            _.each(commandsMap, function(mixedType, eventName) {
+                if (_.isArray(mixedType)) {
+                    _.each(mixedType, function(commandClass) {
+                        _this.wireCommand(eventName, commandClass);
+                    });
+                } else {
+                    _this.wireCommand(eventName, mixedType);
                 }
             });
-
-            return WrappedConstructor;
-        },
-
-        createChildResolver: function() {
-            var child = new Resolver(this._context);
-            child.parent = this;
-            return child;
-        },
-
-        getObject: function(key) {
-            return this._retrieveFromCacheOrCreate(key, false);
         },
 
         wireValue: function(key, useValue) {
@@ -98,13 +281,9 @@
             return this;
         },
 
-        hasWiring: function(key) {
-            return this._mappings.hasOwnProperty(key) || ( !! this.parent && this.parent.hasWiring(key));
-        },
-
         wireClass: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: clazz,
+                clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.OTHER,
                 wiring: wiring
@@ -114,7 +293,7 @@
 
         wireView: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: this._wrapConstructor(clazz, wiring),
+                clazz: createFactory(this._wrapConstructor(clazz, wiring)),
                 object: null,
                 type: TYPES.VIEW
             };
@@ -123,15 +302,32 @@
 
         wireSingleton: function(key, clazz, wiring) {
 
-            var constructor = (clazz.prototype.initialize ? this._wrapConstructor(clazz, wiring) : clazz);
-
             this._mappings[key] = {
-                clazz: constructor,
+                clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
             };
             return this;
+        },
+
+        configure: function(key) {
+            var mapping = this._mappings[key];
+            if (typeof mapping === 'undefined') {
+                throw new Error(NO_MAPPING_FOUND + key);
+            }
+            if (!mapping.clazz || mapping.type === TYPES.VIEW) {
+                throw new Error("Cannot configure " + key + ": only possible for wirings of type singleton or class");
+            }
+            mapping.params = _.toArray(arguments).slice(1);
+        },
+
+        hasWiring: function(key) {
+            return this._mappings.hasOwnProperty(key) || ( !! this.parentContext && this.parentContext.hasWiring(key));
+        },
+
+        getObject: function(key) {
+            return this._retrieveFromCacheOrCreate(key, false);
         },
 
         instantiate: function(key) {
@@ -147,59 +343,30 @@
                 }, this);
             }
             this.addPubSub(instance);
+            this._mapContextEvents(instance);
             return this;
         },
-        addPubSub: function(instance) {
-            instance.listen = _.bind(this._context.listen, this._context);
-            instance.dispatch = _.bind(this._context.dispatch, this._context);
-        },
+
         release: function(key) {
             delete this._mappings[key];
-
             return this;
         },
+
         releaseAll: function() {
             this._mappings = {};
             return this;
-        }
-    };
+        },
 
-    var Geppetto = {};
+        destroy: function destroy() {
+            this.vent.stopListening();
+            this.releaseAll();
 
-    Geppetto.version = '0.7.0-rc4';
+            delete contexts[this._contextId];
 
-    Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
-
-    Geppetto.Resolver = Resolver;
-
-    var contexts = {};
-
-    Geppetto.Context = function Context(options) {
-
-        this.options = options || {};
-        this.parentContext = this.options.parentContext;
-
-        if (this.options.resolver) {
-            this.resolver = this.options.resolver;
-        } else if (this.parentContext) {
-            this.resolver = this.parentContext.resolver.createChildResolver();
-        } else if (!this.resolver) {
-            this.resolver = new Resolver(this);
+            this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
         }
 
-        this.vent = {};
-        _.extend(this.vent, Backbone.Events);
-        if (_.isFunction(this.initialize)) {
-            this.initialize.apply(this, arguments);
-        }
-        this._contextId = _.uniqueId("Context");
-        contexts[this._contextId] = this;
-
-        var wiring = this.wiring || this.options.wiring;
-        if (wiring) {
-            this._configureWirings(wiring);
-        }
-    };
+    });
 
     Geppetto.bindContext = function bindContext(options) {
 
@@ -229,16 +396,7 @@
             context = this.options.context;
         }
 
-        context.resolver.resolve(view);
-
-        // map context events
-        _.each(view.contextEvents, function(callback, eventName) {
-            if (_.isFunction(callback)) {
-                context.listen(view, eventName, callback);
-            } else if (_.isString(callback)) {
-                context.listen(view, eventName, view[callback]);
-            }
-        });
+        context.resolve(view);
 
         var returnValue;
 
@@ -252,174 +410,6 @@
 
         return returnValue;
     };
-
-    var extractConfig = function(def, key) {
-        var thisCtor, thisWiring;
-        if (def.hasOwnProperty("ctor")) {
-            thisCtor = def.ctor;
-            thisWiring = def.wiring;
-        } else {
-            thisCtor = def;
-        }
-        return [key, thisCtor, thisWiring];
-    };
-
-    Geppetto.Context.prototype._configureWirings = function _configureWirings(wiring) {
-        _.each(wiring.singletons, function(def, key) {
-            this.wireSingleton.apply(this, extractConfig(def, key));
-        }, this);
-        _.each(wiring.classes, function(def, key) {
-            this.wireClass.apply(this, extractConfig(def, key));
-        }, this);
-        _.each(wiring.values, function(value, key) {
-            this.wireValue(key, value);
-        }, this);
-        _.each(wiring.views, function(def, key) {
-            this.wireView.apply(this, extractConfig(def, key));
-        }, this);
-        this.wireCommands(wiring.commands);
-    };
-
-    var validateListen = function(target, eventName, callback) {
-
-        if (!_.isObject(target) || !_.isFunction(target.listenTo) || !_.isFunction(target.stopListening)) {
-            throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
-        }
-
-        if (!_.isString(eventName)) {
-            throw "eventName must be a String";
-        }
-
-        if (!_.isFunction(callback)) {
-            throw "callback must be a function";
-        }
-    };
-
-    Geppetto.Context.prototype.listen = function listen(target, eventName, callback) {
-        validateListen(target, eventName, callback);
-        return target.listenTo(this.vent, eventName, callback, target);
-    };
-
-    Geppetto.Context.prototype.listenToOnce = function listenToOnce(target, eventName, callback) {
-        validateListen(target, eventName, callback);
-        return target.listenToOnce(this.vent, eventName, callback, target);
-    };
-
-    Geppetto.Context.prototype.dispatch = function dispatch(eventName, eventData) {
-        if (!_.isUndefined(eventData) && !_.isObject(eventData)) {
-            throw "Event payload must be an object";
-        }
-        eventData = eventData || {};
-        eventData.eventName = eventName;
-        this.vent.trigger(eventName, eventData);
-    };
-
-    Geppetto.Context.prototype.dispatchToParent = function dispatchToParent(eventName, eventData) {
-        if (this.parentContext) {
-            this.parentContext.vent.trigger(eventName, eventData);
-        }
-    };
-
-    Geppetto.Context.prototype.dispatchGlobally = function dispatchGlobally(eventName, eventData) {
-
-        _.each(contexts, function(context, contextId) {
-            context.vent.trigger(eventName, eventData);
-        });
-    };
-
-    Geppetto.Context.prototype.wireCommand = function wireCommand(eventName, CommandConstructor, wiring) {
-
-        var _this = this;
-
-        if (!_.isFunction(CommandConstructor)) {
-            throw "Command must be constructable";
-        }
-
-        this.vent.listenTo(this.vent, eventName, function(eventData) {
-
-            var commandInstance = new CommandConstructor();
-
-            commandInstance.context = _this;
-            commandInstance.eventName = eventName;
-            commandInstance.eventData = eventData;
-            _this.resolver.resolve(commandInstance, wiring);
-            if (_.isFunction(commandInstance.execute)) {
-                commandInstance.execute();
-            }
-
-        }, this);
-    };
-
-    Geppetto.Context.prototype.wireCommands = function wireCommands(commandsMap) {
-        var _this = this;
-        _.each(commandsMap, function(mixedType, eventName) {
-            if (_.isArray(mixedType)) {
-                _.each(mixedType, function(commandClass) {
-                    _this.wireCommand(eventName, commandClass);
-                });
-            } else {
-                _this.wireCommand(eventName, mixedType);
-            }
-        });
-    };
-
-    Geppetto.Context.prototype.wireView = function(key, clazz, wiring) {
-        this.resolver.wireView(key, clazz, wiring);
-        return this;
-    };
-
-    Geppetto.Context.prototype.wireSingleton = function(key, clazz, wiring) {
-        this.resolver.wireSingleton(key, clazz, wiring);
-        return this;
-    };
-
-    Geppetto.Context.prototype.wireValue = function(key, useValue) {
-        this.resolver.wireValue(key, useValue);
-        return this;
-    };
-
-    Geppetto.Context.prototype.wireClass = function(key, clazz, wiring) {
-        this.resolver.wireClass(key, clazz, wiring);
-        return this;
-    };
-
-    Geppetto.Context.prototype.hasWiring = function(key) {
-        return this.resolver.hasWiring(key);
-    };
-
-    Geppetto.Context.prototype.getObject = function(key) {
-        return this.resolver.getObject(key);
-    };
-
-    Geppetto.Context.prototype.instantiate = function(key) {
-        return this.resolver.instantiate(key);
-    };
-
-    Geppetto.Context.prototype.resolve = function(instance, wiring) {
-        this.resolver.resolve(instance, wiring);
-        return this;
-    };
-
-    Geppetto.Context.prototype.release = function(key) {
-        this.resolver.release(key);
-        return this;
-    };
-
-    Geppetto.Context.prototype.releaseAll = function() {
-        this.resolver.releaseAll();
-        return this;
-    };
-
-    Geppetto.Context.prototype.destroy = function destroy() {
-        this.vent.stopListening();
-        this.resolver.releaseAll();
-
-        delete contexts[this._contextId];
-
-        this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
-    };
-
-    Geppetto.Context.extend = Backbone.View.extend;
 
     var debug = {
 

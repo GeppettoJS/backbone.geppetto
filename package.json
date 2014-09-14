@@ -1,28 +1,28 @@
 {
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
-  "version": "0.7.0-rc4",
-  "homepage": "https://github.com/ModelN/backbone.geppetto",
+  "version": "0.7.1",
+  "homepage": "https://github.com/GeppettoJS/backbone.geppetto",
   "author": {
     "name": "Dave Cadwallader",
     "email": "dcadwallader@gmail.com",
     "url": "http://geekdave.com"
   },
-  "github": "https://github.com/ModelN/backbone.geppetto",
+  "github": "https://github.com/GeppettoJS/backbone.geppetto",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ModelN/backbone.geppetto.git"
+    "url": "git://github.com/GeppettoJS/backbone.geppetto.git"
   },
   "bugs": {
-    "url": "https://github.com/ModelN/backbone.geppetto/issues"
+    "url": "https://github.com/GeppettoJS/backbone.geppetto/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/ModelN/backbone.geppetto/blob/master/LICENSE-MIT"
+      "url": "https://github.com/GeppettoJS/backbone.geppetto/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "Gruntfile.js",
+  "main": "backbone.geppetto.js",
   "engines": {
     "node": ">= 0.8.0"
   },
@@ -31,23 +31,41 @@
   },
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-blanket-mocha": "~0.3.1",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-version": "~0.2.2",
-    "mocha-unfunk-reporter": "~0.4.0",
-    "grunt-contrib-connect": "~0.6.0",
-    "grunt-concurrent": "~0.4.0",
+    "grunt-blanket-mocha": "^0.4.0",
+    "grunt-concurrent": "^0.5.0",
+    "grunt-contrib-connect": "^0.7.1",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-jsbeautifier": "0.2.2",
     "grunt-open": "~0.2.2",
-    "grunt-jsbeautifier": "~0.2.2",
-    "grunt-saucelabs": "~4.1.2",
-    "backbone": "~1.1.0",
-    "jquery": "~1.8.3"
+    "grunt-saucelabs": "^5.1.2",
+    "grunt-version": "0.2.2",
+    "jit-grunt": "^0.8.0",
+    "jquery": "^2.1.0",
+    "mocha-unfunk-reporter": "~0.4.0"
   },
   "keywords": [
     "backbone",
+    "marionette",
     "plugin",
     "command",
-    "mvc"
+    "mvc",
+    "dependency injection"
+  ],
+  "dependencies": {
+    "backbone": "~1.1.0",
+    "underscore": "^1.6.0"
+  },
+  "contributors":[
+    "geekdave (https://github.com/geekdave)",
+    "creynders (https://github.com/creynders)",
+    "mtsr (https://github.com/mtsr)",
+    "mmikeyy (https://github.com/mmikeyy)",
+    "mulderp (https://github.com/mulderp)",
+    "pheuter (https://github.com/pheuter)",
+    "schorfES (https://github.com/schorfES)",
+    "niki4810 (https://github.com/niki4810)",
+    "rash-mi (https://github.com/rash-mi)",
+    "toonketels (https://github.com/toonketels)"
   ]
 }

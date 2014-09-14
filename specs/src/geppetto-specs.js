@@ -29,33 +29,11 @@ define([
             afterEach(function() {
                 context.destroy();
             });
-            it("should create an resolver", function() {
-                expect(context.resolver).to.be.an.instanceOf(Geppetto.Resolver);
-            });
-            it("should release its resolvers wirings upon shutdown", function() {
+            it("should release its wirings upon shutdown", function() {
                 var unmapperSpy = sinon.spy();
-                context.resolver.releaseAll = unmapperSpy;
+                context.releaseAll = unmapperSpy;
                 context.destroy();
                 expect(unmapperSpy).to.have.been.calledOnce;
-            });
-            it("should wrap the resolver's methods", function() {
-                var wrapped = [
-                    "wireView",
-                    "wireSingleton",
-                    "wireValue",
-                    "wireClass",
-                    "hasWiring",
-                    "getObject",
-                    "instantiate",
-                    "resolve",
-                    "release",
-                    "releaseAll"
-                ];
-                _.each(wrapped, function(methodName) {
-                    var stub = sinon.stub(context.resolver, methodName);
-                    context[methodName].call(context);
-                    expect(stub).to.have.been.calledOnce;
-                });
             });
         });
 
@@ -476,14 +454,14 @@ define([
 
         describe("when triggering commands", function() {
             var context;
-            var resolver;
             var CommandClass;
             var command;
             beforeEach(function() {
                 var ContextDefinition = Geppetto.Context.extend({});
                 context = new ContextDefinition();
-                resolver = context.resolver;
-                CommandClass = function() {};
+                CommandClass = function() {
+                    this.ctorArgs = _.toArray(arguments);
+                };
                 CommandClass.prototype.execute = function() {
                     command = this;
                 };
@@ -492,14 +470,12 @@ define([
             afterEach(function() {
                 context.destroy();
                 context = null;
-                resolver = null;
-                executionSpy = null;
                 CommandClass = null;
                 command = null;
             });
             it("should resolve dependencies passed to the wireCommand", function() {
                 var value = {};
-                resolver.wireValue('value', value);
+                context.wireValue('value', value);
                 context.wireCommand('foo', CommandClass, {
                     dependency: 'value'
                 });
@@ -509,13 +485,19 @@ define([
 
             it("should resolve dependencies declared in the command", function() {
                 var value = {};
-                resolver.wireValue('value', value);
+                context.wireValue('value', value);
                 CommandClass.prototype.wiring = {
                     dependency: 'value'
                 };
                 context.wireCommand('foo', CommandClass);
                 context.dispatch('foo');
                 expect(command.dependency).to.equal(value);
+            });
+            
+            it("should pass context and event data to the command constructor", function(){
+                context.wireCommand('foo', CommandClass);
+                context.dispatch('foo');
+                expect(command.ctorArgs).to.contain(context);
             });
         });
 
@@ -528,7 +510,7 @@ define([
             var abcSpy;
 
             var wiring;
-
+            
             beforeEach(function() {
                 abcSpy = sinon.spy();
                 AbcCommand = function() {};
@@ -569,17 +551,16 @@ define([
 
                     }
                 };
-
+                
                 var ContextDefinition = Geppetto.Context.extend({
                     wiring: wiring,
-                    resolver: {
-                        wireSingleton: sinon.spy(),
-                        wireClass: sinon.spy(),
-                        wireValue: sinon.spy(),
-                        wireView: sinon.spy(),
-                        resolve: sinon.spy(),
-                        releaseAll: sinon.spy()
-                    }
+                    initialize : sinon.spy(),
+                    wireSingleton: sinon.spy(),
+                    wireClass: sinon.spy(),
+                    wireValue: sinon.spy(),
+                    wireView : sinon.spy(),
+                    resolve: sinon.spy(),
+                    releaseAll: sinon.spy()
                 });
 
                 context = new ContextDefinition();
@@ -595,28 +576,31 @@ define([
                 expect(abcSpy.called).to.be.true;
             });
             it("should wire singletons", function() {
-                expect(context.resolver.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
+                expect(context.wireSingleton).to.be.calledWith("singleton", wiring.singletons.singleton);
             });
             it("should wire custom-mapped singletons", function() {
-                expect(context.resolver.wireSingleton).to.be.calledWith("customWiredSingleton", 
+                expect(context.wireSingleton).to.be.calledWith("customWiredSingleton", 
                         wiring.singletons.customWiredSingleton.ctor, wiring.singletons.customWiredSingleton.wiring);
             });
             it("should wire classes", function() {
-                expect(context.resolver.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
+                expect(context.wireClass).to.be.calledWith("clazz", wiring.classes.clazz);
             });
             it("should wire custom-mapped classes", function() {
-                expect(context.resolver.wireClass).to.be.calledWith("customWiredClass",
+                expect(context.wireClass).to.be.calledWith("customWiredClass",
                         wiring.classes.customWiredClass.ctor, wiring.classes.customWiredClass.wiring);
             });
             it("should wire values", function() {
-                expect(context.resolver.wireValue).to.be.calledWith("value", wiring.values.value);
+                expect(context.wireValue).to.be.calledWith("value", wiring.values.value);
             });
             it("should wire views", function() {
-                expect(context.resolver.wireView).to.be.calledWith("view", wiring.views.view);
+                expect(context.wireView).to.be.calledWith("view", wiring.views.view);
             });
             it("should wire custom-mapped views", function() {
-                expect(context.resolver.wireView).to.be.calledWith("customWiredView",
+                expect(context.wireView).to.be.calledWith("customWiredView",
                         wiring.views.customWiredView.ctor, wiring.views.customWiredView.wiring);
+            });
+            it("should wire everything before initialization", function(){
+                expect(context.wireSingleton).to.be.calledBefore(context.initialize);
             });
         });
 
@@ -709,9 +693,199 @@ define([
                 expect(spy.callCount).to.equal(1);
             });
 
-            it("should have an resolver which is a child resolver of the parent", function() {
-                expect(childContext.resolver.parent).to.equal(parentContext.resolver);
+        });
+        describe("when calling dispatchToParents on a context with multiple levels of ancestry", function() {
+
+            var greatGrandParentView;
+            var greatGrandParentContext;
+
+            var grandParentView;
+            var grandParentContext;
+
+            var parentView;
+            var parentContext;
+
+            var childView;
+            var childContext;
+
+            beforeEach(function () {
+                var ViewDef = Backbone.View.extend();
+
+                greatGrandParentView = new ViewDef();
+                greatGrandParentContext = Geppetto.bindContext({
+                    view: greatGrandParentView,
+                    context: Geppetto.Context.extend()
+                });
+
+                grandParentView = new ViewDef();
+                grandParentContext = Geppetto.bindContext({
+                    view: grandParentView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: greatGrandParentContext
+                });
+
+                parentView = new ViewDef();
+                parentContext = Geppetto.bindContext({
+                    view: parentView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: grandParentContext
+                });
+
+                childView = new ViewDef();
+                childContext = Geppetto.bindContext({
+                    view: childView,
+                    context: Geppetto.Context.extend(),
+                    parentContext: parentContext
+                });
+
+
             });
+
+            afterEach(function () {
+                childView.close();
+                parentView.close();
+                grandParentView.close();
+                greatGrandParentView.close();
+            });
+
+            it("should pass event without data payload to all ancestors", function () {
+                var spyGGP = sinon.spy();
+                var spyGP = sinon.spy();
+                var spyP = sinon.spy();
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents('foo');
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(1);
+
+            });
+            it("should pass data payload all ancestors", function () {
+                var dataGGP;
+                var dataGP;
+                var dataP;
+                var dataC;
+
+                var spyGGP = sinon.spy(function (data) {
+                    dataGGP = data
+                });
+                var spyGP = sinon.spy(function (data) {
+                    dataGP = data
+                });
+                var spyP = sinon.spy(function (data) {
+                    dataP = data;
+                });
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents('foo', {"foo": "bar"});
+
+                expect(dataGGP).to.eql({"foo": "bar"});
+                expect(dataGP).to.eql({"foo": "bar"});
+                expect(dataP).to.eql({"foo": "bar"});
+
+            });
+
+            it("should pass same data payload to all ancestors, not cloned objects", function () {
+                var dataGGP;
+                var dataGP;
+                var dataP;
+                var dataC;
+
+                var spyGGP = sinon.spy(function (data) {
+                    dataGGP = data.foo;
+                    data.foo++;
+                });
+                var spyGP = sinon.spy(function (data) {
+                    dataGP = data.foo;
+                    data.foo++;
+                });
+                var spyP = sinon.spy(function (data) {
+                    dataP = data.foo;
+                    data.foo++;
+                });
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                var payload = {"foo": 1};
+
+                childContext.dispatchToParents('foo', payload);
+
+                expect(dataGGP).to.equal(3);
+                expect(dataGP).to.equal(2);
+                expect(dataP).to.equal(1);
+
+                expect(payload).to.eql({"foo": 4});
+
+            });
+
+            it("should stop bubbling when payload extended with {propagationDisabled:true}", function () {
+
+                var stopBubbling = function(object) {
+                    object.propagationDisabled = true;
+                };
+
+                var spyGGP = sinon.spy();
+                var spyGP = sinon.spy(stopBubbling);
+                var spyP = sinon.spy();
+                var spyC = sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents("foo", {"any": "object"});
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
+
+            });
+            it("should not crash if an ancestor destroys its own ancestor while bubbling", function() {
+
+                var destroyGGP = function() {
+                    if (greatGrandParentView.close) {
+                        greatGrandParentView.close();
+                    } else if (greatGrandParentView.destroy){
+                        greatGrandParentView.destroy();
+                    }
+                };
+
+                var spyGGP =    sinon.spy();
+                var spyGP =     sinon.spy();
+                var spyP =      sinon.spy(destroyGGP);
+                var spyC =      sinon.spy();
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents("foo");
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(0);
+            });
+
 
         });
 
@@ -798,7 +972,96 @@ define([
                 expect(spy3.callCount).to.equal(1);
             });
 
+            it("should skip any context that have been destroyed when looping through list of all contexts to trigger event on each", function() {
+                var spy1 = sinon.spy();
+                var spy2 = sinon.spy();
+                var spy3 = sinon.spy();
+
+                var spyDispatchGlobally = sinon.spy(context1, 'dispatchGlobally');
+
+                context1.listen(view1, "foo", function(){
+                    context2.destroy();
+                });
+
+                context1.listen(view1, "foo", spy1);
+                context2.listen(view2, "foo", spy2);
+                context3.listen(view3, "foo", spy3);
+
+                expect(spy1.callCount).to.equal(0);
+                expect(spy2.callCount).to.equal(0);
+                expect(spy3.callCount).to.equal(0);
+
+                context1.dispatchGlobally('foo');
+
+                expect(spy1.callCount).to.equal(1);
+                expect(spy2.callCount).to.equal(0);
+                expect(spy3.callCount).to.equal(1);
+
+                expect(spyDispatchGlobally.threw()).to.equal(false);
+
+            });
+
         });
+        
+        describe('when configuring wirings', function(){
+            var key = "key";
+            var passed;
+            var context;
+            var ctor = function(){
+                passed = _.toArray(arguments);
+            };
+            beforeEach(function(){
+                passed = null;
+                context = new Geppetto.Context();
+                context.wireClass(key, ctor);
+            });
+            afterEach(function(){
+                context.destroy();
+            });
+            it("should throw an error if no corresponding mapping was found", function() {
+                expect(function() {
+                    context.configure('unregistered key');
+                }).to.
+                throw (/no mapping found/);
+            });
+            it("should throw an error for wired values", function() {
+                context.wireValue('value', {});
+                expect(function() {
+                    context.configure('value');
+                }).to.
+                throw (/only possible for wirings of type singleton or class/);
+            });
+            it("should throw an error for wired views", function() {
+                context.wireView('view', function(){});
+                expect(function() {
+                    context.configure('view');
+                }).to.
+                throw (/only possible for wirings of type singleton or class/);
+            });
+            it('should pass an object as payload to the constructor function', function(){
+                var payload = {};
+                context.configure(key, payload);
+                context.getObject(key);
+                expect(passed[0]).to.equal(payload);
+            });
+            it('should call a function and pass its results as payload to the constructor function', function(){
+                var payload = {};
+                context.configure(key, function(){
+                    return payload;
+                });
+                context.getObject(key);
+                expect(passed[0]).to.equal(payload);
+            });
+            it('should pass all arguments as payload to the constructor function', function(){
+                var a = {};
+                var b = {};
+                context.configure(key, a, b);
+                context.getObject(key);
+                expect(passed[0]).to.equal(a);
+                expect(passed[1]).to.equal(b);
+            });
+        });
+        
 
         describe("when debug mode is enabled", function() {
 
@@ -806,6 +1069,7 @@ define([
             var context;
 
             beforeEach(function() {
+                
                 var viewDef = Backbone.View.extend();
                 view = new viewDef();
                 context = Geppetto.bindContext({
