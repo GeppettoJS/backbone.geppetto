@@ -1,6 +1,6 @@
 # Backbone Geppetto
 
-[![Build Status](https://travis-ci.org/ModelN/backbone.geppetto.png)](https://travis-ci.org/ModelN/backbone.geppetto) [![devDependency Status](https://david-dm.org/ModelN/backbone.geppetto/dev-status.png)](https://david-dm.org/ModelN/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+[![Build Status](https://travis-ci.org/GeppettoJS/backbone.geppetto.png)](https://travis-ci.org/GeppettoJS/backbone.geppetto) [![devDependency Status](https://david-dm.org/ModelN/backbone.geppetto/dev-status.png)](https://david-dm.org/ModelN/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 Tested on these browsers:
 
