@@ -791,6 +791,22 @@ To add your logo, please open an issue.  Include a link to a hosted .png image o
 
 ## Version History
 
+### 0.7.1
+*Released 14 Sep 2014*
+
+* Full refactor
+* Add factory to view mappings
+* Add Context#configure
+* Add Context#dispatchToParents
+* Add contextEvent mapping for all wirings (except values)
+* Fix bug #54
+* Fix bug #51
+* Fix bug #55
+* Make compatible with CommonJS
+* Pass context, event name and data to command constructors
+* Fix bug #43
+
+
 ### 0.7.0
 *Released 29 Apr 2014*
 
