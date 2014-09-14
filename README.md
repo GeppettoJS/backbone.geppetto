@@ -45,7 +45,7 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 * Minified: [backbone.geppetto.min.js](https://github.com/GeppettoJS/backbone.geppetto/blob/0.7.1/dist/backbone.geppetto.min.js)
 * Development (Uncompressed, Comments): [backbone.geppetto.js](https://raw.github.com/GeppettoJS/backbone.geppetto/0.7.1/backbone.geppetto.js)
-* Full Release (Tests, Examples): [0.7.0.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/0.7.1.zip).
+* Full Release (Tests, Examples): [0.7.1.zip](https://github.com/GeppettoJS/backbone.geppetto/archive/0.7.1.zip).
 
 *Unreleased Edge Version (master)*
 
