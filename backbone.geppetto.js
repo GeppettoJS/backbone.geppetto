@@ -72,6 +72,48 @@
         }
     };
 
+    function Configurator(mapping) {
+        this.mapping = mapping;
+    }
+    _.extend(Configurator.prototype, {
+        withWiring: function(wiring) {
+            this.mapping.wiring = wiring;
+            return this;
+        },
+        withContextEvents: function(contextEvents) {
+            this.mapping.contextEvents = contextEvents;
+            return this;
+        },
+        withParameters: function() {
+            this.mapping.params = _.toArray(arguments);
+            return this;
+        }
+    });
+
+    function Mapper(context, subject) {
+        this.context = context;
+        this.subject = subject;
+    }
+
+    _.extend(Mapper.prototype, {
+        asSingleton: function(key) {
+            this.context.wireSingleton(key, this.subject);
+            return new Configurator(this.context._mappings[key]);
+        },
+        asValue: function(key) {
+            this.context.wireValue(key, this.subject);
+            return new Configurator(this.context._mappings[key]);
+        },
+        asClass: function(key) {
+            this.context.wireClass(key, this.subject);
+            return new Configurator(this.context._mappings[key]);
+        },
+        asView: function(key) {
+            this.context.wireView(key, this.subject);
+            return new Configurator(this.context._mappings[key]);
+        }
+    });
+
     var Geppetto = {};
 
     Geppetto.version = '0.7.1';
@@ -134,7 +176,7 @@
                 instance = new config.clazz();
             }
             if (!instance.initialize) {
-                this.resolve(instance, config.wiring);
+                this.resolve(instance, config.wiring, config.contextEvents);
             }
             return instance;
         },
@@ -163,12 +205,12 @@
             return output;
         },
 
-        _wrapConstructor: function(clazz, wiring) {
+        _wrapConstructor: function(key, clazz) {
             var context = this;
             if (clazz.extend) {
                 return clazz.extend({
                     constructor: function() {
-                        context.resolve(this, wiring);
+                        context.resolve(this, context._mappings[key].wiring, context._mappings[key].contextEvents);
                         clazz.prototype.constructor.apply(this, arguments);
                     }
                 });
@@ -177,8 +219,9 @@
             }
         },
 
-        _mapContextEvents: function(obj) {
-            _.each(obj.contextEvents, function(callback, eventName) {
+        _mapContextEvents: function(obj, contextEvents) {
+            var actualEvents = contextEvents || obj.contextEvents;
+            _.each(actualEvents, function(callback, eventName) {
                 if (_.isFunction(callback)) {
                     this.listen(obj, eventName, callback);
                 } else if (_.isString(callback)) {
@@ -236,6 +279,10 @@
             });
         },
 
+        wire: function(subject) {
+            return new Mapper(this, subject);
+        },
+
         wireCommand: function wireCommand(eventName, CommandConstructor, wiring) {
 
             var context = this;
@@ -283,7 +330,7 @@
 
         wireClass: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: this._wrapConstructor(clazz, wiring),
+                clazz: this._wrapConstructor(key, clazz),
                 object: null,
                 type: TYPES.OTHER,
                 wiring: wiring
@@ -293,9 +340,10 @@
 
         wireView: function(key, clazz, wiring) {
             this._mappings[key] = {
-                clazz: createFactory(this._wrapConstructor(clazz, wiring)),
+                clazz: createFactory(this._wrapConstructor(key, clazz)),
                 object: null,
-                type: TYPES.VIEW
+                type: TYPES.VIEW,
+                wiring: wiring
             };
             return this;
         },
@@ -303,7 +351,7 @@
         wireSingleton: function(key, clazz, wiring) {
 
             this._mappings[key] = {
-                clazz: this._wrapConstructor(clazz, wiring),
+                clazz: this._wrapConstructor(key, clazz),
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
@@ -334,7 +382,7 @@
             return this._retrieveFromCacheOrCreate(key, true);
         },
 
-        resolve: function(instance, wiring) {
+        resolve: function(instance, wiring, contextEvents) {
             wiring = wiring || instance.wiring;
             if (wiring) {
                 var propNameArgIndex = Number(!_.isArray(wiring));
@@ -343,7 +391,7 @@
                 }, this);
             }
             this.addPubSub(instance);
-            this._mapContextEvents(instance);
+            this._mapContextEvents(instance, contextEvents);
             return this;
         },
 
