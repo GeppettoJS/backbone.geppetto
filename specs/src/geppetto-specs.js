@@ -666,6 +666,7 @@ define([
                 parentView.close();
             });
 
+
             it("should set the 'parentContext' attribute on the child context", function() {
                 expect(childContext.parentContext).to.equal(parentContext);
             });
@@ -685,6 +686,60 @@ define([
                 childContext.dispatchToParent("foo");
                 expect(spy.callCount).to.equal(1);
             });
+
+            it("should throw an error when a non-object data payload is supplied", function() {
+
+                var errMsg = "Event payload must be an object";
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", 1);
+                }).to.throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", "a string");
+                }).to.throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", null);
+                }).to.throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", true);
+                }).to.throw (errMsg);
+
+                // accept optional payload
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", undefined);
+                }).not.to.throw ();
+
+                expect(function() {
+                    childContext.dispatchToParent("foo", {});
+                }).not.to.throw ();
+
+            });
+
+            it("should pass to parent event with default payload when none initially supplied", function() {
+                var payload;
+                parentContext.listen(parentView, "foo",  function(data) {payload = _.extend({}, data)});
+                childContext.dispatchToParent("foo");
+
+                expect(payload).to.eql({"eventName": "foo"});
+            });
+
+            it("should extend original payload with eventName when dispatching with a payload", function() {
+                var payload = {"foo": "bar", "nb": 1};
+                parentContext.listen(parentView, "foo",  function(data) {
+                        if (_.isObject(data) && _.isNumber(data.nb)) {
+                            data.nb++;
+                        }
+                        payload = _.extend({}, data)}
+                );
+                childContext.dispatchToParent("foo", payload);
+
+                expect(payload).to.eql({"eventName": "foo", "foo": "bar", "nb": 2});
+            });
+
 
             it("should dispatch a context shutdown event to the parent when the child context is closed", function() {
                 var spy = sinon.spy();
@@ -748,7 +803,43 @@ define([
                 greatGrandParentView.close();
             });
 
-            it("should pass event without data payload to all ancestors", function () {
+            it("should throw an error when a non-object is supplied as data payload", function () {
+
+                var errMsg = "Event payload must be an object";
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", 1);
+                }).to.
+                    throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", "a string");
+                }).to.
+                    throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", null);
+                }).to.
+                    throw (errMsg);
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", true);
+                }).to.
+                    throw (errMsg);
+
+                // accept optional payload
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", undefined);
+                }).not.to.throw();
+
+                expect(function() {
+                    childContext.dispatchToParents("foo", {});
+                }).not.to.throw();
+
+            });
+
+            it("should dispatch to all ancestors when no data payload supplied", function () {
                 var spyGGP = sinon.spy();
                 var spyGP = sinon.spy();
                 var spyP = sinon.spy();
@@ -767,7 +858,32 @@ define([
                 expect(spyGGP.callCount).to.equal(1);
 
             });
-            it("should pass data payload all ancestors", function () {
+
+
+
+            it("should dispatch to all ancestors with default payload when no data payload supplied", function () {
+                var results = {};
+                var spyGGP = sinon.spy(function (data) { results.ggp = _.isObject(data) && data.eventName == 'foo';});
+                var spyGP = sinon.spy(function (data) {  results.gp =  _.isObject(data) && data.eventName == 'foo';});
+                var spyP = sinon.spy(function (data) {   results.p =   _.isObject(data) && data.eventName == 'foo';});
+                var spyC = sinon.spy(function (data) {   results.c =   _.isObject(data) && data.eventName == 'foo';});
+
+                greatGrandParentView.listen(greatGrandParentView,   "foo", spyGGP);
+                grandParentView.listen(     grandParentView,        "foo", spyGP);
+                parentView.listen(          parentView,             "foo", spyP);
+                childView.listen(           childView,              "foo", spyC);
+
+                childContext.dispatchToParents('foo');
+
+                expect(spyC.callCount).to.equal(0);
+                expect(spyP.callCount).to.equal(1);
+                expect(spyGP.callCount).to.equal(1);
+                expect(spyGGP.callCount).to.equal(1);
+                expect(results).to.eql({"p": true, "gp": true, "ggp": true });
+
+            });
+
+            it("should extend supplied data payload with eventName and pass it to all ancestors", function () {
                 var dataGGP;
                 var dataGP;
                 var dataP;
@@ -791,9 +907,9 @@ define([
 
                 childContext.dispatchToParents('foo', {"foo": "bar"});
 
-                expect(dataGGP).to.eql({"foo": "bar"});
-                expect(dataGP).to.eql({"foo": "bar"});
-                expect(dataP).to.eql({"foo": "bar"});
+                expect(dataGGP).to.eql({"foo": "bar", "eventName": "foo"});
+                expect(dataGP).to.eql({"foo": "bar", "eventName": "foo"});
+                expect(dataP).to.eql({"foo": "bar", "eventName": "foo"});
 
             });
 
@@ -801,7 +917,6 @@ define([
                 var dataGGP;
                 var dataGP;
                 var dataP;
-                var dataC;
 
                 var spyGGP = sinon.spy(function (data) {
                     dataGGP = data.foo;
@@ -830,7 +945,7 @@ define([
                 expect(dataGP).to.equal(2);
                 expect(dataP).to.equal(1);
 
-                expect(payload).to.eql({"foo": 4});
+                expect(payload).to.eql({"foo": 4, "eventName": "foo"});
 
             });
 
@@ -858,6 +973,7 @@ define([
                 expect(spyGGP.callCount).to.equal(0);
 
             });
+
             it("should not crash if an ancestor destroys its own ancestor while bubbling", function() {
 
                 var destroyGGP = function() {
