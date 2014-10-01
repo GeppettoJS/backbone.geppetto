@@ -28,7 +28,7 @@
     var NO_MAPPING_FOUND = 'no mapping found for key: ';
     var TYPES = {
         SINGLETON: 'singleton',
-        VIEW: 'view',
+        FACTORY: 'factory',
         OTHER: 'other'
     };
 
@@ -149,7 +149,7 @@
                     }
                     output = config.object;
                 } else {
-                    if (config.type === TYPES.VIEW) {
+                    if (config.type === TYPES.FACTORY) {
                         output = config.clazz;
                     } else if (config.clazz) {
                         output = this._createAndSetupInstance(config);
@@ -292,10 +292,14 @@
         },
 
         wireView: function(key, clazz, wiring) {
+            this.wireFactory(key, clazz, wiring);
+        },
+
+        wireFactory: function(key, clazz, wiring) {
             this._mappings[key] = {
                 clazz: createFactory(this._wrapConstructor(clazz, wiring)),
                 object: null,
-                type: TYPES.VIEW
+                type: TYPES.FACTORY
             };
             return this;
         },
@@ -316,7 +320,7 @@
             if (typeof mapping === 'undefined') {
                 throw new Error(NO_MAPPING_FOUND + key);
             }
-            if (!mapping.clazz || mapping.type === TYPES.VIEW) {
+            if (!mapping.clazz || mapping.type === TYPES.FACTORY) {
                 throw new Error("Cannot configure " + key + ": only possible for wirings of type singleton or class");
             }
             mapping.params = _.toArray(arguments).slice(1);

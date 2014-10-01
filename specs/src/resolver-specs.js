@@ -212,6 +212,30 @@ define([
                 expect(contextEventSpy).to.have.been.called;
             });
         });
+        describe("when mapping a factory", function(){
+            var key = 'a class';
+            var clazz = function(){};
+            beforeEach(function() {
+                context.wireFactory(key, clazz);
+            });
+            it('should be determinable', function() {
+                expect(context.hasWiring(key)).to.be.true;
+            });
+            it('should return a function', function(){
+                var factory = context.getObject(key);
+                expect(factory ).to.be.a.function;
+            });
+            it('should create an instance of the mapped class with `new`', function(){
+                var wrapped = context.getObject(key);
+                var instance = new wrapped();
+                expect(instance ).to.be.instanceOf(clazz);
+            });
+            it('should create an instance of the mapped class when called', function(){
+                var factory = context.getObject(key);
+                var instance = factory();
+                expect(instance ).to.be.instanceOf(clazz);
+            });
+        });
         describe("when mapping a view", function() {
             var key = 'a class';
             var clazz;
