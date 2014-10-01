@@ -368,7 +368,17 @@ define([
                 expect(originalModel.obj1).to.eql(wrappedModel.obj1);
                 expect(originalModel.obj2).to.eql(wrappedModel.obj2)
             });
-
+            it("should allow constructors to return an instance of another type", function(){
+                var Foo = function(){};
+                var clazz = Backbone.Model.extend({
+                    constructor : function(){
+                        return new Foo();
+                    } 
+                });
+                var wrappedClazz = context._wrapConstructor(clazz, null);
+                var foo = new wrappedClazz();
+                expect(foo).to.be.instanceOf(Foo);
+            });
         });
         describe("when injecting objects", function() {
             var key = 'a value';
