@@ -26,6 +26,7 @@
     }
 
     var NO_MAPPING_FOUND = 'no mapping found for key: ';
+    var KEY_MUST_BE_STRING_OR_ARRAY = 'Key must be of type "String" or "Array" (of "String")';
     var TYPES = {
         SINGLETON: 'singleton',
         FACTORY: 'factory',
@@ -187,6 +188,21 @@
             }, this);
         },
 
+        _storeMapping: function(keys, mapping) {
+            if (_.isString(keys)) {
+                this._mappings[keys] = mapping;
+            } else if (_.isArray(keys)) {
+                _.each(keys, function(key) {
+                    if (!_.isString(key)) {
+                        throw new Error(KEY_MUST_BE_STRING_OR_ARRAY);
+                    }
+                    this._mappings[key] = mapping;
+                }, this);
+            } else {
+                throw new Error(KEY_MUST_BE_STRING_OR_ARRAY);
+            }
+        },
+
         addPubSub: function(instance) {
             instance.listen = _.bind(this.listen, this);
             instance.dispatch = _.bind(this.dispatch, this);
@@ -272,46 +288,46 @@
             });
         },
 
-        wireValue: function(key, useValue) {
-            this._mappings[key] = {
+        wireValue: function(keys, useValue) {
+            this._storeMapping(keys, {
                 clazz: null,
                 object: useValue,
                 type: TYPES.SINGLETON
-            };
+            });
             return this;
         },
 
-        wireClass: function(key, clazz, wiring) {
-            this._mappings[key] = {
+        wireClass: function(keys, clazz, wiring) {
+            this._storeMapping(keys, {
                 clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.OTHER,
                 wiring: wiring
-            };
+            });
             return this;
         },
 
-        wireView: function(key, clazz, wiring) {
-            this.wireFactory(key, clazz, wiring);
+        wireView: function(keys, clazz, wiring) {
+            this.wireFactory(keys, clazz, wiring);
         },
 
-        wireFactory: function(key, clazz, wiring) {
-            this._mappings[key] = {
+        wireFactory: function(keys, clazz, wiring) {
+            this._storeMapping(keys, {
                 clazz: createFactory(this._wrapConstructor(clazz, wiring)),
                 object: null,
                 type: TYPES.FACTORY
-            };
+            });
             return this;
         },
 
-        wireSingleton: function(key, clazz, wiring) {
+        wireSingleton: function(keys, clazz, wiring) {
 
-            this._mappings[key] = {
+            this._storeMapping(keys, {
                 clazz: this._wrapConstructor(clazz, wiring),
                 object: null,
                 type: TYPES.SINGLETON,
                 wiring: wiring
-            };
+            });
             return this;
         },
 
@@ -328,6 +344,11 @@
 
         hasWiring: function(key) {
             return this._mappings.hasOwnProperty(key) || ( !! this.parentContext && this.parentContext.hasWiring(key));
+        },
+
+        createAlias: function(key, alias) {
+            this._storeMapping(alias, this._mappings[key]);
+            return this;
         },
 
         getObject: function(key) {
