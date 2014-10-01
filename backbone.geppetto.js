@@ -169,7 +169,7 @@
                 return clazz.extend({
                     constructor: function() {
                         context.resolve(this, wiring);
-                        clazz.prototype.constructor.apply(this, arguments);
+                        return clazz.prototype.constructor.apply(this, arguments);
                     }
                 });
             } else {
