@@ -349,6 +349,26 @@ context.wireValue("answerToLifeTheUniverseAndEverything", 42);
 
 Dependants are injected with the value itself.
 
+#### Aliases
+
+Any wiring can be aliased, which means it will be reused with another key. You can do this either with:
+
+1. `createAlias`
+
+	```js
+	context.wireSingleton('userModel', UserModel);
+	context.createAlias('userModel', 'accountModel');
+	```
+
+1. or any of the wire* methods by providing an Array of keys
+
+	```js
+	context.wireSingleton(['userModel', 'accountModel'], UserModel);
+	```
+
+In both examples all dependants that have declared "userModel" or "accountModel" as a dependency will receive the same singleton instance.
+
+
 ### Wiring at the Component Level
 
 Example injecting a model into a view.

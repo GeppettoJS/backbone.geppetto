@@ -376,6 +376,37 @@ define([
                 expect(viewInstance.foo).to.equal(foo);
             });
         });
+        describe("when mapping keys", function(){
+            it("should throw an error for keys other than String or Array", function(){
+                expect(function() {
+                    context.wireSingleton({},{});
+                }).to.
+                throw (/Key must be of type/);
+            });
+            it("should throw an error for an Array of anything else but String", function(){
+                expect(function() {
+                    context.wireSingleton([{}],{});
+                }).to.
+                throw (/Key must be of type/);
+            });
+            it("should use the same mapping for all keys", function(){
+                var singleton = function(){};
+                context.wireSingleton(["s1", "s2"], singleton);
+                var s1 = context.getObject("s1");
+                var s2 = context.getObject("s2");
+                expect(s2).to.equal(s1);
+            });
+        });
+        describe("when creating aliases", function(){
+            it("should reuse the aliased mapping", function(){
+                var singleton = function(){};
+                context.wireSingleton("s1", singleton);
+                context.createAlias("s1", "s2");
+                var s1 = context.getObject("s1");
+                var s2 = context.getObject("s2");
+                expect(s2).to.equal(s1);
+            });
+        });
         describe("when wrapping a constructor", function() {
             it("should allow wrapped constructor to handle initialization parameters in similar fashion as unwrapped constructor)", function() {
                 var obj1 = {value: 'foo'};
