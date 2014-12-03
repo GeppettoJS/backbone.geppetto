@@ -145,7 +145,7 @@
             if (this._mappings.hasOwnProperty(key)) {
                 var config = this._mappings[key];
                 if (!overrideRules && config.type === TYPES.SINGLETON) {
-                    if (!config.object && config.clazz) {
+                    if (!config.object) {
                         config.object = this._createAndSetupInstance(config);
                     }
                     output = config.object;
