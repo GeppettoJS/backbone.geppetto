@@ -467,7 +467,7 @@ define([
             });
 
             it("should accept falsy values", function() {
-                spy.should.not.have.thrown()
+                spy().should.not.throw()
             });
 
         })
