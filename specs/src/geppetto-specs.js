@@ -452,6 +452,26 @@ define([
 
         });
 
+        describe("when wiring a value", function(){
+            var context;
+            var spy;
+            beforeEach(function() {
+                context = new Geppetto.Context();
+            });
+
+            spy = sinon.spy(function() {
+                context.wireValue('test_zero', 0);
+                context.wireValue('test_false', false);
+                context.wireValue('test_null', null);
+                context.wireValue('test_empty_string', '');
+            });
+
+            it("should accept falsy values", function() {
+                spy.should.not.have.thrown()
+            });
+
+        })
+
         describe("when triggering commands", function() {
             var context;
             var CommandClass;
