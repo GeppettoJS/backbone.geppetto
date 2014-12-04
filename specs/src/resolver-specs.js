@@ -151,14 +151,10 @@ define([
         describe("when mapping a value", function() {
             var key = 'a value';
             var value = {};
+            var spy; 
             
-            var spy = sinon.spy( function(param) {
-                context.wireValue(key, param);
-            });
-            
-            beforeEach(function() {
-                context.wireValue(key, value);
-            });
+            context.wireValue(key, value);
+
             it('should be determinable', function() {
                 expect(context.hasWiring(key)).to.be.true;
             });
@@ -172,22 +168,34 @@ define([
             });
             
             it("it should accept the value 'false' as mapped value", function(){
-                spy(false);
+                spy = sinon.spy(function() {
+                    context.wireValue('false', false);
+                });
+                spy();
                 expect(spy).to.have.not.thrown();
             });
             
             it("it should accept empty string as mapped value", function(){
-                spy('');
+                spy = sinon.spy(function() {
+                    context.wireValue('empty_string', '');
+                });
+                spy();
                 expect(spy).to.have.not.thrown();
             });
            
             it("it should accept 0 as mapped value", function(){
-                spy(0);
+                spy = sinon.spy(function() {
+                    context.wireValue('zero', 0);
+                });
+                spy();
                 expect(spy).to.have.not.thrown();
             });
             
             it("it should accept null as mapped value", function(){
-                spy(null);
+                spy = sinon.spy(function() {
+                    context.wireValue('null_value', null);
+                });
+                spy();
                 expect(spy).to.have.not.thrown();
             });
             
