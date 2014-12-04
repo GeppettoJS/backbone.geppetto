@@ -198,7 +198,6 @@ define([
                 spy();
                 expect(spy).to.have.not.thrown();
             });
-            
         });
         describe("when mapping a class", function() {
             var key = 'a class';
