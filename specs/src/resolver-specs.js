@@ -152,9 +152,9 @@ define([
             var key = 'a value';
             var value = {};
             
-            var spy = function(param) {
+            var spy = sinon.spy( function(param) {
                 context.wireValue(key, param);
-            }
+            });
             
             beforeEach(function() {
                 context.wireValue(key, value);
