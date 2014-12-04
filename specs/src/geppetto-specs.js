@@ -452,6 +452,7 @@ define([
 
         });
 
+
         describe("when triggering commands", function() {
             var context;
             var CommandClass;
