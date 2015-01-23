@@ -1,7 +1,7 @@
 {
   "name": "backbone.geppetto",
   "description": "Bring your Backbone applications to life with an event-driven Command framework.",
-  "homepage": "https://github.com/ModelN/backbone.geppetto",
+  "homepage": "https://github.com/GeppettoJS/backbone.geppetto",
   "version": "0.7.1",
   "main": "backbone.geppetto.js",
   "keywords": [
