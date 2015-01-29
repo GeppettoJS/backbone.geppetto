@@ -6,72 +6,110 @@
 // Documentation and full license available at:
 // http://modeln.github.com/backbone.geppetto/
 
-(function(factory) {
+(function( factory ){
     // CommonJS
-    if (typeof exports === "object") {
-        module.exports = factory(require('underscore'), require('backbone'));
-    } else if (typeof define === "function" && define.amd) {
+    if( typeof exports === "object" ){
+        module.exports = factory( require( 'underscore' ), require( 'backbone' ) );
+    } else if( typeof define === "function" && define.amd ){
         // Register as an AMD module if available...
-        define(["underscore", "backbone"], factory);
+        define( [ "underscore", "backbone" ], factory );
     } else {
         // Browser globals for the unenlightened...
-        factory(_, Backbone);
+        factory( _, Backbone );
     }
-}(function(_, Backbone) {
+}( function( _,
+             Backbone ){
 
     "use strict";
 
-    if (!Backbone) {
+    if( !Backbone ){
         throw "Please include Backbone before Geppetto";
     }
 
-    var NO_MAPPING_FOUND = 'no mapping found for key: ';
-    var KEY_MUST_BE_STRING_OR_ARRAY = 'Key must be of type "String" or "Array" (of "String")';
-    var TYPES = {
-        SINGLETON: 'singleton',
-        FACTORY: 'factory',
-        OTHER: 'other'
-    };
+    var extend = Backbone.View.extend;
 
     //based on http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
 
-    function applyToConstructor(constructor, argArray) {
-        var args = [constructor, null].concat(argArray);
-        var FactoryFunction = _.bind.apply(constructor, args);
-        return new FactoryFunction();
+    /**
+     *
+     * @param {Mapping} mapping
+     * @returns {*}
+     */
+    function createInstanceAndResolve( mapping ){
+        var ctor = mapping.source.prototype.constructor;
+        var params = [ ctor, null ].concat( mapping.parameters );
+        var FactoryFunction = _.bind.apply( ctor, params );
+        var instance = new FactoryFunction();
+        mapping.context.resolve( instance, mapping.wiring );
+        return instance;
     }
 
-    function createFactory(clazz) {
-        return function() {
-            return applyToConstructor(clazz, _.toArray(arguments));
+    /**
+     *
+     * @param {Mapping} mapping
+     * @returns {Function}
+     */
+    function createFactory( mapping ){
+        var factory = function(){
+            return createInstanceAndResolve( mapping );
         };
+        factory.prototype = mapping.source.prototype;
+        factory.source = mapping.source;
+        return factory;
     }
 
-    var extractConfig = function(def, key) {
-        var thisCtor, thisWiring;
-        if (def.hasOwnProperty("ctor")) {
-            thisCtor = def.ctor;
-            thisWiring = def.wiring;
-        } else {
-            thisCtor = def;
-        }
-        return [key, thisCtor, thisWiring];
-    };
+    /**
+     * @protected
+     * @param {{}} methodsMap
+     * @param {*} scope
+     * @returns {{}}
+     */
+    function bindFuncs( methodsMap,
+                        scope ){
+        var receiver = {};
+        _.each( methodsMap, function( func,
+                                      methodName ){
+            receiver[ methodName ] = _.bind( func, scope );
+        } );
+        return receiver;
+    }
 
-    var validateListen = function(target, eventName, callback) {
+    function toHash( mixed ){
+        var args = _.flatten( _.toArray( arguments ) );
+        return _.reduce( args, function( memo,
+                                         value,
+                                         index ){
+            if( _.isObject( value ) ){
+                _.each( value, function( value,
+                                         key ){
+                    if( _.isString( value ) ){
+                        memo[ key ] = value;
+                    }// todo: else log warning
+                } );
+            } else if( _.isString( value ) ){
+                memo[ value ] = value;
+            }// todo: else log warning
+            return memo;
+        }, {} );
+    }
 
-        if (!_.isObject(target) || !_.isFunction(target.listenTo) || !_.isFunction(target.stopListening)) {
-            throw "Target for listen() must define a 'listenTo' and 'stopListening' function";
+    /**
+     * @protected
+     * @param {string} message
+     * @param {...*} [values]
+     * @returns {Error}
+     */
+    function createError( message,
+                          values ){
+        if( arguments.length > 1 ){
+            var args = _.toArray( arguments );
+            args.shift();
+            _.times( args.length, function( i ){
+                message = message.replace( "$" + (i + 1), args[ i ] );
+            } );
         }
-
-        if (!_.isString(eventName)) {
-            throw "eventName must be a String";
-        }
-
-        if (!_.isFunction(callback)) {
-            throw "callback must be a function";
-        }
-    };
+        return new Error( message );
+    }
 
     var Geppetto = {};
 
@@ -79,404 +117,535 @@
 
     Geppetto.EVENT_CONTEXT_SHUTDOWN = "Geppetto:contextShutdown";
 
-    var contexts = {};
+    var SINGLETON_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         */
+        validate : function( mapping ){
+            if( !_.isFunction( mapping.source ) ){
+                throw createError( "Singleton provider expects a `function`" );
+            }
+        },
 
-    Geppetto.Context = function Context(options) {
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping,
+                              key ){
+            if( !mapping.cache ){
+                mapping.cache = createInstanceAndResolve( mapping );
+            }
+            return mapping.cache;
+        }
+    };
+
+    var MULTITON_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         */
+        validate : function( mapping ){
+            if( !_.isFunction( mapping.source ) ){
+                throw createError( "Multiton provider expects a `function`" );
+            }
+        },
+
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping,
+                              key ){
+            mapping.cache = mapping.cache || {};
+            if( !mapping.cache.hasOwnProperty( key ) ){
+                mapping.cache[ key ] = createInstanceAndResolve( mapping );
+            }
+            return mapping.cache[ key ];
+        }
+    };
+
+    var VALUE_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping,
+                              key ){
+            return mapping.source;
+        }
+    };
+
+    var UNRESOLVED_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         */
+        validate : function( mapping ){
+            if( !_.isObject( mapping.source ) || _.isArray( mapping.source ) ){
+                throw createError( "Unresolved provider expects an `object`" );
+            }
+        },
+
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping,
+                              key ){
+            if( !mapping.cache ){
+                mapping.cache = true;
+                if( _.isObject( mapping.source ) ){
+                    mapping.context.resolve( mapping.source, mapping.wiring );
+                }
+            }
+            return mapping.source;
+        }
+    };
+
+    var PRODUCER_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         */
+        validate : function( mapping ){
+            if( !_.isFunction( mapping.source ) ){
+                throw createError( "Producer provider expects a `function`" );
+            }
+        },
+        
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping, key ){
+            return createInstanceAndResolve( mapping );
+        }
+    };
+
+    var CONSTRUCTOR_PROVIDER = {
+        /**
+         *
+         * @param {Mapping} mapping
+         */
+        validate : function( mapping ){
+            if( !_.isFunction( mapping.source ) ){
+                throw createError( "Constructor provider expects a `function`" );
+            }
+        },
+        
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {string} key
+         * @returns {*}
+         */
+        construct : function( mapping ){
+            if( !mapping.cache ){
+                mapping.cache = createFactory( mapping );
+            }
+            return mapping.cache;
+        }
+    };
+    var COMMAND_PROVIDER = {
+        construct : function( mapping ){
+            var command = createInstanceAndResolve( mapping );
+            if( command.execute ){
+                command.execute();
+            }
+            return command;
+        }
+    };
+
+    /**
+     *
+     * @param value
+     * @param context
+     * @returns {Mapper}
+     * @constructor
+     */
+    function Mapping( value,
+                      context ){
+        this.source = value;
+        this.context = context;
+
+        return new Mapper( this );
+    }
+
+    _.extend( Mapping.prototype, {
+
+        /**
+         *
+         */
+        reset : function(){
+            this.source = undefined;
+            this.context = undefined;
+            this.provider = undefined;
+            this.wiring = undefined;
+            this.handlers = undefined;
+            this.events = undefined;
+            this.parameters = undefined;
+            this.cache = undefined;
+        }
+    } );
+
+    /**
+     * @protected
+     * @param {Mapping} mapping
+     * @constructor
+     */
+    function Mapper( mapping ){
+        this._mapping = mapping;
+        this.using = this.and = bindFuncs( {
+            wiring     : this._withWiring,
+            handlers   : this._withHandlers,
+            context    : this._withContext,
+            parameters : this._withParameters
+        }, this );
+        this.to = bindFuncs( {
+            event : this._toEvent
+        }, this );
+        this.as = bindFuncs( Mapper.providers, this );
+    }
+
+    _.extend( Mapper.prototype, {
+        /**
+         * @param {{}} provider
+         * @param {(string|string[]|{})} keys
+         * @returns {Mapper}
+         * @protected
+         */
+        _mapToProvider : function( provider,
+                                   keys ){
+            this._mapping.provider = provider;
+            this._mapping.context._map( this._mapping, keys );
+            _.each( this.as, function( f,
+                                       providerName ){
+                this.as[ providerName ] = function(){
+                    throw createError( "A subject can not be mapped to multiple providers" );
+                }
+            }, this );
+            return this;
+        },
+
+        /**
+         * @param {{}|string[]} wiring
+         * @protected
+         */
+        _withWiring : function( wiring ){
+            this._mapping.wiring = toHash( _.toArray( arguments ) );
+            return this;
+        },
+
+        /**
+         *
+         * @param {{}} handlers
+         * @protected
+         */
+        _withHandlers : function( handlers ){
+            this._mapping.handlers = handlers;
+            return this;
+        },
+
+        /**
+         *
+         * @param {...*} parameters
+         * @protected
+         */
+        _withParameters : function( parameters ){
+            this._mapping.parameters = _.toArray( arguments );
+            return this;
+        },
+
+        /**
+         *
+         * @param {Context} context
+         * @protected
+         */
+        _withContext : function( context ){
+            if( !(context instanceof Context ) ){
+                throw createError( '`context` expects an instance of `Context`' );
+            }
+            this._mapping.context = context;
+            return this;
+        },
+
+        /**
+         *
+         * @param {string} eventName
+         * @protected
+         */
+        _toEvent : function( eventName ){
+            this._mapping.provider = COMMAND_PROVIDER;
+            //todo: map event
+            return this;
+        }
+    } );
+
+    /**
+     * @protected
+     * @type {{}}
+     */
+    Mapper.providers = {};
+
+    /**
+     *
+     * @param options
+     * @constructor
+     */
+    function Context( options ){
         this._mappings = {};
 
-        this.options = options || {};
-        this.parentContext = this.options.parentContext;
+        /**
+         * @param {(...string|string[]|{})} [keys]
+         */
+        this.release.wires = _.bind( function( keys ){
+            keys = (keys)
+                ? toHash( _.toArray( arguments ) )
+                : _.keys( this._mappings );
+            _.each( keys, function( key ){
+                var mapping = this._mappings[ key ];
+                delete this._mappings[ key ];
+                if( !_.contains( this._mappings, mapping ) ){
+                    mapping.reset();
+                }
+            }, this );
+        }, this );
+        /**
+         *
+         */
+        this.release.all = _.bind( function(){
+            this.release.wires();
+        }, this );
 
-        this.vent = {};
-        _.extend(this.vent, Backbone.Events);
-        this._contextId = _.uniqueId("Context");
-        contexts[this._contextId] = this;
+        this.has.each = _.bind( function( keys ){
+            var result = this.has( _.toArray( arguments ) );
+            if( _.isBoolean( result ) ){
+                return result;
+            }
 
-        var wiring = this.wiring || this.options.wiring;
-        if (wiring) {
-            this._configureWirings(wiring);
+            return _.every( result, function( value,
+                                              key ){
+                return value;
+            } )
+        }, this )
+    }
+
+    _.extend( Context.prototype, {
+        /**
+         *
+         * @param {Mapping} mapping
+         * @param {(...string|string[]|{})} [keys]
+         * @protected
+         */
+        _map : function( mapping,
+                         keys ){
+            keys = toHash( _.toArray( arguments ) );
+            _.each( keys, function( key ){
+                if( this._mappings.hasOwnProperty( key ) ){
+                    throw createError( 'mapping already exists for "$1"', key );
+                }
+                this._mappings[ key ] = mapping;
+            }, this );
+        },
+
+        /**
+         * {{wires: Function}}
+         */
+        release : {},
+
+        /**
+         *
+         * @param {*} value
+         * @throws {Error} Context#wire parameter should not be 'undefined' or 'null'
+         * @returns {Mapper} The constructor of Mapping returns a Mapper instance
+         */
+        wire : function( value ){
+            if( _.isUndefined( value ) || _.isNull( value ) ){
+                throw createError( "Context#wire parameter should not be 'undefined' or 'null'" );
+            }
+            return new Mapping( value, this );
+        },
+
+        _get : function( keys,
+                         receiver ){
+            return _.reduce( keys, function( memo,
+                                             key,
+                                             index ){
+                if( !this._mappings.hasOwnProperty( key ) ){
+                    throw createError( 'no mapping found for key "$1"', key );
+                }
+                if( "undefined" !== typeof memo[ index ] ){
+                    throw createError( 'cannot overwrite "$1"', index );
+                }
+                var mapping = this._mappings[ key ];
+                memo[ index ] = mapping.provider.construct( mapping, key );
+                return memo;
+            }, receiver, this );
+        },
+
+        /**
+         *
+         * @param {(...string|string[]|{})} keys
+         * @throws {Error} no mapping found for key
+         * @returns {*|*[]|{}}
+         */
+        get : function( keys ){
+            keys = toHash( _.toArray( arguments ) );
+            var result = this._get( keys, {} );
+            if( 1 === _.size( result ) ){
+                result = _.reduce( result, function( memo ){
+                    return memo;
+                } );
+            }
+            return result;
+        },
+
+        /**
+         *
+         * @param {*} obj
+         * @param {({}|[]|...string)} wiring
+         * @returns {Context}
+         */
+        resolve : function( obj,
+                            wiring ){
+            if( !_.isObject( obj ) || _.isArray( obj ) ){
+                throw createError( 'Context#resolve parameter should be an object' );
+            }
+            var args = _.toArray( arguments );
+            args.shift();
+            //todo: the other stuff needs to be extracted from obj as well: parameters et cetera.
+            var keys = _.defaults( toHash( args ), toHash( obj.wiring ) );
+            return this._get( keys, obj );
+        },
+
+        /**
+         *
+         * @param {(...string|string[]|{})} keys
+         * @returns {boolean}
+         */
+        has : function( keys ){
+            keys = toHash( _.toArray( arguments ) );
+            var result = _.reduce( keys, function( memo,
+                                                   key,
+                                                   index ){
+                memo[ index ] = this._mappings.hasOwnProperty( key );
+                return memo;
+            }, {}, this );
+            if( 1 === _.size( result ) ){
+                result = _.reduce( result, function( memo ){
+                    return memo;
+                } );
+            }
+            return result;
         }
-        if (_.isFunction(this.initialize)) {
-            this.initialize.apply(this, arguments);
+    } );
+
+    /**
+     *
+     * @param {string} providerName
+     * @throws {Error} Context.provide expects a String as argument
+     * @throws {Error} A provider mapping already exists for
+     * @returns {{using: Function}}
+     */
+    Context.provide = function( providerName ){
+        if( !_.isString( providerName ) ){
+            throw createError( "Context.provide expects a String as argument" );
         }
-    };
-
-    Geppetto.Context.extend = Backbone.View.extend;
-
-    _.extend(Geppetto.Context.prototype, {
-
-        _configureWirings: function _configureWirings(wiring) {
-            _.each(wiring.singletons, function(def, key) {
-                this.wireSingleton.apply(this, extractConfig(def, key));
-            }, this);
-            _.each(wiring.classes, function(def, key) {
-                this.wireClass.apply(this, extractConfig(def, key));
-            }, this);
-            _.each(wiring.values, function(value, key) {
-                this.wireValue(key, value);
-            }, this);
-            _.each(wiring.views, function(def, key) {
-                this.wireView.apply(this, extractConfig(def, key));
-            }, this);
-            this.wireCommands(wiring.commands);
-        },
-
-        _createAndSetupInstance: function(config) {
-            var instance;
-            if (config.params) {
-                var params = _.map(config.params, function(param) {
-                    if (_.isFunction(param)) {
-                        param = param(this);
-                    }
-                    return param;
-                }, this);
-                instance = applyToConstructor(config.clazz, params);
-            } else {
-                instance = new config.clazz();
-            }
-            if (!instance.initialize) {
-                this.resolve(instance, config.wiring);
-            }
-            return instance;
-        },
-
-        _retrieveFromCacheOrCreate: function(key, overrideRules) {
-            var output;
-            if (this._mappings.hasOwnProperty(key)) {
-                var config = this._mappings[key];
-                if (!overrideRules && config.type === TYPES.SINGLETON) {
-                    if (!config.object) {
-                        config.object = this._createAndSetupInstance(config);
-                    }
-                    output = config.object;
-                } else {
-                    if (config.type === TYPES.FACTORY) {
-                        output = config.clazz;
-                    } else if (config.clazz) {
-                        output = this._createAndSetupInstance(config);
-                    }
-                }
-            } else if (this.parentContext && this.parentContext.hasWiring(key)) {
-                output = this.parentContext._retrieveFromCacheOrCreate(key, overrideRules);
-            } else {
-                throw new Error(NO_MAPPING_FOUND + key);
-            }
-            return output;
-        },
-
-        _wrapConstructor: function(clazz, wiring) {
-            var context = this;
-            if (clazz.extend) {
-                return clazz.extend({
-                    constructor: function() {
-                        context.resolve(this, wiring);
-                        return clazz.prototype.constructor.apply(this, arguments);
-                    }
-                });
-            } else {
-                return clazz;
-            }
-        },
-
-        _mapContextEvents: function(obj) {
-            _.each(obj.contextEvents, function(callback, eventName) {
-                if (_.isFunction(callback)) {
-                    this.listen(obj, eventName, callback);
-                } else if (_.isString(callback)) {
-                    this.listen(obj, eventName, obj[callback]);
-                }
-            }, this);
-        },
-
-        _storeMapping: function(keys, mapping) {
-            if (_.isString(keys)) {
-                this._mappings[keys] = mapping;
-            } else if (_.isArray(keys)) {
-                _.each(keys, function(key) {
-                    if (!_.isString(key)) {
-                        throw new Error(KEY_MUST_BE_STRING_OR_ARRAY);
-                    }
-                    this._mappings[key] = mapping;
-                }, this);
-            } else {
-                throw new Error(KEY_MUST_BE_STRING_OR_ARRAY);
-            }
-        },
-
-        addPubSub: function(instance) {
-            instance.listen = _.bind(this.listen, this);
-            instance.dispatch = _.bind(this.dispatch, this);
-        },
-
-        listen: function listen(target, eventName, callback) {
-            validateListen(target, eventName, callback);
-            return target.listenTo(this.vent, eventName, callback, target);
-        },
-
-        listenToOnce: function listenToOnce(target, eventName, callback) {
-            validateListen(target, eventName, callback);
-            return target.listenToOnce(this.vent, eventName, callback, target);
-        },
-
-        dispatch: function dispatch(eventName, eventData) {
-            if (!_.isUndefined(eventData) && !_.isObject(eventData)) {
-                throw "Event payload must be an object";
-            }
-            eventData = eventData || {};
-            eventData.eventName = eventName;
-            this.vent.trigger(eventName, eventData);
-        },
-
-        dispatchToParent: function dispatchToParent(eventName, eventData) {
-            if (this.parentContext) {
-                this.parentContext.vent.trigger(eventName, eventData);
-            }
-        },
-
-        dispatchToParents: function dispatchToParents(eventName, eventData) {
-            if (this.parentContext && !(eventData && eventData.propagationDisabled)) {
-                this.parentContext.vent.trigger(eventName, eventData);
-                if (this.parentContext) {
-                    this.parentContext.dispatchToParents(eventName, eventData);
-                }
-            }
-        },
-
-        dispatchGlobally: function dispatchGlobally(eventName, eventData) {
-
-            _.each(contexts, function(context) {
-                if (!context) {
-                    return true;
-                }
-                context.vent.trigger(eventName, eventData);
-            });
-        },
-
-        wireCommand: function wireCommand(eventName, CommandConstructor, wiring) {
-
-            var context = this;
-
-            if (!_.isFunction(CommandConstructor)) {
-                throw "Command must be constructable";
-            }
-
-            this.vent.listenTo(this.vent, eventName, function(eventData) {
-
-                var commandInstance = new CommandConstructor(context, eventName, eventData);
-
-                commandInstance.context = context;
-                commandInstance.eventName = eventName;
-                commandInstance.eventData = eventData;
-                context.resolve(commandInstance, wiring);
-                if (_.isFunction(commandInstance.execute)) {
-                    commandInstance.execute();
-                }
-
-            });
-        },
-
-        wireCommands: function wireCommands(commandsMap) {
-            var _this = this;
-            _.each(commandsMap, function(mixedType, eventName) {
-                if (_.isArray(mixedType)) {
-                    _.each(mixedType, function(commandClass) {
-                        _this.wireCommand(eventName, commandClass);
-                    });
-                } else {
-                    _this.wireCommand(eventName, mixedType);
-                }
-            });
-        },
-
-        wireValue: function(keys, useValue) {
-            this._storeMapping(keys, {
-                clazz: null,
-                object: useValue,
-                type: TYPES.SINGLETON
-            });
-            return this;
-        },
-
-        wireClass: function(keys, clazz, wiring) {
-            this._storeMapping(keys, {
-                clazz: this._wrapConstructor(clazz, wiring),
-                object: null,
-                type: TYPES.OTHER,
-                wiring: wiring
-            });
-            return this;
-        },
-
-        wireView: function(keys, clazz, wiring) {
-            this.wireFactory(keys, clazz, wiring);
-        },
-
-        wireFactory: function(keys, clazz, wiring) {
-            this._storeMapping(keys, {
-                clazz: createFactory(this._wrapConstructor(clazz, wiring)),
-                object: null,
-                type: TYPES.FACTORY
-            });
-            return this;
-        },
-
-        wireSingleton: function(keys, clazz, wiring) {
-
-            this._storeMapping(keys, {
-                clazz: this._wrapConstructor(clazz, wiring),
-                object: null,
-                type: TYPES.SINGLETON,
-                wiring: wiring
-            });
-            return this;
-        },
-
-        configure: function(key) {
-            var mapping = this._mappings[key];
-            if (typeof mapping === 'undefined') {
-                throw new Error(NO_MAPPING_FOUND + key);
-            }
-            if (!mapping.clazz || mapping.type === TYPES.FACTORY) {
-                throw new Error("Cannot configure " + key + ": only possible for wirings of type singleton or class");
-            }
-            mapping.params = _.toArray(arguments).slice(1);
-        },
-
-        hasWiring: function(key) {
-            return this._mappings.hasOwnProperty(key) || ( !! this.parentContext && this.parentContext.hasWiring(key));
-        },
-
-        createAlias: function(key, alias) {
-            this._storeMapping(alias, this._mappings[key]);
-            return this;
-        },
-
-        getObject: function(key) {
-            return this._retrieveFromCacheOrCreate(key, false);
-        },
-
-        instantiate: function(key) {
-            return this._retrieveFromCacheOrCreate(key, true);
-        },
-
-        resolve: function(instance, wiring) {
-            wiring = wiring || instance.wiring;
-            if (wiring) {
-                var propNameArgIndex = Number(!_.isArray(wiring));
-                _.each(wiring, function(dependencyKey) {
-                    instance[arguments[propNameArgIndex]] = this.getObject(dependencyKey);
-                }, this);
-            }
-            this.addPubSub(instance);
-            this._mapContextEvents(instance);
-            return this;
-        },
-
-        release: function(key) {
-            delete this._mappings[key];
-            return this;
-        },
-
-        releaseAll: function() {
-            this._mappings = {};
-            return this;
-        },
-
-        destroy: function destroy() {
-            this.vent.stopListening();
-            this.releaseAll();
-
-            delete contexts[this._contextId];
-
-            this.dispatchToParent(Geppetto.EVENT_CONTEXT_SHUTDOWN);
+        if( Mapper.providers.hasOwnProperty( providerName ) ){
+            throw createError( "A provider mapping already exists for '$1'", providerName );
         }
-
-    });
-
-    Geppetto.bindContext = function bindContext(options) {
-
-        this.options = options || {};
-
-        var view = this.options.view;
-
-        var context = null;
-        if (typeof this.options.context === 'function') {
-            // create new context if we get constructor
-            context = new this.options.context(this.options);
-
-            // only close context if we are the owner
-            if (!view.close) {
-                view.close = function() {
-                    view.trigger("close");
-                    view.remove();
+        return {
+            /**
+             *
+             * @param {{}} provider
+             * @throws {Error} A provider must expose a 'construct' method
+             */
+            using : function( provider ){
+                if( !provider.hasOwnProperty( "construct" ) ){
+                    throw createError( "A provider must expose a 'construct' method" );
+                }
+                /**
+                 * @protected
+                 * @this Mapper
+                 * @param {(string|string[]|{})} keys
+                 * @returns {*}
+                 */
+                Mapper.providers[ providerName ] = function( keys ){
+                    if( provider.validate ){
+                        provider.validate( this._mapping );
+                    }
+                    return this._mapToProvider( provider, _.toArray( arguments ) );
                 };
             }
-
-            view.on("close", function() {
-                view.off("close");
-                context.destroy();
-            });
-        } else if (typeof this.options.context === 'object') {
-            // or use existing context if we get one
-            context = this.options.context;
         }
-
-        context.resolve(view);
-
-        var returnValue;
-
-        // only set a reference to the context on the view if the view
-        // is a pre-0.7.0 component that does not use dependency injection. 
-        // this will be removed in a future release...
-        if (!view.wiring) {
-            view.context = context;
-            returnValue = context;
-        }
-
-        return returnValue;
     };
 
-    var debug = {
-
-        contexts: contexts,
-
-        countEvents: function countEvents() {
-
-            var numEvents = 0;
-
-            _.each(contexts, function(context, id) {
-                if (contexts.hasOwnProperty(id)) {
-                    numEvents += _.size(context.vent._events);
-                }
-            });
-
-            return numEvents;
-        },
-
-        countContexts: function countContexts() {
-
-            var numContexts = 0;
-
-            _.each(contexts, function(context, id) {
-                if (contexts.hasOwnProperty(id)) {
-                    numContexts++;
-                }
-            });
-            return numContexts;
+    /**
+     *
+     * @type {{provider: Function}}
+     */
+    Context.release = {
+        /**
+         *
+         * @param {String} providerName
+         */
+        provider : function( providerName ){
+            delete Mapper.providers[ providerName ];
         }
-
     };
 
-    Geppetto.setDebug = function setDebug(enableDebug) {
-        if (enableDebug) {
-            this.debug = debug;
-        } else {
-            this.debug = undefined;
+    /**
+     *
+     * @type {{provider: Function}}
+     */
+    Context.has = {
+        /**
+         *
+         * @param {String} providerName
+         * @returns {boolean}
+         */
+        provider : function( providerName ){
+            return Mapper.providers.hasOwnProperty( providerName );
         }
-        return this.debug;
     };
+
+    Context.createInstanceAndResolve = createInstanceAndResolve;
+    Context.createFactory = createFactory;
+
+    Context.provide( "singleton" )
+        .using( SINGLETON_PROVIDER );
+
+    Context.provide( "multiton" )
+        .using( MULTITON_PROVIDER );
+
+    Context.provide( "value" )
+        .using( VALUE_PROVIDER );
+
+    Context.provide( "unresolved" )
+        .using( UNRESOLVED_PROVIDER );
+
+    Context.provide( "producer" )
+        .using( PRODUCER_PROVIDER );
+
+    Context.provide( "constructor" )
+        .using( CONSTRUCTOR_PROVIDER );
+
+    Geppetto.Context = Context;
+    Geppetto.toHash = toHash;
 
     Backbone.Geppetto = Geppetto;
 
     return Geppetto;
-}));
+} ));
