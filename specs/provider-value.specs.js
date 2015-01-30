@@ -5,7 +5,7 @@
 
 var _ = require( "underscore" );
 var sinon = require( "sinon" );
-var stub = require( "proxyquire" );
+
 var expect = require( "must" );
 
 var subject = require( "../backbone.geppetto.js" );
