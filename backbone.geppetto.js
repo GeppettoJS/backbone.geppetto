@@ -35,9 +35,11 @@
      * @param {Mapping} mapping
      * @returns {*}
      */
-    function createInstanceAndResolve( mapping ){
+    function createInstanceAndResolve( mapping,
+                                       args ){
+        var params = args || mapping.parameters; //todo: log warning about ignoring mapping.parameters
         var ctor = mapping.source.prototype.constructor;
-        var params = [ ctor, null ].concat( mapping.parameters );
+        params = [ ctor, null ].concat( params );
         var FactoryFunction = _.bind.apply( ctor, params );
         var instance = new FactoryFunction();
         mapping.context.resolve( instance, mapping.wiring );
@@ -51,6 +53,9 @@
      */
     function createFactory( mapping ){
         var factory = function(){
+            if( arguments.length > 0 ){
+                return createInstanceAndResolve( mapping, _.toArray( arguments ) );
+            }
             return createInstanceAndResolve( mapping );
         };
         factory.prototype = mapping.source.prototype;
@@ -222,14 +227,15 @@
                 throw createError( "Producer provider expects a `function`" );
             }
         },
-        
+
         /**
          *
          * @param {Mapping} mapping
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping, key ){
+        construct : function( mapping,
+                              key ){
             return createInstanceAndResolve( mapping );
         }
     };
@@ -244,7 +250,7 @@
                 throw createError( "Constructor provider expects a `function`" );
             }
         },
-        
+
         /**
          *
          * @param {Mapping} mapping

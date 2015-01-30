@@ -12,6 +12,7 @@ var Geppetto = require( "../backbone.geppetto.js" );
 
 var FixtureClass = function(){
     this.foo = undefined;
+    this.params = _.toArray( arguments );
 };
 
 describe( "-- constructor provider -- ", function(){
@@ -71,8 +72,9 @@ describe( "-- constructor provider -- ", function(){
     } );
 
     describe( "when wiring a function", function(){
+        var mapper;
         beforeEach( function(){
-            context.wire( FixtureClass )
+            mapper = context.wire( FixtureClass )
                 .as.constructor( "ctor" );
         } );
         it( "should resolve to a function, with the same prototype", function(){
@@ -97,6 +99,23 @@ describe( "-- constructor provider -- ", function(){
             var result = new Clazz();
             expect( result.dep ).to.equal( dep );
             delete FixtureClass.prototype.wiring;
+        } );
+        it( "should pass the wired parameters to the wrapped constructor", function(){
+            var a = {}, b = "b", c = [ "c" ];
+            mapper.using.parameters( a, b, c );
+            var Clazz = context.get( "ctor" );
+            var result = new Clazz();
+            expect( result.params[ 0 ] ).to.equal( a );
+            expect( result.params[ 1 ] ).to.equal( b );
+            expect( result.params[ 2 ] ).to.equal( c );
+        } );
+        it( "should pass the passed parameters to the wrapped constructor (and ignore the wiring parameters)", function(){
+            var a = {}, b = "b", c = [ "c" ], d={}, e="e";
+            mapper.using.parameters( a, b, c );
+            var Clazz = context.get( "ctor" );
+            var result = new Clazz(d, e);
+            expect( result.params[ 0 ] ).to.equal( d );
+            expect( result.params[ 1 ] ).to.equal( e );
         } );
     } );
 } );

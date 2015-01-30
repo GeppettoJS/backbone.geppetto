@@ -12,6 +12,7 @@ var subject = require( "../backbone.geppetto.js" );
 
 var FixtureClass = function(){
     this.foo = undefined;
+    this.params = _.toArray( arguments );
 };
 
 describe( "-- multiton provider -- ", function(){
@@ -92,6 +93,15 @@ describe( "-- multiton provider -- ", function(){
             expect( result.dep ).to.equal( dep );
             delete FixtureClass.prototype.wiring;
         } );
+        it( "should pass the parameters to the constructor", function(){
+            var a = {}, b = "b", c = [ "c" ];
+            mapper.using.parameters( a, b, c );
+            var result = context.get( "multiton" );
+            expect( result.params[ 0 ] ).to.equal( a );
+            expect( result.params[ 1 ] ).to.equal( b );
+            expect( result.params[ 2 ] ).to.equal( c );
+        } );
+
     } );
     describe( "wiring a function to multiple keys", function(){
         it( "should create an instance per key", function(){
