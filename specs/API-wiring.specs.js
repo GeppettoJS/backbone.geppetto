@@ -30,6 +30,7 @@ function verifyMapper( mapper ){
     expect( mapper ).to.have.property( "using" );
     expect( mapper ).to.have.property( "and" );
     expect( mapper ).to.have.property( "to" );
+    expect( mapper ).to.have.property( "as" );
 }
 
 describe( "-- wiring API --", function(){
@@ -68,18 +69,16 @@ describe( "-- wiring API --", function(){
             it( "should throw an error when wiring `undefined`", function(){
                 expect( function(){
                     subject.wire( undefined );
-                } ).to.throw( /'undefined'/ );
+                } ).to.throw( /undefined/ );
             } );
             it( "should throw an error when wiring `null`", function(){
                 expect( function(){
                     subject.wire( null );
-                } ).to.throw( /'null'/ );
+                } ).to.throw( /null/ );
             } );
             it( "should return a mapper object", function(){
                 var result = subject.wire( {} );
-                expect( result ).to.have.property( "as" );
-                expect( result ).to.have.property( "to" );
-                expect( result ).to.have.property( "using" );
+                verifyMapper(result);
             } );
             describe( ".as", function(){
                 it( "should register the value for a single key", function(){

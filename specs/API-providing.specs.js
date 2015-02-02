@@ -71,6 +71,19 @@ describe( "-- providers API --", function(){
                     context.wire( {} ).as.foo( "foo" );
                     context.get( "foo" );
                     expect( provider.provide.callCount ).to.equal( 1 );
+                } );
+                it( "should call the provider's 'provide' method within the provider's scope", function(){
+                    var scope;
+                    var provider = {
+                        provide : function(){
+                            scope=this;
+                        }
+                    };
+                    subject.provide( "foo" ).using( provider );
+                    var context = new subject();
+                    context.wire( {} ).as.foo( "foo" );
+                    context.get( "foo" );
+                    expect( scope ).to.equal( provider );
                 } )
             } );
         } );

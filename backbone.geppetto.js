@@ -26,8 +26,6 @@
         throw "Please include Backbone before Geppetto";
     }
 
-    var extend = Backbone.View.extend;
-
     //based on http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
 
     /**
