@@ -9,7 +9,7 @@ var subject = Geppetto.Context;
 
 var NOOP = _.noop;
 var DUMMY_PROVIDER = {
-    construct : NOOP
+    provide : NOOP
 };
 
 describe( "-- providers API --", function(){
@@ -46,10 +46,10 @@ describe( "-- providers API --", function(){
                 expect( subject.provide( "foo" ) ).to.have.property( "using" );
             } );
             describe( ".using", function(){
-                it( "should throw an error if the provider doesn't expose a 'construct' method", function(){
+                it( "should throw an error if the provider doesn't expose a 'provide' method", function(){
                     expect( function(){
                         subject.provide( "foo" ).using( {} );
-                    } ).to.throw( /provider must expose a 'construct'/ );
+                    } ).to.throw( /provider must expose a 'provide'/ );
                 } );
                 it( "should throw an error when re-registering a providerName", function(){
                     subject.provide( "foo" ).using( DUMMY_PROVIDER );
@@ -62,15 +62,15 @@ describe( "-- providers API --", function(){
                     var context = new subject();
                     expect( context.wire( {} ).as ).to.have.property( "foo" );
                 } );
-                it( "should call the provider's 'construct' method when retrieving an object", function(){
+                it( "should call the provider's 'provide' method when retrieving an object", function(){
                     var provider = {
-                        construct : sinon.spy()
+                        provide : sinon.spy()
                     };
                     subject.provide( "foo" ).using( provider );
                     var context = new subject();
                     context.wire( {} ).as.foo( "foo" );
                     context.get( "foo" );
-                    expect( provider.construct.callCount ).to.equal( 1 );
+                    expect( provider.provide.callCount ).to.equal( 1 );
                 } )
             } );
         } );

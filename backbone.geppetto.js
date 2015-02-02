@@ -139,7 +139,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping,
+        provide : function( mapping,
                               key ){
             if( !mapping.cache ){
                 mapping.cache = createInstanceAndResolve( mapping );
@@ -165,7 +165,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping,
+        provide : function( mapping,
                               key ){
             mapping.cache = mapping.cache || {};
             if( !mapping.cache.hasOwnProperty( key ) ){
@@ -182,7 +182,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping,
+        provide : function( mapping,
                               key ){
             return mapping.source;
         }
@@ -205,7 +205,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping,
+        provide : function( mapping,
                               key ){
             if( !mapping.cache ){
                 mapping.cache = true;
@@ -234,7 +234,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping,
+        provide : function( mapping,
                               key ){
             return createInstanceAndResolve( mapping );
         }
@@ -257,7 +257,7 @@
          * @param {string} key
          * @returns {*}
          */
-        construct : function( mapping ){
+        provide : function( mapping ){
             if( !mapping.cache ){
                 mapping.cache = createFactory( mapping );
             }
@@ -265,7 +265,7 @@
         }
     };
     var COMMAND_PROVIDER = {
-        construct : function( mapping ){
+        provide : function( mapping ){
             var command = createInstanceAndResolve( mapping );
             if( command.execute ){
                 command.execute();
@@ -496,7 +496,7 @@
                     throw createError( 'cannot overwrite "$1"', index );
                 }
                 var mapping = this._mappings[ key ];
-                memo[ index ] = mapping.provider.construct( mapping, key );
+                memo[ index ] = mapping.provider.provide( mapping, key );
                 return memo;
             }, receiver, this );
         },
@@ -576,11 +576,11 @@
             /**
              *
              * @param {{}} provider
-             * @throws {Error} A provider must expose a 'construct' method
+             * @throws {Error} A provider must expose a 'provide' method
              */
             using : function( provider ){
-                if( !provider.hasOwnProperty( "construct" ) ){
-                    throw createError( "A provider must expose a 'construct' method" );
+                if( !provider.hasOwnProperty( "provide" ) ){
+                    throw createError( "A provider must expose a 'provide' method" );
                 }
                 /**
                  * @protected

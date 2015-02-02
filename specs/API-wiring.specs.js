@@ -11,20 +11,20 @@ var FixtureClass = function(){
 };
 
 Geppetto.Context.provide( "mapping" ).using( {
-    construct : function( mapping ){
+    provide : function( mapping ){
         return mapping;
     }
 } );
 Geppetto.Context.provide( "reflection" ).using( {
-    construct : function( mapping ){
+    provide : function( mapping ){
         return mapping.source;
     }
 } );
 Geppetto.Context.provide( "resolution" ).using( {
-    construct : function( mapping ){
+    provide : function( mapping ){
         return Geppetto.Context.createInstanceAndResolve( mapping );
     }
-} )
+} );
 
 function verifyMapper( mapper ){
     expect( mapper ).to.have.property( "using" );
