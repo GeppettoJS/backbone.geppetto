@@ -138,7 +138,7 @@
          * @returns {*}
          */
         provide : function( mapping,
-                              key ){
+                            key ){
             if( !mapping.cache ){
                 mapping.cache = createInstanceAndResolve( mapping );
             }
@@ -164,7 +164,7 @@
          * @returns {*}
          */
         provide : function( mapping,
-                              key ){
+                            key ){
             mapping.cache = mapping.cache || {};
             if( !mapping.cache.hasOwnProperty( key ) ){
                 mapping.cache[ key ] = createInstanceAndResolve( mapping );
@@ -181,7 +181,7 @@
          * @returns {*}
          */
         provide : function( mapping,
-                              key ){
+                            key ){
             return mapping.source;
         }
     };
@@ -204,7 +204,7 @@
          * @returns {*}
          */
         provide : function( mapping,
-                              key ){
+                            key ){
             if( !mapping.cache ){
                 mapping.cache = true;
                 if( _.isObject( mapping.source ) ){
@@ -233,7 +233,7 @@
          * @returns {*}
          */
         provide : function( mapping,
-                              key ){
+                            key ){
             return createInstanceAndResolve( mapping );
         }
     };
@@ -648,6 +648,133 @@
 
     Geppetto.Context = Context;
     Geppetto.toHash = toHash;
+
+    /**
+     *
+     * @param {{}} opts
+     * @param {function} opts.callback
+     * @param {{}} opts.scope
+     * @param {string} opts.event
+     * @param {{}} opts.dispatcher
+     * @private
+     */
+    function registerListener( opts ){
+        var callback = opts.callback;
+        if( _.isFunction( callback ) ){
+            callback = [ callback ];
+        }
+        if( _.isObject( callback ) ){
+            _.each( callback, function( callback ){
+                if( _.isFunction( callback ) ){
+                    opts.dispatcher.on( opts.event, callback, opts.scope );
+                }
+            } );
+            return;
+        }
+        throw createError( opts.err );
+    }
+
+    Geppetto.Events = {
+        _dispatcher   : _.extend( {}, Backbone.Events ),
+        on            : function( event,
+                                  callback,
+                                  scope ){
+            var d = this._dispatcher;
+            var self = this;
+            if( arguments.length >= 2 ){
+                d.on( event, callback, scope );
+            }
+            return {
+                execute : function( callback ){
+                    registerListener( {
+                        callback   : callback,
+                        dispatcher : d,
+                        event      : event,
+                        scope      : scope,
+                        err        : "on.execute expects a `function`, `object` or `array`"
+                    } );
+                },
+                have    : function( scope ){
+                    if( _.isString( scope ) ){
+                        if( "undefined" === typeof self.context ){
+                            throw createError( "shoudl have context" );
+                        }
+                        var key = scope;
+                        return {
+                            execute : function( callback ){
+                                if( _.isUndefined( callback ) ){
+                                    callback = "execute";
+                                }
+                                d.on( "event", function(){
+                                    var scope = self.context.get( key );
+                                    if( _.isString( callback ) ){
+                                        if( "undefined" === typeof scope[ callback ] ){
+                                            throw createError( "object does not have a method '$1'", callback );
+                                        }
+                                        callback = scope[ callback ];
+                                    }
+                                    if( _.isFunction( callback ) ){
+                                        callback = [ callback ];
+                                    }
+                                    if( _.isObject( callback ) ){
+                                        _.each( callback, function( callback ){
+                                            if( _.isFunction( callback ) ){
+                                                callback.call( scope );
+                                            }
+                                        } );
+                                        return;
+                                    }
+                                    throw createError( "on.have.execute expects a `function`, `object`, `array` or `string`" );
+
+                                } );
+                            }
+                        }
+                    }
+                    if( !_.isObject( scope ) || _.isArray( scope ) ){
+                        throw createError( "on.have expects an `object` or `string`" );
+                    }
+                    return {
+                        execute : function( callback ){
+                            if( _.isUndefined( callback ) ){
+                                callback = "execute";
+                            }
+                            if( _.isString( callback ) ){
+                                if( "undefined" === typeof scope[ callback ] ){
+                                    throw createError( "object does not have a method '$1'", callback );
+                                }
+                                callback = scope[ callback ];
+                            }
+                            registerListener( {
+                                callback   : callback,
+                                dispatcher : d,
+                                event      : event,
+                                scope      : scope,
+                                err        : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                            } );
+                        }
+                    }
+                }
+            }
+        },
+        off           : function(){
+            this._dispatcher.off.apply( this._dispatcher, _.toArray( arguments ) );
+        },
+        trigger       : function( event ){
+            this._dispatcher.trigger( event );
+        },
+        once          : function(){
+
+        },
+        listenTo      : function(){
+
+        },
+        stopListening : function(){
+
+        },
+        listenToOnce  : function(){
+
+        }
+    };
 
     Backbone.Geppetto = Geppetto;
 
