@@ -653,12 +653,12 @@
      *
      * @param {{}} opts
      * @param {function} opts.callback
-     * @param {{}} opts.scope
-     * @param {string} opts.event
-     * @param {{}} opts.dispatcher
+     * @param {string} opts.expects
+     * @param {function} next
      * @private
      */
-    function registerListener( opts ){
+    function verifyCallback( opts,
+                             next ){
         var callback = opts.callback;
         if( _.isFunction( callback ) ){
             callback = [ callback ];
@@ -666,12 +666,38 @@
         if( _.isObject( callback ) ){
             _.each( callback, function( callback ){
                 if( _.isFunction( callback ) ){
-                    opts.dispatcher.on( opts.event, callback, opts.scope );
+                    //opts.dispatcher.on( opts.event, callback, opts.scope );
+                    next( callback );
                 }
             } );
             return;
         }
-        throw createError( opts.err );
+        throw createError( opts.expects );
+    }
+
+    /**
+     *
+     * @param {{}} opts
+     * @param {function} opts.callback
+     * @param {{}} opts.scope
+     * @param {function} next
+     * @private
+     */
+    function verifyScopedCallback( opts,
+                                   next ){
+        var callback = opts.callback;
+        var scope = opts.scope;
+
+        if( _.isUndefined( callback ) ){
+            callback = "execute";
+        }
+        if( _.isString( callback ) ){
+            if( "undefined" === typeof scope[ callback ] ){
+                throw createError( "object does not have a method '$1'", callback );
+            }
+            opts.callback = scope[ callback ];
+        }
+        verifyCallback( opts, next );
     }
 
     Geppetto.Events = {
@@ -686,46 +712,30 @@
             }
             return {
                 execute : function( callback ){
-                    registerListener( {
-                        callback   : callback,
-                        dispatcher : d,
-                        event      : event,
-                        scope      : scope,
-                        err        : "on.execute expects a `function`, `object` or `array`"
+                    verifyCallback( {
+                        callback : callback,
+                        expects  : "on.execute expects a `function`, `object` or `array`"
+                    }, function( callback ){
+                        d.on( event, callback );
                     } );
                 },
                 have    : function( scope ){
                     if( _.isString( scope ) ){
                         if( "undefined" === typeof self.context ){
-                            throw createError( "shoudl have context" );
+                            throw createError( "should have context" );
                         }
                         var key = scope;
                         return {
                             execute : function( callback ){
-                                if( _.isUndefined( callback ) ){
-                                    callback = "execute";
-                                }
                                 d.on( "event", function(){
                                     var scope = self.context.get( key );
-                                    if( _.isString( callback ) ){
-                                        if( "undefined" === typeof scope[ callback ] ){
-                                            throw createError( "object does not have a method '$1'", callback );
-                                        }
-                                        callback = scope[ callback ];
-                                    }
-                                    if( _.isFunction( callback ) ){
-                                        callback = [ callback ];
-                                    }
-                                    if( _.isObject( callback ) ){
-                                        _.each( callback, function( callback ){
-                                            if( _.isFunction( callback ) ){
-                                                callback.call( scope );
-                                            }
-                                        } );
-                                        return;
-                                    }
-                                    throw createError( "on.have.execute expects a `function`, `object`, `array` or `string`" );
-
+                                    verifyScopedCallback( {
+                                        callback : callback,
+                                        scope    : scope,
+                                        expects  : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                                    }, function( callback ){
+                                        callback.call( scope );
+                                    } );
                                 } );
                             }
                         }
@@ -735,21 +745,12 @@
                     }
                     return {
                         execute : function( callback ){
-                            if( _.isUndefined( callback ) ){
-                                callback = "execute";
-                            }
-                            if( _.isString( callback ) ){
-                                if( "undefined" === typeof scope[ callback ] ){
-                                    throw createError( "object does not have a method '$1'", callback );
-                                }
-                                callback = scope[ callback ];
-                            }
-                            registerListener( {
-                                callback   : callback,
-                                dispatcher : d,
-                                event      : event,
-                                scope      : scope,
-                                err        : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                            verifyScopedCallback( {
+                                callback : callback,
+                                scope    : scope,
+                                expects  : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                            }, function( callback ){
+                                d.on( event, callback, scope );
                             } );
                         }
                     }

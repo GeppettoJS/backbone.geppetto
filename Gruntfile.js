@@ -66,10 +66,10 @@ module.exports = function( grunt ){
             },
             all     : [
                 "specs/events.specs.js",
-                //"specs/API-helpers.specs.js", "specs/API-wiring.specs.js", "specs/API-providing.specs.js",
-                //"specs/provider-singleton.specs.js", "specs/provider-multiton.specs.js",
-                //"specs/provider-value.specs.js", "specs/provider-unresolved.specs.js",
-                //"specs/provider-producer.specs.js", "specs/provider-constructor.specs.js"
+                "specs/API-helpers.specs.js", "specs/API-wiring.specs.js", "specs/API-providing.specs.js",
+                "specs/provider-singleton.specs.js", "specs/provider-multiton.specs.js",
+                "specs/provider-value.specs.js", "specs/provider-unresolved.specs.js",
+                "specs/provider-producer.specs.js", "specs/provider-constructor.specs.js"
             ]
         }
     } );
