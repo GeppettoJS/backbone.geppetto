@@ -97,9 +97,7 @@ describe( "-- multiton provider -- ", function(){
             var a = {}, b = "b", c = [ "c" ];
             mapper.using.parameters( a, b, c );
             var result = context.get( "multiton" );
-            expect( result.params[ 0 ] ).to.equal( a );
-            expect( result.params[ 1 ] ).to.equal( b );
-            expect( result.params[ 2 ] ).to.equal( c );
+            expect( result.params ).to.eql( [ a, b, c ] );
         } );
 
     } );

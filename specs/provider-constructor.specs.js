@@ -105,17 +105,14 @@ describe( "-- constructor provider -- ", function(){
             mapper.using.parameters( a, b, c );
             var Clazz = context.get( "ctor" );
             var result = new Clazz();
-            expect( result.params[ 0 ] ).to.equal( a );
-            expect( result.params[ 1 ] ).to.equal( b );
-            expect( result.params[ 2 ] ).to.equal( c );
+            expect( result.params ).to.eql( [ a, b, c ] );
         } );
         it( "should pass the passed parameters to the wrapped constructor (and ignore the wiring parameters)", function(){
-            var a = {}, b = "b", c = [ "c" ], d={}, e="e";
+            var a = {}, b = "b", c = [ "c" ], d = {}, e = "e";
             mapper.using.parameters( a, b, c );
             var Clazz = context.get( "ctor" );
-            var result = new Clazz(d, e);
-            expect( result.params[ 0 ] ).to.equal( d );
-            expect( result.params[ 1 ] ).to.equal( e );
+            var result = new Clazz( d, e );
+            expect( result.params ).to.eql( [ d, e ] );
         } );
     } );
 } );

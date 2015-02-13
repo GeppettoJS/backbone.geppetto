@@ -72,8 +72,10 @@ describe( "-- value provider -- ", function(){
             context.wire( source )
                 .as.value( "a", "b" );
             var obj = context.get( "a", "b" );
-            expect( obj.a ).to.equal( source );
-            expect( obj.b ).to.equal( source );
+            expect( obj ).to.eql( {
+                a : source,
+                b : source
+            } );
         } );
     } );
 } );

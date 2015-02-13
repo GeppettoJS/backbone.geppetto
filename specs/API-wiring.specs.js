@@ -78,7 +78,7 @@ describe( "-- wiring API --", function(){
             } );
             it( "should return a mapper object", function(){
                 var result = subject.wire( {} );
-                verifyMapper(result);
+                verifyMapper( result );
             } );
             describe( ".as", function(){
                 it( "should register the value for a single key", function(){
@@ -131,10 +131,10 @@ describe( "-- wiring API --", function(){
                                 } ).as.mapping( "under test" )
                                     .using.wiring( [ "a", "b" ] );
                                 var mapping = subject.get( "under test" );
-                                expect( mapping.wiring ).to.have.a.property( "a" );
-                                expect( mapping.wiring.a ).to.equal( "a" );
-                                expect( mapping.wiring ).to.have.a.property( "b" );
-                                expect( mapping.wiring.b ).to.equal( "b" );
+                                expect( mapping.wiring ).to.eql( {
+                                    a : "a",
+                                    b : "b"
+                                } );
                             } );
                             it( "should store the wirings when a hash is passed", function(){
                                 subject.wire( {
@@ -145,10 +145,10 @@ describe( "-- wiring API --", function(){
                                         bb : "b"
                                     } );
                                 var mapping = subject.get( "under test" );
-                                expect( mapping.wiring ).to.have.property( "aa" );
-                                expect( mapping.wiring.aa ).to.equal( "a" );
-                                expect( mapping.wiring ).to.have.property( "bb" );
-                                expect( mapping.wiring.bb ).to.equal( "b" );
+                                expect( mapping.wiring ).to.eql( {
+                                    aa : "a",
+                                    bb : "b"
+                                } );
                             } );
                         } );
                         describe( ".parameters", function(){
@@ -234,12 +234,11 @@ describe( "-- wiring API --", function(){
             } );
             it( "should return a hash with correct values when an array of keys was provided and all were found", function(){
                 var result = subject.has( [ "c", "a", "b" ] );
-                expect( result ).to.have.property( "c" );
-                expect( result.c ).to.be.true();
-                expect( result ).to.have.property( "a" );
-                expect( result.a ).to.be.true();
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.be.true();
+                expect( result ).to.eql( {
+                    a : true,
+                    b : true,
+                    c : true
+                } );
             } );
             it( "should return a hash with correct values when a hash of keys was provided and all were found", function(){
                 var result = subject.has( {
@@ -247,56 +246,52 @@ describe( "-- wiring API --", function(){
                     bb : "b",
                     cc : "c"
                 } );
-                expect( result ).to.have.property( "cc" );
-                expect( result.cc ).to.be.true();
-                expect( result ).to.have.property( "aa" );
-                expect( result.aa ).to.be.true();
-                expect( result ).to.have.property( "bb" );
-                expect( result.bb ).to.be.true();
+                expect( result ).to.eql( {
+                    aa : true,
+                    bb : true,
+                    cc : true
+                } );
             } );
             it( "should return a hash with correct values when multiple keys wre provided and all were found", function(){
                 var result = subject.has( "c", "a", "b" );
-                expect( result ).to.have.property( "c" );
-                expect( result.c ).to.be.true();
-                expect( result ).to.have.property( "a" );
-                expect( result.a ).to.be.true();
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.be.true();
+                expect( result ).to.eql( {
+                    a : true,
+                    b : true,
+                    c : true
+                } );
             } );
             it( "should return a hash with correct values when a single key was provided and not found", function(){
                 expect( subject.has( "notfound" ) ).to.be.false();
             } );
             it( "should return a hash with correct values when an array of keys was provided and none were found", function(){
                 var result = subject.has( [ "z", "y" ] );
-                expect( result ).to.have.property( "z" );
-                expect( result.z ).to.be.false();
-                expect( result ).to.have.property( "y" );
-                expect( result.y ).to.be.false();
+                expect( result ).to.eql( {
+                    y : false,
+                    z : false
+                } );
             } );
             it( "should return a hash with correct values when an array of keys was provided and one was not found", function(){
                 var result = subject.has( [ "c", "z", "b" ] );
-                expect( result ).to.have.property( "c" );
-                expect( result.c ).to.be.true();
-                expect( result ).to.have.property( "z" );
-                expect( result.z ).to.be.false();
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.be.true();
+                expect( result ).to.eql( {
+                    c : true,
+                    b : true,
+                    z : false
+                } );
             } );
             it( "should return a hash with correct values when multiple keys were provided and none were found", function(){
                 var result = subject.has( "z", "y" );
-                expect( result ).to.have.property( "z" );
-                expect( result.z ).to.be.false();
-                expect( result ).to.have.property( "y" );
-                expect( result.y ).to.be.false();
+                expect( result ).to.eql( {
+                    y : false,
+                    z : false
+                } );
             } );
             it( "should return a hash with correct values when multiple keys were provided and one was not found", function(){
                 var result = subject.has( "c", "z", "b" );
-                expect( result ).to.have.property( "c" );
-                expect( result.c ).to.be.true();
-                expect( result ).to.have.property( "z" );
-                expect( result.z ).to.be.false();
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.be.true();
+                expect( result ).to.eql( {
+                    c : true,
+                    b : true,
+                    z : false
+                } );
             } );
             describe( ".each", function(){
                 it( "should return `true` when a single key was provided and found", function(){
@@ -359,19 +354,17 @@ describe( "-- wiring API --", function(){
             } );
             it( "should retrieve an array of values when an array of keys is passed", function(){
                 var result = subject.get( [ "a", "b" ] );
-                expect( result ).to.be.an.object();
-                expect( result ).to.have.property( "a" );
-                expect( result.a ).to.equal( a );
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.equal( b );
+                expect( result ).to.eql( {
+                    a : a,
+                    b : b
+                } );
             } );
             it( "should retrieve an array of values when multiple keys are passed", function(){
                 var result = subject.get( "a", "b" );
-                expect( result ).to.be.an.object();
-                expect( result ).to.have.property( "a" );
-                expect( result.a ).to.equal( a );
-                expect( result ).to.have.property( "b" );
-                expect( result.b ).to.equal( b );
+                expect( result ).to.eql( {
+                    a : a,
+                    b : b
+                } );
             } );
             it( "should retrieve a hash of values when an array with a hash is passed", function(){
                 expect( subject.get( [ { aa : "a" } ] ) ).to.equal( a );
@@ -381,11 +374,10 @@ describe( "-- wiring API --", function(){
                     aa : "a",
                     bb : "b"
                 } );
-                expect( result ).to.be.an.object();
-                expect( result ).to.have.property( "aa" );
-                expect( result.aa ).to.equal( a );
-                expect( result ).to.have.property( "bb" );
-                expect( result.bb ).to.equal( b );
+                expect( result ).to.eql( {
+                    aa : a,
+                    bb : b
+                } );
             } );
             it( "should throw an error when a mapping is not found", function(){
                 expect( function(){
@@ -566,26 +558,26 @@ describe( "-- wiring API --", function(){
                     aa : "a",
                     bb : "b"
                 } );
-                expect( obj ).to.have.property( "aa" );
-                expect( obj.aa ).to.equal( a );
-                expect( obj ).to.have.property( "bb" );
-                expect( obj.bb ).to.equal( b );
+                expect( obj ).to.eql( {
+                    aa : a,
+                    bb : b
+                } );
             } );
             it( "should resolve the dependencies passed as an array", function(){
                 var obj = {};
                 subject.resolve( obj, [ "a", "b" ] );
-                expect( obj ).to.have.property( "a" );
-                expect( obj.a ).to.equal( a );
-                expect( obj ).to.have.property( "b" );
-                expect( obj.b ).to.equal( b );
+                expect( obj ).to.eql( {
+                    a : a,
+                    b : b
+                } );
             } );
             it( "should resolve the dependencies passed as parameters", function(){
                 var obj = {};
                 subject.resolve( obj, "a", "b" );
-                expect( obj ).to.have.property( "a" );
-                expect( obj.a ).to.equal( a );
-                expect( obj ).to.have.property( "b" );
-                expect( obj.b ).to.equal( b );
+                expect( obj ).to.eql( {
+                    a : a,
+                    b : b
+                } );
             } );
             it( "should resolve the dependencies as configured in the class with an object", function(){
                 FixtureClass.prototype.wiring = {

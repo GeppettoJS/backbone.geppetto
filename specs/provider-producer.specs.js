@@ -70,7 +70,7 @@ describe( "-- producer provider -- ", function(){
             } ).to.throw( /function/ );
         } );
     } );
-    
+
     describe( "when wiring a function", function(){
         var mapper;
         beforeEach( function(){
@@ -98,9 +98,7 @@ describe( "-- producer provider -- ", function(){
             var a = {}, b = "b", c = [ "c" ];
             mapper.using.parameters( a, b, c );
             var result = context.get( "producer" );
-            expect( result.params[ 0 ] ).to.equal( a );
-            expect( result.params[ 1 ] ).to.equal( b );
-            expect( result.params[ 2 ] ).to.equal( c );
+            expect( result.params ).to.eql( [ a, b, c ] );
         } );
     } );
 } );

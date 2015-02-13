@@ -700,23 +700,24 @@
         verifyCallback( opts, next );
     }
 
-    Geppetto.Events = {
-        _dispatcher   : _.extend( {}, Backbone.Events ),
-        on            : function( event,
-                                  callback,
-                                  scope ){
-            var d = this._dispatcher;
+    var eventsBase = {
+        __geppetto_dispatcher : _.extend( {}, Backbone.Events ),
+        __geppetto_listen     : function( method,
+                                          event,
+                                          callback,
+                                          scope ){
+            var d = this.__geppetto_dispatcher;
             var self = this;
             if( arguments.length >= 2 ){
-                d.on( event, callback, scope );
+                d[ method ]( event, callback, scope );
             }
             return {
                 execute : function( callback ){
                     verifyCallback( {
                         callback : callback,
-                        expects  : "on.execute expects a `function`, `object` or `array`"
+                        expects  : method + ".execute expects a `function`, `object` or `array`"
                     }, function( callback ){
-                        d.on( event, callback );
+                        d[ method ]( event, callback );
                     } );
                 },
                 have    : function( scope ){
@@ -727,12 +728,12 @@
                         var key = scope;
                         return {
                             execute : function( callback ){
-                                d.on( "event", function(){
+                                d[ method ]( "event", function(){
                                     var scope = self.context.get( key );
                                     verifyScopedCallback( {
                                         callback : callback,
                                         scope    : scope,
-                                        expects  : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                                        expects  : method + ".have.execute expects a `function`, `object`, `array` or `string`"
                                     }, function( callback ){
                                         callback.call( scope );
                                     } );
@@ -741,42 +742,109 @@
                         }
                     }
                     if( !_.isObject( scope ) || _.isArray( scope ) ){
-                        throw createError( "on.have expects an `object` or `string`" );
+                        throw createError( method + ".have expects an `object` or `string`" );
                     }
                     return {
                         execute : function( callback ){
                             verifyScopedCallback( {
                                 callback : callback,
                                 scope    : scope,
-                                expects  : "on.have.execute expects a `function`, `object`, `array` or `string`"
+                                expects  : method + ".have.execute expects a `function`, `object`, `array` or `string`"
                             }, function( callback ){
-                                d.on( event, callback, scope );
+                                d[ method ]( event, callback, scope );
                             } );
                         }
                     }
                 }
             }
         },
-        off           : function(){
-            this._dispatcher.off.apply( this._dispatcher, _.toArray( arguments ) );
-        },
-        trigger       : function( event ){
-            this._dispatcher.trigger( event );
-        },
-        once          : function(){
+        __geppetto_listenTo   : function( other,
+                                          event,
+                                          callback ){
 
+            if( arguments.length === 3 ){
+                this.__geppetto_dispatcher.listenTo.apply( this, _.toArray( arguments ) );
+            } else {
+                var self = this;
+                return {
+                    on : function( event ){
+                        return {
+                            execute : function( callback ){
+                                var scope = self;
+                                verifyScopedCallback( {
+                                    callback : callback,
+                                    scope    : scope,
+                                    expects  : "listenTo.on.execute expects a `function`, `object`, `array` or `string`"
+                                }, function( callback ){
+                                    other.on( event, callback, scope );
+                                } );
+                            }
+                        }
+                    }
+                }
+            }
         },
-        listenTo      : function(){
 
+        on : function( event,
+                       callback,
+                       scope ){
+            return this.__geppetto_listen( "on", event, callback, scope );
         },
+
+        off : function(){
+            this.__geppetto_dispatcher.off.apply( this.__geppetto_dispatcher, _.toArray( arguments ) );
+            return this;
+        },
+
+        trigger : function( event ){
+            this.__geppetto_dispatcher.trigger.apply( this.__geppetto_dispatcher, _.toArray( arguments ) );
+            return this;
+        },
+
+        dispatch : function( eventName,
+                             eventData ){
+            this.__geppetto_dispatcher.trigger.call( this.__geppetto_dispatcher, eventName, {
+                eventName : eventName,
+                eventData : eventData
+            } );
+            return this;
+        },
+
+        once : function( event,
+                         callback,
+                         scope ){
+            return this.__geppetto_listen( "once", event, callback, scope );
+        },
+
+        listenTo : function( other,
+                             event,
+                             callback ){
+            return this.__geppetto_listenTo.apply( this, _.toArray( arguments ) );
+        },
+
         stopListening : function(){
 
         },
-        listenToOnce  : function(){
+
+        listenToOnce : function(){
 
         }
     };
+    eventsBase.dispatches = eventsBase.on;
+    eventsBase.allow = eventsBase.listenTo;
 
+    var Events = function( subject ){
+        if( subject ){
+            return subject;
+        } else if( !(this instanceof Events) ){
+            return new Events();
+        }
+    };
+
+    _.extend( Events, eventsBase );
+    _.extend( Events.prototype, eventsBase );
+
+    Geppetto.Events = Events;
     Backbone.Geppetto = Geppetto;
 
     return Geppetto;

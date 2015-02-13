@@ -76,7 +76,7 @@ describe( "-- providers API --", function(){
                     var scope;
                     var provider = {
                         provide : function(){
-                            scope=this;
+                            scope = this;
                         }
                     };
                     subject.provide( "foo" ).using( provider );
@@ -102,7 +102,7 @@ describe( "-- providers API --", function(){
                 it( "should unregister a provider", function(){
                     subject.provide( "foo" ).using( DUMMY_PROVIDER );
                     subject.has.provider( "foo" ).must.be.true();
-                    subject.release.provider("foo");
+                    subject.release.provider( "foo" );
                     expect( subject.has.provider( "foo" ) ).to.be.false();
                 } );
             } );

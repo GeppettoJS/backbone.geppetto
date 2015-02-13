@@ -97,9 +97,7 @@ describe( "-- singleton provider -- ", function(){
             var a = {}, b = "b", c = [ "c" ];
             mapper.using.parameters( a, b, c );
             var result = context.get( "singleton" );
-            expect( result.params[ 0 ] ).to.equal( a );
-            expect( result.params[ 1 ] ).to.equal( b );
-            expect( result.params[ 2 ] ).to.equal( c );
+            expect( result.params ).to.eql( [ a, b, c ] );
         } );
     } );
     describe( "wiring a function to multiple keys", function(){
