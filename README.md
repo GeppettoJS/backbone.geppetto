@@ -2,7 +2,7 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/GeppettoJS/backbone.geppetto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/GeppettoJS/backbone.geppetto.png)](https://travis-ci.org/GeppettoJS/backbone.geppetto) [![devDependency Status](https://david-dm.org/GeppettoJS/backbone.geppetto/dev-status.png)](https://david-dm.org/GeppettoJS/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+[![Build Status](https://travis-ci.org/GeppettoJS/backbone.geppetto.svg?branch=master)](https://travis-ci.org/GeppettoJS/backbone.geppetto) [![devDependency Status](https://david-dm.org/GeppettoJS/backbone.geppetto/dev-status.png)](https://david-dm.org/GeppettoJS/backbone.geppetto#info=devDependencies) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 Tested on these browsers:
 
