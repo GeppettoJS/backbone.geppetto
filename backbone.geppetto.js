@@ -202,27 +202,32 @@
             return target.listenToOnce(this.vent, eventName, callback, target);
         },
 
-        dispatch: function dispatch(eventName, eventData) {
+        _extendEventData: function(eventName, eventData) {
             if (!_.isUndefined(eventData) && !_.isObject(eventData)) {
                 throw "Event payload must be an object";
             }
             eventData = eventData || {};
             eventData.eventName = eventName;
+            return eventData;
+        },
+
+        dispatch: function dispatch(eventName, eventData) {
+            eventData = this._extendEventData(eventName, eventData);
             this.vent.trigger(eventName, eventData);
         },
 
         dispatchToParent: function dispatchToParent(eventName, eventData) {
             if (this.parentContext) {
-                this.parentContext.vent.trigger(eventName, eventData);
+                this.parentContext.dispatch(eventName, eventData);
             }
         },
 
         dispatchToParents: function dispatchToParents(eventName, eventData) {
-            if (this.parentContext && !(eventData && eventData.propagationDisabled)) {
-                this.parentContext.vent.trigger(eventName, eventData);
-                if (this.parentContext) {
-                    this.parentContext.dispatchToParents(eventName, eventData);
-                }
+            eventData = this._extendEventData(eventName, eventData);
+            var context = this.parentContext;
+            while (context && !eventData.propagationDisabled) {
+                context.vent.trigger(eventName, eventData);
+                context = context.parentContext;
             }
         },
 
