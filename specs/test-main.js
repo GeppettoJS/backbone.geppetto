@@ -26,7 +26,8 @@ require([
     "backbone",
     "geppetto",
     "src/geppetto-specs",
-    "src/resolver-specs"
+    "src/resolver-specs",
+    "src/fluent-api-specs"
 ], function() {
 
     chai.Assertion.includeStack = true;

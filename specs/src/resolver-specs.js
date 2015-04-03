@@ -1,3 +1,5 @@
+
+
 /* suppress jshint warnings for chai syntax - https://github.com/chaijs/chai/issues/41#issuecomment-14904150 */
 /* jshint -W024 */
 /* jshint expr:true */
@@ -356,17 +358,17 @@ define([
             it("should allow wrapped constructor to handle initialization parameters in similar fashion as unwrapped constructor)", function() {
                 var obj1 = {value: 'foo'};
                 var obj2 = {value: 'bar'};
-                var clazz = Backbone.Model.extend({
+                var clazz = Backbone.View.extend({
                     initialize: function (obj1, obj2) {
                         this.obj1 = obj1;
                         this.obj2 = obj2;
                     }
                 });
-                var originalModel = new clazz(obj1, obj2);
-                var wrappedClazz = context._wrapConstructor(clazz, null);
-                var wrappedModel = new wrappedClazz(obj1, obj2);
-                expect(originalModel.obj1).to.eql(wrappedModel.obj1);
-                expect(originalModel.obj2).to.eql(wrappedModel.obj2)
+                context.wireView('View', clazz);
+                var View = context.getObject('View');
+                var view = new View(obj1, obj2);
+                expect(view.obj1).to.equal(obj1);
+                expect(view.obj2).to.equal(obj2);
             });
 
         });
