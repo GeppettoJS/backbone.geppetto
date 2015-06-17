@@ -57,84 +57,15 @@ While Marionette is not a dependency, if you're already using Marionette, your d
 
 Visit the [project repo](https://github.com/GeppettoJS/backbone.geppetto) to download the latest unreleased code (may be unstable).
 
-## Get Involved!
-
-### Mailing List
-
-Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!forum/backbone-geppetto) to discuss new features and stay-up-to-date on project updates.
-
-
-### Ways to Contribute
-
-Has Geppetto been helpful to you?  If you'd like to give back, here are a few ways:
-
-1. Blog about your experiences using Geppetto, and let us know about it!
-2. Create a demo app using Geppetto and add it to the examples directory.
-3. Improve the docs in the README.
-4. Fix a bug or add a new feature and submit a pull request (see below)
-
-### Pull Requests
-
-Pull requests are welcome.  For any significant change or new feature, please start a discussion in the Google Group, or log an issue first.  This will save you some time, in case your idea is deemed not general enough to be included in Geppetto.
-
-Before submitting a pull request, please:
-
-1. Write unit tests to cover any new or modified lines of code, and add it to `specs/geppetto.specs.js`.  See the [Tests](#tests) section for more info.
-2. Run the test specs to make sure everything works.  You can fire up a local web server, and point your browser to `http://localhost:<port>/specs/`
-3. Run the Grunt task to lint, test, and run code coverage on the project.  See the [Build](#build) section for more info.
-
-## Build
-
-### Grunt
-
-Geppetto uses [Grunt](http://gruntjs.com/) to verify each build.  If you are not familiar with Grunt, check out the [getting started guide](http://gruntjs.com/getting-started) for an introduction and installation instructions.
-
-Before submitting a pull request, please run the grunt task.  To do so:
-
-First, install local development dependencies.  From the root Geppetto directory, run:
-
-```
-npm install
-```
-
-then
-
-```
-grunt
-```
-
-Grunt will perform these tasks:
-
-#### Beautify
-
-To reduce merging and styling issues related to whitespace and formatting, the [jsbeautifier](https://github.com/vkadam/grunt-jsbeautifier) task normalizes all formatting in project source.  If you fail to run `grunt` prior to check-in, and any files have not been beautified, Travis-CI will reject the checkin.
-
-#### Uglify
-
-The code will be minified and saved to `dist/backbone.geppetto.min.js`.
-
-#### Lint
-
-Javascript files are checked for errors using [JSHint](http://jshint.com/).  The JSLint configuration is driven by the `.jshintrc` file.
-
-#### Test
-
-Test specs are run headlessly using [PhantomJS](www.phantomjs.org).  Note that Travis-CI will also run the tests across multiple browsers using [SauceLabs](http://saucelabs.com).
-
-#### Coverage
-
-Code coverage is enforced using [BlanketJS](http://blanketjs.org/).  Every line in Geppetto must have code coverage, with the exception of the AMD boilerplate at the top.  Currently this means that a 97% coverage rate is enforced.
-
-### Travis-CI
-
-The Grunt build is run automatically using [Travis-CI](travis-ci.org) upon every pull request and push to master.  But if any errors are found, you'll need to fix them and re-submit your pull request.  So please run the grunt task locally to save time.
-
+---
 
 ## Dependencies
 You'll need to include the following projects for Geppetto to work:
 
 ### Backbone
 [Backbone v0.9.10](http://documentcloud.github.com/backbone/) or higher is required for its eventing system.
+
+---
 
 ## Recommended Libraries
 
@@ -157,6 +88,8 @@ require.config( {
     }
 } );
 ```
+
+---
 
 ## Technical Overview
 Geppetto implements a standard MVC architecture, with the added flavor of the "Mediated View" pattern.  The key players are:
@@ -187,28 +120,198 @@ The View is implemented with Backbone.View or extensions of it such as Marionett
 The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
 
 ### Controller
-Geppetto implements the Controller piece using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
+Geppetto implements the Controller tier using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
 
-## Geppetto.Context
-Metaphorically speaking, if different modules of your app could be considered separate *living entities*, the `Geppetto.Context` would be like each being's *central nervous system*.  The Context is responsible for facilitating communication and sharing data between components *within a given module*, providing encapsulation so that this sharing does not extend past the boundaries of that module.
+### Context
+Metaphorically speaking, if different modules of your app could be considered separate *living entities*, the `Geppetto.Context` would be like each being's *central nervous system*.  The Context is responsible for facilitating communication and sharing data between components *within a given module*, providing encapsulation so that this sharing does not extend past the boundaries of that module. This communication is achieved through the standard [Backbone.Events](http://backbonejs.org/#Events) module, with some syntactic sugar for allowing intercontextual communication.
 
-The Context's specific jobs are:
+### Diagram
 
-### Job #1: Dependency Injection
+[![MVC Diagram](http://i.imgur.com/zsVjd.gif)](http://i.imgur.com/zsVjd.gif)
 
-The Context contains mappings for wiring Singletons, Classes, Views, and Values for injection into other components.  This means that instead of dependent components needing to "reach out and grab" their dependencies, Geppetto will inject them automatically.  This also has the advantage of dependent components being able to have different dependencies injected depending on the module.  
+---
 
-### Job #1: Event Bus
+## Let's get started
 
-Each Context acts as an event bus, using the `Backbone.Events` system.  While the event bus is not exposed directly to components, each dependent component associated with a given Context is injected with a `dispatch` and `listen` function, which can be used to communicate with other components on the same Context.  You can think of this like each dependent component being given a walkie talkie tuned to the same frequency.  This pattern promotes loose-coupling between components.
+### Contexts
 
-### Job #3: Command Registry
+First and foremost is the context, since this groups your components and allows them to communicate to each other in a decoupled fashion and provides dependency injection, again to ensure decouplement and provide [inversion of control](http://en.wikipedia.org/wiki/Inversion_of_control)
 
-Do you have any business logic in your app that doesn't necessarily belong to a view?  For instance, you might have some code that loads some backing data which is shared across many views.  Sure, you could place that business logic in your outer-most view, but then that view would be responsible for telling the sub-views whenever new data is available.  Wouldn't it be great if we could completely decouple our shared client business logic from our views?
+In detail, a Context's specific jobs are:
 
-Well, now we can!  Each Context has a registry where you can assign a named event to an associated Command.  Whenever you want some work to be done, you simply dispatch an event onto the Context's Event Bus, and the appropriate command will automagically get instantiated, carry out its job, and clean itself up.  You may choose to have the Command dispatch another event when its work is done, so that any observers (such as Views) can be notified.
+1. **Event Bus**
 
-### Creating a Context
+	Each Context acts as an event bus, using the `Backbone.Events` system.  While the event bus is not exposed directly to components, each dependent component associated with a given Context is injected with a `dispatch` and `listen` function, which can be used to communicate with other components on the same Context.  You can think of this like each dependent component being given a walkie talkie tuned to the same frequency.  This pattern promotes loose-coupling between components.
+
+1. **Dependency Injection**
+
+	The Context contains mappings for wiring Singletons, Classes, Views, and Values for injection into other components.  This means that instead of dependent components needing to "reach out and grab" their dependencies, Geppetto will inject them automatically.  This also has the advantage of dependent components being able to have different dependencies injected depending on the module. An added benefit is that components are lazily instantiated, meaning their construction is delayed until another component needs them. This can significantly reduce bootstrapping duration.
+
+1. **Command Registry**
+
+	Each Context has a registry where you can assign a named event to an associated Command.  Whenever you want some work to be done, you simply dispatch an event onto the Context's Event Bus, and the appropriate command will automagically get instantiated, carry out its job, and clean itself up.  You may choose to have the Command dispatch another event when its work is done, so that any observers (such as Views) can be notified.
+
+#### Declaration
+
+```js
+//AppContext.js
+define([
+	"Geppetto",
+	"AuthService",
+	"LoginView",
+	"AuthenticateCommand"
+], function(Geppetto, AuthService, LoginView, AuthenticateCommand){
+	return Geppetto.Context.extend( {
+		initialize: function () {
+			console.log('Context instantiated');
+			this.wireSingleton("authService", AuthService);
+			this.wireView("LoginView", LoginView);
+			this.wireCommand("startup:requested", CreateLoginScreenCommand);
+			this.wireCommand("authentication:requested", AuthenticateCommand);
+		},
+		start: function(){
+			this.dispatch('startup:requested');
+		}
+	});
+});
+```
+
+Once `initialize` is called the context will have setup the central event bus and wired `AuthService` for dependency injection as a (good) singleton, prepared `LoginView` as a context-aware view and coupled `CreateLoginScreenCommand`, `AuthenticateCommand` to the `startup:requested` and `authentication:requested` application events respectively. The `start` method is for example purposes only, i.e. it's a developer-declared method and isn't a requisite of a Geppetto.Context extending class. 
+
+#### Usage
+
+```js
+//App.js
+define([
+	"AppContext"
+], function(AppContext){
+	var app = {
+		context: new AppContext()
+	};
+	app.context.start();
+
+	return app;
+});
+```
+
+### Commands
+
+Commands are normal "classes" (i.e. constructor functions) with an `execute` method declaration. A command's life cycle is as follows:
+
+1. Context receives an event wired to a command and **instantiates** the command.
+1. The command's **constructor function** is called.
+1. The command's declared **dependencies are injected** into the command.
+1. The **`execute` method** of the command instance is called.
+1. Once the `execute` method has finished the **command instance is discarded**.
+
+#### Declaration
+
+```js
+//AuthenticateCommand.js
+define([
+	'underscore'
+], function(_){
+	var Command = function(){
+		console.log('AuthenticateCommand instantiated');
+	}
+	_.extend(Command.prototype, {
+		wiring: ['authService'],
+		execute: function(){
+			console.log('AuthenticateCommand#execute');
+			this.authService.authenticate(this.eventData.username, this.eventData.password);
+		}
+	});
+	return Command;
+});
+```
+
+A command's (or any other component wired in the context) dependencies are declared in a `wiring` array. The contained strings have a double use, they tell the context which dependency is requested (in this case the one wired to `authService`) but they're also used as property name in the instance to refer to the dependency, i.e. `this.authService`.
+
+Since commands are executed as a result of a dispatched event regularly they need access to the event's payload. All commands are automatically injected with `eventName` and `eventData` (the payload) properties to allow easy retrieval of relevant event data.
+
+#### Usage
+
+Commands are coupled to events and automatically instantiated by the context, they should not be manually constructed.
+
+### Views
+
+As noted earlier on, Geppetto doesn't provide a specific View implementation, but rather adds some functionality to a [Backbone.View](http://backbonejs.org/#View) or [Marionette](http://marionettejs.com/docs/current)'s view classes.
+
+#### Declaration
+
+```js
+//LoginView.js
+define([
+	"Backbone"
+], function(Backbone){
+	return Backbone.View.extend({
+		el : "#loginView",
+		contextEvents : {
+			"authentication:request:failed": "showError"
+		},
+		events : {
+			"click #loginButton": "requestAuthentication"
+		},
+
+		initialize: function(){
+			console.log('LoginView instantiated');
+		},
+
+		showError: function(err){
+			//render error on screen
+		},
+		requestAuthentication : function(){
+			this.dispatch("authentication:requested", {
+				username: this.$('#username-field').val(),
+				password: this.$('#password-field').val(); 
+			});
+		}
+	});
+});
+```
+
+The `contextEvents` map automatically sets up listeners for events dispatched by the context (i.e. the central event bus.) In this case once the view receives a `authentication:request:failed` event its `showError` method will be called.
+Views (or any other component wired in the context) are extended with `dispatch` and `listen` methods hooked up to communicate directly over the context's central event bus. Here the view dispatches an object with `username` and `password` members as a payload of the `authentication:requested` event.
+
+N.B.: an event's payload _must_ be an object, other primitive types are not allowed.
+
+#### Usage
+```js
+//CreateLoginScreenCommand.js
+define(function(){
+	var Command = function(){
+	}
+	_.extend(Command.prototype, {
+		wiring: ['LoginView'],
+		execute: function(){
+			new this.LoginView();
+		}
+	});
+	return Command;
+});
+```
+
+Views are injected as constructor functions, NOT as instances. This was done deliberately to ensure compatibility and ease-of-use with Marionette for example.
+
+## Full Documentation
+
+See
+
+1. Under construction
+
+
+---
+
+---
+
+---
+
+
+
+
+
+
+
 
 **Using Context factory method**
 
@@ -724,12 +827,6 @@ Backbone.Geppetto.debug.countEvents();
 >> 25
 ```
 
-## Diagrams
-
-### MVC Overview
-
-[![MVC Diagram](http://i.imgur.com/zsVjd.gif)](http://i.imgur.com/zsVjd.gif)
-
 
 ## FAQ
 
@@ -765,6 +862,79 @@ Now, the example is running at:  `http://0.0.0.0:8000/examples/widgets/`
 Often, you want to provide a user interface to browse data, combined with easy filtering and sorting. The movies example show how to combine a context with commands, and where to place the dependencies of the context.
 
 [Give it a whirl here](http://jsbin.com/uleXOjOx/15).
+
+## Get Involved!
+
+### Mailing List
+
+Join the [Backbone.Geppetto Google Group](https://groups.google.com/forum/#!forum/backbone-geppetto) to discuss new features and stay-up-to-date on project updates.
+
+
+### Ways to Contribute
+
+Has Geppetto been helpful to you?  If you'd like to give back, here are a few ways:
+
+1. Blog about your experiences using Geppetto, and let us know about it!
+2. Create a demo app using Geppetto and add it to the examples directory.
+3. Improve the docs in the README.
+4. Fix a bug or add a new feature and submit a pull request (see below)
+
+### Pull Requests
+
+Pull requests are welcome.  For any significant change or new feature, please start a discussion in the Google Group, or log an issue first.  This will save you some time, in case your idea is deemed not general enough to be included in Geppetto.
+
+Before submitting a pull request, please:
+
+1. Write unit tests to cover any new or modified lines of code, and add it to `specs/geppetto.specs.js`.  See the [Tests](#tests) section for more info.
+2. Run the test specs to make sure everything works.  You can fire up a local web server, and point your browser to `http://localhost:<port>/specs/`
+3. Run the Grunt task to lint, test, and run code coverage on the project.  See the [Build](#build) section for more info.
+
+## Build
+
+### Grunt
+
+Geppetto uses [Grunt](http://gruntjs.com/) to verify each build.  If you are not familiar with Grunt, check out the [getting started guide](http://gruntjs.com/getting-started) for an introduction and installation instructions.
+
+Before submitting a pull request, please run the grunt task.  To do so:
+
+First, install local development dependencies.  From the root Geppetto directory, run:
+
+```
+npm install
+```
+
+then
+
+```
+grunt
+```
+
+Grunt will perform these tasks:
+
+#### Beautify
+
+To reduce merging and styling issues related to whitespace and formatting, the [jsbeautifier](https://github.com/vkadam/grunt-jsbeautifier) task normalizes all formatting in project source.  If you fail to run `grunt` prior to check-in, and any files have not been beautified, Travis-CI will reject the checkin.
+
+#### Uglify
+
+The code will be minified and saved to `dist/backbone.geppetto.min.js`.
+
+#### Lint
+
+Javascript files are checked for errors using [JSHint](http://jshint.com/).  The JSLint configuration is driven by the `.jshintrc` file.
+
+#### Test
+
+Test specs are run headlessly using [PhantomJS](www.phantomjs.org).  Note that Travis-CI will also run the tests across multiple browsers using [SauceLabs](http://saucelabs.com).
+
+#### Coverage
+
+Code coverage is enforced using [BlanketJS](http://blanketjs.org/).  Every line in Geppetto must have code coverage, with the exception of the AMD boilerplate at the top.  Currently this means that a 97% coverage rate is enforced.
+
+### Travis-CI
+
+The Grunt build is run automatically using [Travis-CI](travis-ci.org) upon every pull request and push to master.  But if any errors are found, you'll need to fix them and re-submit your pull request.  So please run the grunt task locally to save time.
+
 
 
 ## Tests
