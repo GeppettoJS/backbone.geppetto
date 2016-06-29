@@ -339,7 +339,15 @@
             if (wiring) {
                 var propNameArgIndex = Number(!_.isArray(wiring));
                 _.each(wiring, function(dependencyKey) {
-                    instance[arguments[propNameArgIndex]] = this.getObject(dependencyKey);
+                    var propName = arguments[propNameArgIndex];
+                    if (typeof dependencyKey != 'string') {
+                        instance[propName] = [];
+                        _.each(dependencyKey, function(dependencyKey) {
+                            instance[propName].push(this.getObject(dependencyKey));
+                        }, this);
+                    } else {
+                        instance[propName] = this.getObject(dependencyKey);
+                    }
                 }, this);
             }
             this.addPubSub(instance);
