@@ -769,7 +769,7 @@ Often, you want to provide a user interface to browse data, combined with easy f
 
 ## Tests
 ### About
-Geppetto test specs are written using [Mocha](http://visionmedia.github.io/mocha/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development)
+Geppetto test specs are written using [Mocha](http://mochajs.org/) with [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development)
 syntax provided by the [Chai](http://chaijs.com/) plugin.
 Mocks, Spies, and Stubs are provided by the fantastic [SinonJS](http://sinonjs.org/) library.
 
