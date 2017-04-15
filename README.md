@@ -1,3 +1,4 @@
+hola
 # Backbone Geppetto
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/GeppettoJS/backbone.geppetto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -184,7 +185,7 @@ The View is implemented with Backbone.View or extensions of it such as Marionett
 * Responds to DOM events by triggering **Application Events** for the **Controller** to respond to
 * Listens for **Application Events** triggered by the **Controller** and manipulates the View in response
 
-The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
+ The last two points are the key differences between Geppetto Applications and traditional Backbone Applications.  Normally, your Backbone.View would both listen for DOM events *and* handle the business logic to respond to those events.  With Geppetto, your Backbone.View's job as a Mediator is simply to translate DOM events into Application Events (and vice-versa) *that's it*.  Once the Mediator has created and triggered an Application event, its job is done.
 
 ### Controller
 Geppetto implements the Controller piece using the Command Pattern.  Commands are automatically instantiated and executed in response to Application Events.
@@ -206,7 +207,7 @@ Each Context acts as an event bus, using the `Backbone.Events` system.  While th
 
 Do you have any business logic in your app that doesn't necessarily belong to a view?  For instance, you might have some code that loads some backing data which is shared across many views.  Sure, you could place that business logic in your outer-most view, but then that view would be responsible for telling the sub-views whenever new data is available.  Wouldn't it be great if we could completely decouple our shared client business logic from our views?
 
-Well, now we can!  Each Context has a registry where you can assign a named event to an associated Command.  Whenever you want some work to be done, you simply dispatch an event onto the Context's Event Bus, and the appropriate command will automagically get instantiated, carry out its job, and clean itself up.  You may choose to have the Command dispatch another event when its work is done, so that any observers (such as Views) can be notified.
+ Well, now we can!  Each Context has a registry where you can assign a named event to an associated Command.  Whenever you want some work to be done, you simply dispatch an event onto the Context's Event Bus, and the appropriate command will automagically get instantiated, carry out its job, and clean itself up.  You may choose to have the Command dispatch another event when its work is done, so that any observers (such as Views) can be notified.
 
 ### Creating a Context
 
