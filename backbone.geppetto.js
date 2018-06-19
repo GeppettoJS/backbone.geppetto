@@ -105,30 +105,33 @@
     _.extend(Geppetto.Context.prototype, {
 
         _configureWirings: function _configureWirings(wiring) {
+            var _this = this;
             _.each(wiring.singletons, function(def, key) {
-                this.wireSingleton.apply(this, extractConfig(def, key));
-            }, this);
+                _this.wireSingleton.apply(_this, extractConfig(def, key));
+            });
             _.each(wiring.classes, function(def, key) {
-                this.wireClass.apply(this, extractConfig(def, key));
-            }, this);
+                _this.wireClass.apply(_this, extractConfig(def, key));
+            });
             _.each(wiring.values, function(value, key) {
-                this.wireValue(key, value);
-            }, this);
+                _this.wireValue(key, value);
+            });
             _.each(wiring.views, function(def, key) {
-                this.wireView.apply(this, extractConfig(def, key));
-            }, this);
+                _this.wireView.apply(_this, extractConfig(def, key));
+            });
             this.wireCommands(wiring.commands);
         },
 
         _createAndSetupInstance: function(config) {
-            var instance;
+            var instance,
+                _this = this;
+
             if (config.params) {
                 var params = _.map(config.params, function(param) {
                     if (_.isFunction(param)) {
-                        param = param(this);
+                        param = param(_this);
                     }
                     return param;
-                }, this);
+                });
                 instance = applyToConstructor(config.clazz, params);
             } else {
                 instance = new config.clazz();
@@ -178,13 +181,17 @@
         },
 
         _mapContextEvents: function(obj) {
+
+            var _this = this;
+
             _.each(obj.contextEvents, function(callback, eventName) {
                 if (_.isFunction(callback)) {
-                    this.listen(obj, eventName, callback);
+                    _this.listen(obj, eventName, callback);
                 } else if (_.isString(callback)) {
-                    this.listen(obj, eventName, obj[callback]);
+                    _this.listen(obj, eventName, obj[callback]);
                 }
-            }, this);
+            });
+
         },
 
         addPubSub: function(instance) {
@@ -323,7 +330,7 @@
         },
 
         hasWiring: function(key) {
-            return this._mappings.hasOwnProperty(key) || ( !! this.parentContext && this.parentContext.hasWiring(key));
+            return this._mappings.hasOwnProperty(key) || (!!this.parentContext && this.parentContext.hasWiring(key));
         },
 
         getObject: function(key) {
@@ -335,12 +342,14 @@
         },
 
         resolve: function(instance, wiring) {
+            var _this = this;
+
             wiring = wiring || instance.wiring;
             if (wiring) {
                 var propNameArgIndex = Number(!_.isArray(wiring));
                 _.each(wiring, function(dependencyKey) {
-                    instance[arguments[propNameArgIndex]] = this.getObject(dependencyKey);
-                }, this);
+                    instance[arguments[propNameArgIndex]] = _this.getObject(dependencyKey);
+                });
             }
             this.addPubSub(instance);
             this._mapContextEvents(instance);
@@ -401,7 +410,7 @@
         var returnValue;
 
         // only set a reference to the context on the view if the view
-        // is a pre-0.7.0 component that does not use dependency injection. 
+        // is a pre-0.7.0 component that does not use dependency injection.
         // this will be removed in a future release...
         if (!view.wiring) {
             view.context = context;
